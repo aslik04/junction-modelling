@@ -1,0 +1,33 @@
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore SQLite database files
+*.sqlite
+*.sqlite3
+
+# Ignore environment and dependency files
+.env
+venv/
+.virtualenv/
+*.log
+
+# Ignore temporary or backup files
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Ignore IDE/editor-specific files
+.vscode/
+.idea/
+*.iml
+
+# Ignore generated or temporary shell scripts
+*.sh~
+*.sh.swp
+
+# Ignore vcwk directory
+vcwk/

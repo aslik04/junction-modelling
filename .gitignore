@@ -28,6 +28,3 @@ venv/
 # Ignore generated or temporary shell scripts
 *.sh~
 *.sh.swp
-
-# Ignore vcwk directory
-vcwk/

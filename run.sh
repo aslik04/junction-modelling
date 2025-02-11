@@ -7,7 +7,7 @@ fi
 app=$1
 
 if [[ -z $app ]]; then
-    app=debtmanager
+    app=app
 fi
 
 # activate the virtual environment for the lab

@@ -5,7 +5,7 @@ const junctionCanvas = document.getElementById("junctionCanvas");
 
 /**
  * @constant {CanvasRenderingContext2D} canvas2D : Context of the canvas, which gives methods in order to draw shapes, lines and images in our 2D canvas. 
- *                                                 This provides an interface for our drawing operations to act on the canvas.
+ *                                              This provides an interface for our drawing operations to act on the canvas.
  */
 const canvas2D = junctionCanvas.getContext("2d");
 
@@ -20,14 +20,14 @@ const inputNumOfLanes = document.getElementById("laneInputNum");
 const pixelWidthOfLane = 30;
 
 /**
- * @constant {number} pixelThicknessOfPC : How many pixels thick each stripe in a puffin crossing is.
+ * @constant {number} pixelThicknessOfCW : How many pixels thick each stripe in a puffin crossing is.
  */
-const pixelThicknessOfPC = 6;
+const pixelThicknessOfCW = 6;
 
 /**
- * @constant {number} pixelGapOfPCStripes : How much pixels gap there is between each stripe in a puffin crossing.
+ * @constant {number} pixelGapOfCWStripes : How much pixels gap there is between each stripe in a puffin crossing.
  */
-const pixelGapOfPCStripes = 3;
+const pixelGapOfCWStripes = 3;
 
 /**
  * @constant {string} colourOfRoad : What colour the road of the junction is.
@@ -45,59 +45,13 @@ const colourOfLaneMarking = "#ffffff";
 const colourOfBackground = "#86b049";
 
 /**
- * @constant {HTMLInputElement} inputVPHNorth : Amount of vehicles per hour incoming from North.
- */
-const inputVPHNorth = document.getElementById("VPHNorth");
-
-/**
- * @constant {HTMLInputElement} inputVPHEast : Amount of vehicles per hour incoming from East.
- */
-const inputVPHEast = document.getElementById("VPHEast");
-
-/**
- * @constant {HTMLInputElement} inputVPHSouth : Amount of vehicles per hour incoming from South.
- */
-const inputVPHSouth = document.getElementById("VPHSouth");
-
-/**
- * @constant {HTMLInputElement} inputVPHWest : Amount of vehicles per hour incoming from West.
- */
-const inputVPHWest = document.getElementById("VPHWest");
-
-/**
- * @constant {HTMLSelectElement} inputBusLane : Does User want to include bus lane yes or no.
- */
-const inputBusLane = document.getElementById("busLane");
-
-/**
- * @constant {HTMLInputElement} inputPedestriansNorth : Amount of pedestrians per hour incoming from North.
- */
-const inputPedestriansNorth = document.getElementById("pedestriansNorth");
-
-/**
- * @constant {HTMLInputElement} inputPedestriansEast : Amount of pedestrians per hour incoming from East.
- */
-const inputPedestriansEast = document.getElementById("pedestriansEast");
-
-/**
- * @constant {HTMLInputElement} inputPedestriansSouth : Amount of pedestrians per hour incoming from South.
- */
-const inputPedestriansSouth = document.getElementById("pedestriansSouth");
-
-/**
- * @constant {HTMLInputElement} inputPedestriansWest : Amount of pedestrians per hour incoming from West.
- */
-const inputPedestriansWest = document.getElementById("pedestriansWest");
-
-
-/**
- * Returns how many pixels long a short stripe is, (utilised for puffin crossing). 
- * To ensure lane markings do not cross over puffin crossing.
+ * Returns how many pixels long a short stripe is, (utilised for crosswalks). 
+ * To ensure lane markings do not cross over crosswalks.
  * Defined as being twice the width of a lane (arbitrary).
  * 
  * @returns {number} : How many pixels long a short stripe should be.
  */
-function puffinCrossingStripeLength() {
+function crossWalkStripeLength() {
     return pixelWidthOfLane * 2;
 }
 
@@ -108,7 +62,7 @@ function puffinCrossingStripeLength() {
  */
 function junctionDrawing() {
     // Parses the input given by user to ensure it is a valid whole number (1 - 5).
-    const numOfLanes = parseInt(inputNumOfLanes.value, 10);
+    const numOfLanes = parseInt(inputNumOfLanes.ariaValueMax, 10);
 
     // User input invalid not between (1 - 5), or input is not a whole number.
     if (numOfLanes < 1 || numOfLanes > 5 || isNaN(numOfLanes)) {
@@ -157,8 +111,8 @@ function junctionDrawing() {
  * @param {number} canvasY : Y-coordinate of the centre of the junction.
  */
 function drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVertical, rightVertical, canvasX, canvasY) {
-    // Finds width of puffin crossing, so the road markings do not cross over into puffin crossing.
-    const widthOfPC = puffinCrossingStripeLength();
+    // Finds width of crosswalk, so the road markings do not cross over into puffin crossing.
+    const widthOfCW = crossWalkStripeLength();
 
     // Colour and width of the dashed lane markings.
     canvas2D.strokeStyle = colourOfLaneMarking;
@@ -175,12 +129,12 @@ function drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVertical, ri
         // Left-Sided lane markings (WEST) drawn before the intersection and crossing starts.
         canvas2D.beginPath();
         canvas2D.moveTo(0, yCoord);
-        canvas2D.lineTo(leftVertical - widthOfPC, yCoord);
+        canvas2D.lineTo(leftVertical - widthOfCW, yCoord);
         canvas2D.stroke();
 
         // Right-Sided lane markings (EAST) drawn after the intersection and crossing ends.
         canvas2D.beginPath();
-        canvas2D.moveTo(rightVertical + widthOfPC, yCoord);
+        canvas2D.moveTo(rightVertical + widthOfCW, yCoord);
         canvas2D.lineTo(junctionCanvas.width, yCoord);
         canvas2D.stroke();
     }
@@ -191,16 +145,16 @@ function drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVertical, ri
         const yCoord = canvasY + i * pixelWidthOfLane; 
 
         // Ensures lane divider doesnt extend past bottom of the road boundary.
-        if (yCoord < bottomHorizontal) {
+        if (y < bottomHorizontal) {
             // Left-Sided lane markings (WEST) drawn before the intersection and crossing starts.
             canvas2D.beginPath();
             canvas2D.moveTo(0, yCoord);
-            canvas2D.lineTo(leftVertical - widthOfPC, yCoord);
+            canvas2D.lineTo(leftVertical - widthOfCW, yCoord);
             canvas2D.stroke();
 
             // Right-Sided lane markings (EAST) drawn after the intersection and crossing ends.
             canvas2D.beginPath();
-            canvas2D.moveTo(rightVertical + widthOfPC, yCoord);
+            canvas2D.moveTo(rightVertical + widthOfCW, yCoord);
             canvas2D.lineTo(junctionCanvas.width, yCoord);
             canvas2D.stroke();
         }
@@ -214,12 +168,12 @@ function drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVertical, ri
         // Top-Sided lane markings (NORTH) drawn before the intersection and crossing starts.
         canvas2D.beginPath();
         canvas2D.moveTo(xCoord, 0);
-        canvas2D.lineTo(xCoord, topHorizontal - widthOfPC);
+        canvas2D.lineTo(xCoord, topHorizontal - widthOfCW);
         canvas2D.stroke();
 
         // Bottom-Sided lane markings (SOUTH) drawn after the intersection and crossing ends.
         canvas2D.beginPath();
-        canvas2D.moveTo(xCoord, bottomHorizontal + widthOfPC);
+        canvas2D.moveTo(xCoord, bottomHorizontal + widthOfCW);
         canvas2D.lineTo(xCoord, junctionCanvas.height);
         canvas2D.stroke();
     }
@@ -234,12 +188,12 @@ function drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVertical, ri
             // Top-Sided lane markings (NORTH) drawn before the intersection and crossing starts.
             canvas2D.beginPath();
             canvas2D.moveTo(xCoord, 0);
-            canvas2D.lineTo(xCoord, topHorizontal - widthOfPC);
+            canvas2D.lineTo(xCoord, topHorizontal - widthOfCW);
             canvas2D.stroke();
 
             // Bottom-Sided lane markings (SOUTH) drawn after the intersection and crossing ends.
             canvas2D.beginPath();
-            canvas2D.moveTo(xCoord, bottomHorizontal + widthOfPC);
+            canvas2D.moveTo(xCoord, bottomHorizontal + widthOfCW);
             canvas2D.lineTo(xCoord, junctionCanvas.height);
             canvas2D.stroke();
         }
@@ -252,24 +206,24 @@ function drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVertical, ri
     // Left-Sided (WEST) solid white centre line drawn before intersection/crossing starts.
     canvas2D.beginPath();
     canvas2D.moveTo(0, canvasY);
-    canvas2D.lineTo(leftVertical - widthOfPC, canvasY);
+    canvas2D.lineTo(leftVertical - widthOfCW, canvasY);
     canvas2D.stroke();
 
     // Right-Sided (EAST) solid white centre line drawn after intersection/crossing ends.
     canvas2D.beginPath();
-    canvas2D.moveTo(rightVertical + widthOfPC, canvasY);
+    canvas2D.moveTo(rightVertical + widthOfCW, canvasY);
     canvas2D.lineTo(junctionCanvas.width, canvasY);
     canvas2D.stroke();
 
     // Top-Sided (NORTH) solid white centre line drawn before intersection/crossing starts.
     canvas2D.beginPath();
     canvas2D.moveTo(canvasX, 0);
-    canvas2D.lineTo(canvasX, topHorizontal - widthOfPC);
+    canvas2D.lineTo(canvasX, topHorizontal - widthOfCW);
     canvas2D.stroke();
 
     // Bottom-Sided (SOUTH) solid white centre line drawn after intersection/crossing ends.
     canvas2D.beginPath();
-    canvas2D.moveTo(canvasX, bottomHorizontal + widthOfPC);
+    canvas2D.moveTo(canvasX, bottomHorizontal + widthOfCW);
     canvas2D.lineTo(canvasX, junctionCanvas.height);
     canvas2D.stroke();
 }
@@ -282,17 +236,17 @@ function drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVertical, ri
  * @param {number} leftVertical : X-coordinate of left edge of the vertical road.
  * @param {number} rightVertical : X-coordinate of right edge of the vertical road.
  */
-function drawPuffinCrossing(topHorizontal, bottomHorizontal, leftVertical, rightVertical) {
-    // Finds width of puffin crossing, so the road markings do not cross over into puffin crossing.
-    const widthOfPC = puffinCrossingStripeLength();
+function drawCrosswalks(topHorizontal, bottomHorizontal, leftVertical, rightVertical) {
+    // Finds width of crosswalk, so the road markings do not cross over into puffin crossing.
+    const widthOfCW = crossWalkStripeLength();
   
     // Drawing of cross walk for top and bottom flowing vertically (NORTH and SOUTH).
-    drawVertical(leftVertical, topHorizontal - widthOfPC, rightVertical - leftVertical, widthOfPC);
-    drawVertical(leftVertical, bottomHorizontal, rightVertical - leftVertical, widthOfPC);
+    drawVertical(leftVertical, topHorizontal - widthOfCW, rightVertical - leftVertical, widthOfCW);
+    drawVertical(leftVertical, bottomHorizontal, rightVertical - leftVertical, widthOfCW);
   
     // Drawing of cross walk for left and right flowing horizontally (EAST and WEST)
-    drawHorizontal(leftVertical - widthOfPC, topHorizontal, widthOfPC, bottomHorizontal - topHorizontal);
-    drawHorizontal(rightVertical, topHorizontal, widthOfPC, bottomHorizontal - topHorizontal);
+    drawHorizontal(leftVertical - widthOfCW, topHorizontal, widthOfCW, bottomHorizontal - topHorizontal);
+    drawHorizontal(rightVertical, topHorizontal, widthOfCW, bottomHorizontal - topHorizontal);
 }
 
 /**
@@ -305,21 +259,21 @@ function drawPuffinCrossing(topHorizontal, bottomHorizontal, leftVertical, right
  */
 function drawVertical(xCoord, yCoord, width, height) {
     // Save the current state of the canvas before modifying.
-    canvas2D.save();
-    canvas2D.beginPath();
+    canvasContext.save();
+    canvasContext.beginPath();
     // Clipping area where stripes of puffin crossing drawn, rescricted within rectangle.
-    canvas2D.rect(xCoord, yCoord, width, height);
-    canvas2D.clip();
+    canvasContext.rect(xCoord, yCoord, width, height);
+    canvasContext.clip();
 
     let currentX = xCoord;
     // Loop until stripes drawn in entire restricted area.
     while (currentX < xCoord + width) {
-        canvas2D.fillStyle = colourOfLaneMarking;
-        canvas2D.fillRect(currentX, yCoord, pixelThicknessOfPC, height);
-        currentX += pixelThicknessOfPC + pixelGapOfPCStripes;
+        canvasContext.fillStyle = colourOfLaneMarking;
+        canvasContext.fillRect(currentX, yCoord, pixelThicknessOfCW, height);
+        currentX += pixelThicknessOfCW + pixelGapOfCWStripes;
     }
     // Restore the state of the canvas to prevent unintentional clipping elsewhere.
-    canvas2D.restore();
+    canvasContext.restore();
 }
 
 /**
@@ -330,23 +284,23 @@ function drawVertical(xCoord, yCoord, width, height) {
  * @param {number} width : how wide the crossing is.
  * @param {number} height : how tall the crossing is.
  */
-function drawHorizontal(xCoord, yCoord, width, height) {
+function drawHorizontalStripes(xStart, yStart, width, height) {
     // Save the current state of the canvas before modifying.
-    canvas2D.save();
-    canvas2D.beginPath();
+    canvasContext.save();
+    canvasContext.beginPath();
     // Clipping area where stripes of puffin crossing drawn, rescricted within rectangle.
-    canvas2D.rect(xCoord, yCoord, width, height);
-    canvas2D.clip();
+    canvasContext.rect(xCoord, yCoord, width, height);
+    canvasContext.clip();
 
     let currentY = yCoord;
     // Loop until stripes drawn in entire restricted area.
     while (currentY < yCoord + height) {
-        canvas2D.fillStyle = colourOfLaneMarking;
-        canvas2D.fillRect(xCoord, currentY, width, pixelThicknessOfPC);
-        currentY += pixelThicknessOfPC + pixelGapOfPCStripes;
+        canvasContext.fillStyle = colourOfLaneMarking;
+        canvasContext.fillRect(xCoord, currentY, width, pixelThicknessOfCW);
+        currentY += pixelThicknessOfCW + pixelGapOfCWStripes;
     }
     // Restore the state of the canvas to prevent unintentional clipping elsewhere.
-    canvas2D.restore();
+    canvasContext.restore();
 }
 
 // Draw the junction each time page loads and when input of lanes change.

@@ -45,51 +45,6 @@ export const colourOfLaneMarking = "#ffffff";
 export const colourOfBackground = "#86b049";
 
 /**
- * @constant {HTMLInputElement} inputVPHNorth : Amount of vehicles per hour incoming from North.
- */
-export const inputVPHNorth = document.getElementById("VPHNorth");
-
-/**
- * @constant {HTMLInputElement} inputVPHEast : Amount of vehicles per hour incoming from East.
- */
-export const inputVPHEast = document.getElementById("VPHEast");
-
-/**
- * @constant {HTMLInputElement} inputVPHSouth : Amount of vehicles per hour incoming from South.
- */
-export const inputVPHSouth = document.getElementById("VPHSouth");
-
-/**
- * @constant {HTMLInputElement} inputVPHWest : Amount of vehicles per hour incoming from West.
- */
-export const inputVPHWest = document.getElementById("VPHWest");
-
-/**
- * @constant {HTMLSelectElement} inputBusLane : Does User want to include bus lane yes or no.
- */
-export const inputBusLane = document.getElementById("busLane");
-
-/**
- * @constant {HTMLInputElement} inputPedestriansNorth : Amount of pedestrians per hour incoming from North.
- */
-export const inputPedestriansNorth = document.getElementById("pedestriansNorth");
-
-/**
- * @constant {HTMLInputElement} inputPedestriansEast : Amount of pedestrians per hour incoming from East.
- */
-export const inputPedestriansEast = document.getElementById("pedestriansEast");
-
-/**
- * @constant {HTMLInputElement} inputPedestriansSouth : Amount of pedestrians per hour incoming from South.
- */
-export const inputPedestriansSouth = document.getElementById("pedestriansSouth");
-
-/**
- * @constant {HTMLInputElement} inputPedestriansWest : Amount of pedestrians per hour incoming from West.
- */
-export const inputPedestriansWest = document.getElementById("pedestriansWest");
-
-/**
  * Returns how many pixels long a short stripe is, (utilised for puffin crossing). 
  * To ensure lane markings do not cross over puffin crossing.
  * Defined as being twice the width of a lane (arbitrary).
@@ -98,4 +53,58 @@ export const inputPedestriansWest = document.getElementById("pedestriansWest");
  */
 export function puffinCrossingStripeLength() {
     return pixelWidthOfLane * 2;
+}
+
+/**
+ * Calculates data representing the junction according to user input lanes, and returns this data as an object.
+ * Data includes the size of the road, centre of canvas, road boundaries, and dimensions of the car.
+ *
+ * @returns {Object} An object containing:
+ *   - roadSize {number} : The total size of the road for incoming and outgoing traffic (in pixels).
+ *   - canvasX {number} : The x-coordinate of the centre of the canvas.
+ *   - canvasY {number} : The y-coordinate of the centre of the canvas.
+ *   - topHorizontal {number} : The y-coordinate corresponding to the top boundary of the road.
+ *   - bottomHorizontal {number} : The y-coordinate corresponding to the bottom boundary of the road.
+ *   - leftVertical {number} : The x-coordinate corresponding to the left boundary of the road.
+ *   - rightVertical {number} : The x-coordinatecorresponding to the right boundary of the road.
+ *   - widthOfCar {number} : The width of a car (80% of lane width).
+ *   - heightOfCar {number} : The height of a car (2 times lane width).
+ */
+export function getJunctionData() {
+    // Parses the input given by user to ensure it is a valid whole number (1 - 5).
+    const numOfLanes = parseInt(inputNumOfLanes.value, 10);
+
+    // User input invalid not between (1 - 5), or input is not a whole number.
+    if (numOfLanes < 1 || numOfLanes > 5 || isNaN(numOfLanes)) {
+        return;
+    }
+
+    // The total size of the road, incoming and outgoing lanes included.
+    const roadSize = 2 * numOfLanes * pixelWidthOfLane;
+
+    // Centre (x, y) coordinates of the canvas.
+    const canvasX = junctionCanvas.width / 2;
+    const canvasY = junctionCanvas.height / 2;
+
+    // Boundaries of road for all 4 cardinal directions.
+    const topHorizontal = canvasY - roadSize / 2;
+    const bottomHorizontal = canvasY + roadSize / 2;
+    const leftVertical = canvasX - roadSize / 2;
+    const rightVertical = canvasX + roadSize / 2;
+
+    // The dimensions of the car, which will be scaled according the number of lanes input.
+    const widthOfCar = pixelWidthOfLane * 0.8;
+    const heightOfCar = pixelWidthOfLane * 2;
+
+    return {
+        roadSize, 
+        canvasX, 
+        canvasY, 
+        topHorizontal,
+        bottomHorizontal,
+        leftVertical,
+        rightVertical,
+        widthOfCar,
+        heightOfCar
+    };
 }

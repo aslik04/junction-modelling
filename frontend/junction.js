@@ -1,3 +1,7 @@
+/**
+ * @fileoverview
+ */
+
 import { 
     junctionCanvas, 
     canvas2D, 
@@ -8,7 +12,8 @@ import {
     colourOfRoad, 
     colourOfLaneMarking, 
     colourOfBackground, 
-    puffinCrossingStripeLength 
+    puffinCrossingStripeLength, 
+    getJunctionData
 } from "./config.js";
 
 /**
@@ -17,30 +22,12 @@ import {
  * Canvas is cleared and each element of the junction is drawn based on user input.
  */
 export function junctionDrawing() {
-    // Parses the input given by user to ensure it is a valid whole number (1 - 5).
-    const numOfLanes = parseInt(inputNumOfLanes.value, 10);
-
-    // User input invalid not between (1 - 5), or input is not a whole number.
-    if (numOfLanes < 1 || numOfLanes > 5 || isNaN(numOfLanes)) {
-        return;
-    }
-
+    // To prevent repeated code utilised method with returns object of data regarding junction
+    const {roadSize, canvasX, canvasY, topHorizontal, bottomHorizontal, leftVertical, rightVertical} = getJunctionData();
+    
     // Clears and fills the canvas with a green colour for background.
     canvas2D.fillStyle = colourOfBackground;
     canvas2D.fillRect(0, 0, junctionCanvas.width, junctionCanvas.height);
-
-    // Number of pixels for each road, based on user inputs and multiplied by two for incoming/outgoing.
-    const roadSize = 2 * numOfLanes * pixelWidthOfLane;
-    
-    // centreed coordinates for the canvas.
-    const canvasX = junctionCanvas.width / 2;
-    const canvasY = junctionCanvas.height / 2;
-
-    // Boundaries of road for all 4 cardinal directions.
-    const topHorizontal = canvasY - roadSize / 2;
-    const bottomHorizontal = canvasY + roadSize / 2;
-    const leftVertical = canvasX - roadSize / 2;
-    const rightVertical = canvasX + roadSize / 2;
 
     // Drawing of the roads on canvas.
     canvas2D.fillStyle = colourOfRoad;

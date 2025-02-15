@@ -13,7 +13,7 @@ import {
 } from "./images.js";
 
 /**
- * There are 4 puffin crossings in the simulation, one for each pedestriandinal direction. 
+ * There are 4 puffin crossings in the simulation, one for each pedestrian cardinal direction. 
  * Where the top crossing is "north", bottom is "south", left is "west", right is "east". 
  * This simulates one pedestrian crossing from one end of the crossing to the other. 
  * The pedestrian always starts at the lefthand side of the road and walks to right hand side.
@@ -119,7 +119,7 @@ export function makePedestrian(direction, speed) {
         // Speed set to positive as we are moving from up to down in simulation.
         pedestrian.dy = speed;
 
-        // Pedestrian walks across outgoing lane to incoming lane so up to down for east.
+        // Pedestrian walks across outgoing lane to incoming lane so up to down for west.
         pedestrian.start = topHorizontal;
         pedestrian.end = bottomHorizontal;
 
@@ -241,7 +241,7 @@ export function drawPedestrian(pedestrian) {
             insideCrossing = (pedestrian.y >= pedestrian.start && pedestrian.y <= pedestrian.end);
         }
 
-        // East bound crossing down to up, as dx is negative.
+        // East bound crossing down to up, as dy is negative.
         if (pedestrian.dy < 0) { 
             insideCrossing = (pedestrian.y <= pedestrian.start && pedestrian.y >= pedestrian.end);
         }

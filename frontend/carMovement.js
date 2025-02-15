@@ -115,6 +115,9 @@ export function makeCar(direction, lane, speed, typeOfTurn) {
     car.speed = speed;
     car.currentRightTurnAngle = car.rightTurnInitialAngle
 
+    // Store the type of turn used.
+    car.typeOfTurn = typeOfTurn;
+
     // return the entire object of the car to then be used by future methods
     return car;
 }
@@ -135,10 +138,16 @@ export function drawCar(car) {
     // Angle we need to rotate png dependent on the direction of car
     let angle = 0;
 
-    if (car.direction === "north") angle = 0;
-    else if (car.direction === "east") angle = Math.PI / 2;
-    else if (car.direction === "south") angle = Math.PI;
-    else if (car.direction === "west") angle = -Math.PI / 2;
+    if (car.typeOfTurn === "right") {
+
+        // When a car is turning right we need to dynamically update the cars angle.
+        angle = car.currentRightTurnAngle;
+    } else { // Otherwise we rotate car based on angle from cars current direction.
+        if (car.direction === "north") angle = 0;
+        else if (car.direction === "east") angle = Math.PI / 2;
+        else if (car.direction === "south") angle = Math.PI;
+        else if (car.direction === "west") angle = -Math.PI / 2;
+    }
 
     // Rotate the image, and then draw the png based on stored dimensions.
     canvas2D.rotate(angle);
@@ -235,7 +244,7 @@ export function moveLeftTurnCar(car) {
 
             // When moving West, we keep dcereasing x till we reach the right boundary and margin.
             if (car.x - car.speed <= rightVertical + margin) {
-                car.x = rightVertical + margin;
+                car.x = rightVertical - margin;
                 car.direction = "south";
                 car.completedLeft = true;
             } else {

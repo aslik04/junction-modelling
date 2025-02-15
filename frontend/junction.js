@@ -23,7 +23,7 @@ import {
  */
 export function junctionDrawing() {
     // To prevent repeated code utilised method with returns object of data regarding junction
-    const {roadSize, canvasX, canvasY, topHorizontal, bottomHorizontal, leftVertical, rightVertical} = getJunctionData();
+    const {numOfLanes, roadSize, canvasX, canvasY, topHorizontal, bottomHorizontal, leftVertical, rightVertical} = getJunctionData();
     
     // Clears and fills the canvas with a green colour for background.
     canvas2D.fillStyle = colourOfBackground;

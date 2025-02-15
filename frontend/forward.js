@@ -33,7 +33,14 @@ import {
  */
 export function makeForwardCar(direction, lane, speed) {
     // To prevent repeated code utilised method with returns object of data regarding junction.
-    const {topHorizontal, bottomHorizontal, leftVertical, rightVertical, widthOfCar, heightOfCar} = getJunctionData();
+    const {
+        topHorizontal, 
+        bottomHorizontal, 
+        leftVertical, 
+        rightVertical, 
+        widthOfCar, 
+        heightOfCar
+    } = getJunctionData();
     
     // Initiliase an object which will store data of the car.
     let car = {};
@@ -119,7 +126,7 @@ export function drawForwardCar(car) {
 
     // Rotate the image, and then draw the png based on stored dimensions.
     canvas2D.rotate(angle);
-    canvas2D.drawImage(car.image, -car.width / 2, -car.height / 2, car.width, car.height);
+    canvas2D.drawImage(car.png, -car.width / 2, -car.height / 2, car.width, car.height);
 
     // Now restore the previous state of the canvas.
     canvas2D.restore();

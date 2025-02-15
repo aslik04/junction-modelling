@@ -1,4 +1,8 @@
 /**
+ * @fileoverview
+ */
+
+/**
  * @constant {HTMLCanvasElement} junctionCanvas : The canvas where the junction is drawn.
  */
 export const junctionCanvas = document.getElementById("junctionCanvas");
@@ -97,6 +101,7 @@ export function getJunctionData() {
     const heightOfCar = pixelWidthOfLane * 2;
 
     return {
+        numOfLanes,
         roadSize, 
         canvasX, 
         canvasY, 

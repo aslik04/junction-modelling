@@ -24,7 +24,7 @@ export function loadCarPngs() {
     // Looping through the entire array of cars
     fileNames.forEach(name => {
         const png = new Image();
-        png.src = 'cars/${name}.png';
+        png.src = `cars/${name}.png`;
         carPngs.push(png);
     });
 }

@@ -29,7 +29,7 @@ def process_csv(file):
     for row in csv_input:
         config = Configuration(
             run_id=row['run_id'],
-            lanes=row['lanes'],
+            #lanes=row['lanes'],
             pedestrian_crossings=row['pedestrian_crossings'].lower() == 'true',
 
             north_vph=row['north_vph'],
@@ -73,7 +73,7 @@ def upload():
             data = request.form
             config = Configuration(
                 run_id=data.get('run_id'),
-                lanes=data.get('lanes'),
+                #lanes=data.get('lanes'),
                 pedestrian_crossings='pedestrian_crossings' in data,
 
                 north_vph=data.get('north_vph'),

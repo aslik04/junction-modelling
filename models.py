@@ -26,7 +26,7 @@ class Attempts(db.Model):
 class Configuration(db.Model):
     __tablename__ = 'configurations'
     run_id = db.Column(db.Integer, primary_key=True)
-    lanes = db.Column(db.Integer, nullable=False)
+    #lanes = db.Column(db.Integer, nullable=False)
     pedestrian_crossings = db.Column(db.Boolean, nullable=False)
     #TODO: should add time required for pedestrians to cross
 

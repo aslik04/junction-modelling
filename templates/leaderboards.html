@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="../static/main.css" type="text/css" media="all" charset="utf-8">
+    <title>Leaderboards</title>
+</head>
+<body>
+    <script src="//instant.page/5.2.0" type="module" integrity="sha384-jnZyxPjiipYXnSU0ygqeac2q7CVYMbh84q0uHVRRxEtvFPiQYbXWUorga2aqZJ0z"></script>
+    <div id='content_wrapper'>
+        <h1>Top Configurations</h1>
+        {% include "navigation-bar.html" %}
+        <div id='content'>
+            <table border="1">
+                <tr>
+                    <th>Run ID</th>
+                    <th>Average Wait Time</th>
+                    <th>Max Wait Time</th>
+                    <th>Max Queue Length</th>
+                    <th>Score</th>
+                </tr>
+                {% for result in results %}
+                <tr>
+                    <td>{{ result.run_id }}</td>
+                    <td>{{ result.avg_wait_time | round(2) }}</td>
+                    <td>{{ result.max_wait_time | round(2) }}</td>
+                    <td>{{ result.max_queue_length }}</td>
+                    <td>{{ result.score | round(2) }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <nav>
+                <!-- <ul>
+                    <li><a href="/upload">Upload Configuration</a></li>
+                    <li><a href="/">Return Home</a></li>
+                </ul> -->
+            </nav>
+        </div>
+    </div>
+</body>
+</html>

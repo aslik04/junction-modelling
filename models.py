@@ -50,8 +50,6 @@ class Configuration(db.Model):
     west_exit_south_vph = db.Column(db.Integer, nullable=False)
     west_exit_east_vph = db.Column(db.Integer, nullable=False)
 
-    # Relation between tables
-    leaderboard_result = db.relationship('LeaderboardResult', backref='configuration', uselist=False)
 
 
 class LeaderboardResult(db.Model):

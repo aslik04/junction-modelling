@@ -26,9 +26,11 @@ class Attempts(db.Model):
 class Configuration(db.Model):
     __tablename__ = 'configurations'
     run_id = db.Column(db.Integer, primary_key=True)
-    #lanes = db.Column(db.Integer, nullable=False)
+    #lanes = db.Column(db.Integer, nullable=False)  Don't need this since it is in Attempts
     pedestrian_crossings = db.Column(db.Boolean, nullable=False)
-    #TODO: should add time required for pedestrians to cross
+    pedestrian_time = db.Column(db.Integer) #Time for pedestrains to cross (s)
+    pedestrian_frequency = db.column(db.Integer) #Crossing requests per hour
+    #TODO: Do we also need time to run for?
 
     north_vph = db.Column(db.Integer, nullable=False)
     north_exit_east_vph = db.Column(db.Integer, nullable=False)

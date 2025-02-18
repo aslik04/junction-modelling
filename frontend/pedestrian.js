@@ -252,13 +252,14 @@ export function drawPedestrian(pedestrian) {
 
     // If the pedestrian is currently not in the crossing we use the start image.
     if (!insideCrossing) {
-        png = pedestrianPngs["start"];
+        // Still Image
+        png = pedestrianPngs[0];
     } else {
         // If the pedestrian is inside the crossing we alternate walking 1/2 png every 10 frames.
         if (Math.floor(pedestrian.numOfFrames / 10) % 2 === 0) {
-            png = pedestrianPngs["walking1"];
+            png = pedestrianPngs[1];
         } else {
-            png = pedestrianPngs["walking2"];
+            png = pedestrianPngs[2];
         }
     }
 

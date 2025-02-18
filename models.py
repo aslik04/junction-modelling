@@ -1,36 +1,25 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 db = SQLAlchemy()
 
-class Attempts(db.Model):
-    __tablename__ = 'attempts'
-    id = db.Column(db.Integer, primary_key=True)
-    run_id = db.Column(db.Integer, db.ForeignKey("configurations.run_id"))
+class Session(db.Model):
+    __tablename__ = 'sessions'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    active = db.Column(db.Boolean, default=True, nullable=False)  # True when session is ongoing
 
-    N_LeftLane = db.Column(db.Integer, nullable=False)  # should be either 0 or 1
-    N_NoOfLanes = db.Column(db.Integer, nullable=False)  # should be from 1 to 5
-
-    E_LeftLane = db.Column(db.Integer, nullable=False)  
-    E_NoOfLanes = db.Column(db.Integer, nullable=False)  
-
-    S_LeftLane = db.Column(db.Integer, nullable=False)  
-    S_NoOfLanes = db.Column(db.Integer, nullable=False)  
-
-    W_LeftLane = db.Column(db.Integer, nullable=False)  
-    W_NoOfLanes = db.Column(db.Integer, nullable=False)  
-
-    # Relationship: One Attempt -> One LeaderboardResult (probably optional)
-    leaderboard_result = db.relationship('LeaderboardResult', backref='attempts', uselist=False)
+    configurations = db.relationship('Configuration', backref='session', lazy=True)
 
 
 class Configuration(db.Model):
     __tablename__ = 'configurations'
     run_id = db.Column(db.Integer, primary_key=True)
-    #lanes = db.Column(db.Integer, nullable=False)  Don't need this since it is in Attempts
+    session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False)  # Each configuration belongs to a session
+
     pedestrian_crossings = db.Column(db.Boolean, nullable=False)
-    pedestrian_time = db.Column(db.Integer) #Time for pedestrains to cross (s)
-    pedestrian_frequency = db.Column(db.Integer) #Crossing requests per hour
-    #TODO: Do we also need time to run for?
+    pedestrian_time = db.Column(db.Integer)  # Time for pedestrians to cross (s)
+    pedestrian_frequency = db.Column(db.Integer)  # Crossing requests per hour
 
     north_vph = db.Column(db.Integer, nullable=False)
     north_exit_east_vph = db.Column(db.Integer, nullable=False)
@@ -53,12 +42,24 @@ class Configuration(db.Model):
     west_exit_east_vph = db.Column(db.Integer, nullable=False)
 
 
-
 class LeaderboardResult(db.Model):
     __tablename__ = 'leaderboard_results'
-    id = db.Column(db.Integer, db.ForeignKey('attempts.id'), primary_key=True)  # FK constraint
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     run_id = db.Column(db.Integer, db.ForeignKey('configurations.run_id'), nullable=False)
+    session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False)  # Always store session ID
+
     avg_wait_time = db.Column(db.Float, nullable=False)
     max_wait_time = db.Column(db.Float, nullable=False)
     max_queue_length = db.Column(db.Integer, nullable=False)
     score = db.Column(db.Float, nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "run_id": self.run_id,
+            "session_id": self.session_id,
+            "avg_wait_time": self.avg_wait_time,
+            "max_wait_time": self.max_wait_time,
+            "max_queue_length": self.max_queue_length,
+            "score": self.score
+        }

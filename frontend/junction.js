@@ -5,13 +5,11 @@
 import { 
     junctionCanvas, 
     canvas2D, 
-    inputNumOfLanes, 
     pixelWidthOfLane, 
     pixelThicknessOfPC, 
     pixelGapOfPCStripes, 
     colourOfRoad, 
     colourOfLaneMarking, 
-    colourOfBackground, 
     puffinCrossingStripeLength, 
     getJunctionData
 } from "./config.js";
@@ -24,10 +22,6 @@ import {
 export function junctionDrawing() {
     // To prevent repeated code utilised method with returns object of data regarding junction
     const {numOfLanes, roadSize, canvasX, canvasY, topHorizontal, bottomHorizontal, leftVertical, rightVertical} = getJunctionData();
-    
-    // Clears and fills the canvas with a green colour for background.
-    canvas2D.fillStyle = colourOfBackground;
-    canvas2D.fillRect(0, 0, junctionCanvas.width, junctionCanvas.height);
 
     // Drawing of the roads on canvas.
     canvas2D.fillStyle = colourOfRoad;
@@ -55,7 +49,7 @@ export function junctionDrawing() {
  */
 export function drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVertical, rightVertical, canvasX, canvasY) {
     // Finds width of puffin crossing, so the road markings do not cross over into puffin crossing.
-    const widthOfPC = puffinCrossingStripeLength();
+    const widthOfPC = puffinCrossingStripeLength() + 5;
 
     // Colour and width of the dashed lane markings.
     canvas2D.strokeStyle = colourOfLaneMarking;
@@ -152,10 +146,22 @@ export function drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVerti
     canvas2D.lineTo(leftVertical - widthOfPC, canvasY);
     canvas2D.stroke();
 
+    // Left-Sided (WEST) solid white line drawn on left hand side = outgoing lane.
+    canvas2D.beginPath();
+    canvas2D.moveTo(leftVertical - widthOfPC, canvasY);
+    canvas2D.lineTo(leftVertical - widthOfPC, leftVertical);
+    canvas2D.stroke();
+
     // Right-Sided (EAST) solid white centre line drawn after intersection/crossing ends.
     canvas2D.beginPath();
     canvas2D.moveTo(rightVertical + widthOfPC, canvasY);
     canvas2D.lineTo(junctionCanvas.width, canvasY);
+    canvas2D.stroke();
+
+    // Right-Sided (EAST) solid white line drawn on left hand side = outgoing lane.
+    canvas2D.beginPath();
+    canvas2D.moveTo(rightVertical + widthOfPC, canvasY);
+    canvas2D.lineTo(rightVertical + widthOfPC, rightVertical);
     canvas2D.stroke();
 
     // Top-Sided (NORTH) solid white centre line drawn before intersection/crossing starts.
@@ -164,10 +170,22 @@ export function drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVerti
     canvas2D.lineTo(canvasX, topHorizontal - widthOfPC);
     canvas2D.stroke();
 
+    // Top-Sided (NORTH) solid white centre line line drawn on left hand side = outgoing lane.
+    canvas2D.beginPath();
+    canvas2D.moveTo(canvasX, topHorizontal - widthOfPC);
+    canvas2D.lineTo(rightVertical, topHorizontal - widthOfPC);
+    canvas2D.stroke();
+
     // Bottom-Sided (SOUTH) solid white centre line drawn after intersection/crossing ends.
     canvas2D.beginPath();
     canvas2D.moveTo(canvasX, bottomHorizontal + widthOfPC);
     canvas2D.lineTo(canvasX, junctionCanvas.height);
+    canvas2D.stroke();
+
+    // Bottom-Sided (SOUTH) solid white centre line line drawn on left hand side = outgoing lane.
+    canvas2D.beginPath();
+    canvas2D.moveTo(leftVertical, bottomHorizontal + widthOfPC);
+    canvas2D.lineTo(canvasX, bottomHorizontal + widthOfPC);
     canvas2D.stroke();
 }
 
@@ -246,6 +264,8 @@ export function drawHorizontal(xCoord, yCoord, width, height) {
     canvas2D.restore();
 }
 
+/*
+waiting on input page to be made
 // Draw the junction each time page loads and when input of lanes change.
 inputNumOfLanes.addEventListener("input", junctionDrawing);
-junctionDrawing();
+junctionDrawing();*/

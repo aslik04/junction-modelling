@@ -21,12 +21,12 @@ export const inputNumOfLanes = document.getElementById("laneInputNum");
 /**
  * @constant {number} pixelWidthOfLane : How many pixels wide each lane in the junction is.
  */
-export const pixelWidthOfLane = 30;
+export const pixelWidthOfLane = 20;
 
 /**
  * @constant {number} pixelThicknessOfPC : How many pixels thick each stripe in a puffin crossing is.
  */
-export const pixelThicknessOfPC = 6;
+export const pixelThicknessOfPC = 5;
 
 /**
  * @constant {number} pixelGapOfPCStripes : How much pixels gap there is between each stripe in a puffin crossing.
@@ -36,17 +36,12 @@ export const pixelGapOfPCStripes = 3;
 /**
  * @constant {string} colourOfRoad : What colour the road of the junction is.
  */
-export const colourOfRoad = "#666666";
+export const colourOfRoad = "#302e2e";
 
 /**
  * @constant {string} colourOfLaneMarking : White colour for the lane markings on the road.
  */
 export const colourOfLaneMarking = "#ffffff";
-
-/**
- * @constant {string} colourOfBackground : Green colour for the background of Website
- */
-export const colourOfBackground = "#86b049";
 
 /**
  * Returns how many pixels long a short stripe is, (utilised for puffin crossing). 
@@ -56,7 +51,7 @@ export const colourOfBackground = "#86b049";
  * @returns {number} : How many pixels long a short stripe should be.
  */
 export function puffinCrossingStripeLength() {
-    return pixelWidthOfLane * 2;
+    return pixelWidthOfLane * 1.25;
 }
 
 /**
@@ -75,13 +70,18 @@ export function puffinCrossingStripeLength() {
  *   - heightOfCar {number} : The height of a car (2 times lane width).
  */
 export function getJunctionData() {
+    /*I need to wait for input page to be completed before i can use user input for
+    now use default value of 5
+    
     // Parses the input given by user to ensure it is a valid whole number (1 - 5).
     const numOfLanes = parseInt(inputNumOfLanes.value, 10);
 
     // User input invalid not between (1 - 5), or input is not a whole number.
     if (numOfLanes < 1 || numOfLanes > 5 || isNaN(numOfLanes)) {
         return;
-    }
+    }*/
+    // default value while waiting for input page
+    let numOfLanes = 5;
 
     // The total size of the road, incoming and outgoing lanes included.
     const roadSize = 2 * numOfLanes * pixelWidthOfLane;

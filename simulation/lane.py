@@ -3,42 +3,47 @@ from simulation.enums import LaneType, Direction
 from simulation.vehicle import Vehicle
 
 class Lane:
-    def __init__(self, lane_id: str, lane_type: LaneType, length: int = 100):
+    def __init__(self, lane_id: str, lane_type: LaneType, end: int):
         self.id = lane_id
         self.type = lane_type
         self.vehicles = deque()
-        self.length = length  # Length of lane
+        self.queueing_vehicles = deque()
+        self.end = end # End of lane
 
     def is_position_occupied(self, position_x, position_y):
         # Check if a position is occupied by a vehicle.
-        return any(vehicle.position_x == position_x and vehicle.position_y == position_y for vehicle in self.vehicles)
+        if not self.vehicles:
+            return False
+        vehicle = self.vehicles[-1]
+        return vehicle.position_x == position_x and vehicle.position_y == position_y
 
     def move_vehicles(self):
+        end_vehicle = None
         # Move vehicles forward
-        vehicles = self.vehicles
-        self.vehicles = deque()
-        for vehicle in list(vehicles):
-            old_x = vehicle.position_x
-            old_y = vehicle.position_y
+        for _ in range (len(self.vehicles)):
+            vehicle = self.vehicles.popleft()
             vehicle.move()
-
             # Check if the new position is not occupied
-            while self.is_position_occupied(vehicle.position_x, vehicle.position_y) and (vehicle.position_x != old_x or vehicle.position_y != old_y):
-                vehicle.moveBack()
-            self.vehicles.append(vehicle)
+            # while self.is_position_occupied(vehicle.position_x, vehicle.position_y) and (vehicle.position_x != old_x or vehicle.position_y != old_y):
+            #     vehicle.moveBack()
+            
+            # Remove vehicles that have reached the end of the lane
+            if self.has_reached_end(vehicle):
+                end_vehicle = vehicle
+            else:
+                self.vehicles.append(vehicle)
 
-        # Remove vehicles that have reached the end of the lane
-        self.vehicles = deque([v for v in self.vehicles if not self.has_reached_end(v)])
+        # Adds a queueing vehicle to lane if some are queuing
+        if self.queueing_vehicles:
+            self.vehicles.append(self.queueing_vehicles.popleft())
+
+        return end_vehicle
 
     def has_reached_end(self, vehicle):
         # Check if vehicle has reached end of lane
-        if vehicle.direction == Direction.NORTH and vehicle.position_y >= self.length:
+        if (vehicle.direction == Direction.NORTH or vehicle.direction == Direction.SOUTH) and vehicle.position_y == self.end:
             return True
-        if vehicle.direction == Direction.SOUTH and vehicle.position_y <= 0:
-            return True
-        if vehicle.direction == Direction.EAST and vehicle.position_x >= self.length:
-            return True
-        if vehicle.direction == Direction.WEST and vehicle.position_x <= 0:
+        elif (vehicle.direction == Direction.EAST or vehicle.direction == Direction.WEST) and vehicle.position_x == self.end:
             return True
         return False
 
@@ -46,3 +51,5 @@ class Lane:
         # Adds a vehicle to the lane if starting position not occupied.
         if not self.is_position_occupied(vehicle.position_x, vehicle.position_y):
             self.vehicles.append(vehicle)
+        else:
+            self.queueing_vehicles.append(vehicle)

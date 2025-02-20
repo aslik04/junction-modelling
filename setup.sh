@@ -1,6 +1,6 @@
 #!/bin/bash
 
-portnum=5000  # Fixed port number
+portnum=6000  # Fixed port number
 
 if [ "$1" = "--port" ]; then
   portnum="$2"

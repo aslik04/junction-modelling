@@ -13,7 +13,7 @@ class Vehicle(ABC):
     def move(self): # Defines how vehicles move
         pass
 
-    def moveBack(self): # Moves back by 1
+    def move_back(self): # Moves back by 1
         if self.direction == Direction.NORTH:
             self.position_y -= 1
         elif self.direction == Direction.SOUTH:

@@ -9,3 +9,4 @@ SQLAlchemy==1.4.46
 Werkzeug==2.0.3
 WTForms==3.0.0
 itsdangerous==2.0.1
+pytest==7.2.2

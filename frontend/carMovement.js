@@ -203,7 +203,7 @@ export function moveLeftTurnCar(car) {
     } = getJunctionData();
 
     // Margin used to normal boundaries so car can turn before reach an edge.
-    const margin = 15;
+    const margin = 10;
 
     // If the car hasnt completed its left turn we need to update according to its position in canvas.
     if (!car.completedLeft) {
@@ -320,8 +320,8 @@ export function moveRightTurnCar(car) {
         } else if (car.direction === "west") {
 
             // When moving West, we keep dcereasing x till we reach the right boundary and margin.
-            if (car.x - car.speed <= rightVertical + margin) {
-                car.x = rightVertical + margin;
+            if (car.x - car.speed <= rightVertical - margin) {
+                car.x = rightVertical - margin;
 
                 // Reached start of junction so now phase 1 starts, and car turned 45 degrees.
                 car.rightTurnPhase = 1;

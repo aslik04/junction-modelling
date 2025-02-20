@@ -1,0 +1,196 @@
+import { junctionDrawing } from "./junction.js";
+import {
+  drawNorthTrafficLight,
+  drawEastTrafficLight,
+  drawSouthTrafficLight,
+  drawWestTrafficLight,
+  drawNorthPuffinLight,
+  drawEastPuffinLight,
+  drawSouthPuffinLight,
+  drawWestPuffinLight,
+  drawNorthRightTurnLight,
+  drawEastRightTurnLight,
+  drawSouthRightTurnLight,
+  drawWestRightTurnLight
+} from "./trafficLights.js";
+import { puffinCrossingStripeLength, getJunctionData, pixelWidthOfLane } from "./config.js";
+import { makeCar, drawCar, moveForwardCar, moveLeftTurnCar, moveRightTurnCar } from "./carMovement.js";
+import { loadCarPngs, loadPedestrianPngs } from "./images.js";
+
+/* ============================================================
+   Global State and Simulation Control
+============================================================ */
+// Global main traffic light states.
+const trafficLightStates = {
+  north: { red: true, amber: false, green: false },
+  east:  { red: true, amber: false, green: false },
+  south: { red: true, amber: false, green: false },
+  west:  { red: true, amber: false, green: false }
+};
+
+// Global right-turn light states.
+const rightTurnLightStates = {
+  north: { off: true, on: false },
+  east:  { off: true, on: false },
+  south: { off: true, on: false },
+  west:  { off: true, on: false }
+};
+
+// Pedestrian lights (unused; remain off).
+const pedestrianLightStates = {
+  north: { off: true, on: false },
+  east:  { off: true, on: false },
+  south: { off: true, on: false },
+  west:  { off: true, on: false }
+};
+
+/* Sequence parameters – adjust these as needed */
+const MAIN_SEQUENCE_LENGTH = 12000;         // Total cycle length for main lights (ms)
+const RIGHT_TURN_SEQUENCE_TIMEOUT = 2000;     // Time to wait (ms) after main cycle before clearing right-turn lights
+const PEDESTRIAN_SEQUENCE_LENGTH = 0;         // (For future pedestrian sequencing)
+
+/* ============================================================
+   Canvas Animation and Drawing
+============================================================ */
+function updateCanvasSize() {
+  const middleSection = document.getElementById("middle");
+  const canvas = document.getElementById("junctionCanvas");
+  canvas.width = middleSection.clientWidth;
+  canvas.height = middleSection.clientHeight;
+}
+
+function drawTrafficLights() {
+  drawNorthTrafficLight(trafficLightStates.north);
+  drawEastTrafficLight(trafficLightStates.east);
+  drawSouthTrafficLight(trafficLightStates.south);
+  drawWestTrafficLight(trafficLightStates.west);
+
+  drawNorthPuffinLight(pedestrianLightStates.north);
+  drawEastPuffinLight(pedestrianLightStates.east);
+  drawSouthPuffinLight(pedestrianLightStates.south);
+  drawWestPuffinLight(pedestrianLightStates.west);
+
+  drawNorthRightTurnLight(rightTurnLightStates.north);
+  drawEastRightTurnLight(rightTurnLightStates.east);
+  drawSouthRightTurnLight(rightTurnLightStates.south);
+  drawWestRightTurnLight(rightTurnLightStates.west);
+}
+
+function animate() {
+  updateCanvasSize();
+  junctionDrawing();
+  drawTrafficLights();
+  // (Assume updateCarQueues() is your car update function)
+  updateCarQueues();
+  requestAnimationFrame(animate);
+}
+
+/* ============================================================
+   Traffic Light Sequencing – Parameterized
+============================================================ */
+// Vertical sequence (affects north and south)
+function runVerticalSequence() {
+  // t=0: main lights red; right-turn off.
+  trafficLightStates.north = { red: true, amber: false, green: false };
+  trafficLightStates.south = { red: true, amber: false, green: false };
+  rightTurnLightStates.north = { off: true, on: false };
+  rightTurnLightStates.south = { off: true, on: false };
+
+  // t=0.5 sec: main lights become red+amber.
+  setTimeout(() => {
+    trafficLightStates.north = { red: true, amber: true, green: false };
+    trafficLightStates.south = { red: true, amber: true, green: false };
+  }, 500);
+
+  // t=1 sec: main lights turn green.
+  setTimeout(() => {
+    trafficLightStates.north = { red: false, amber: false, green: true };
+    trafficLightStates.south = { red: false, amber: false, green: true };
+  }, 1000);
+
+  // Remain green until (MAIN_SEQUENCE_LENGTH - 3000) ms.
+  setTimeout(() => {
+    trafficLightStates.north = { red: false, amber: true, green: false };
+    trafficLightStates.south = { red: false, amber: true, green: false };
+    rightTurnLightStates.north = { off: false, on: true };
+    rightTurnLightStates.south = { off: false, on: true };
+  }, MAIN_SEQUENCE_LENGTH - 3000);
+
+  // t = MAIN_SEQUENCE_LENGTH - 2000: main lights return to red.
+  setTimeout(() => {
+    trafficLightStates.north = { red: true, amber: false, green: false };
+    trafficLightStates.south = { red: true, amber: false, green: false };
+  }, MAIN_SEQUENCE_LENGTH - 2000);
+
+  // t = MAIN_SEQUENCE_LENGTH: clear right-turn lights after waiting RIGHT_TURN_SEQUENCE_TIMEOUT.
+  setTimeout(() => {
+    waitForIntersectionClearOrTimeout(RIGHT_TURN_SEQUENCE_TIMEOUT, () => {
+      rightTurnLightStates.north = { off: true, on: false };
+      rightTurnLightStates.south = { off: true, on: false };
+    });
+  }, MAIN_SEQUENCE_LENGTH);
+
+  return MAIN_SEQUENCE_LENGTH;
+}
+
+// Horizontal sequence (affects east and west); same timings.
+function runHorizontalSequence() {
+  trafficLightStates.east = { red: true, amber: false, green: false };
+  trafficLightStates.west = { red: true, amber: false, green: false };
+  rightTurnLightStates.east = { off: true, on: false };
+  rightTurnLightStates.west = { off: true, on: false };
+
+  setTimeout(() => {
+    trafficLightStates.east = { red: true, amber: true, green: false };
+    trafficLightStates.west = { red: true, amber: true, green: false };
+  }, 500);
+
+  setTimeout(() => {
+    trafficLightStates.east = { red: false, amber: false, green: true };
+    trafficLightStates.west = { red: false, amber: false, green: true };
+  }, 1000);
+
+  setTimeout(() => {
+    trafficLightStates.east = { red: false, amber: true, green: false };
+    trafficLightStates.west = { red: false, amber: true, green: false };
+    rightTurnLightStates.east = { off: false, on: true };
+    rightTurnLightStates.west = { off: false, on: true };
+  }, MAIN_SEQUENCE_LENGTH - 3000);
+
+  setTimeout(() => {
+    trafficLightStates.east = { red: true, amber: false, green: false };
+    trafficLightStates.west = { red: true, amber: false, green: false };
+  }, MAIN_SEQUENCE_LENGTH - 2000);
+
+  setTimeout(() => {
+    waitForIntersectionClearOrTimeout(RIGHT_TURN_SEQUENCE_TIMEOUT, () => {
+      rightTurnLightStates.east = { off: true, on: false };
+      rightTurnLightStates.west = { off: true, on: false };
+    });
+  }, MAIN_SEQUENCE_LENGTH);
+
+  return MAIN_SEQUENCE_LENGTH;
+}
+
+function runLightSequences() {
+  runVerticalSequence();
+  setTimeout(() => {
+    runHorizontalSequence();
+    setTimeout(runLightSequences, MAIN_SEQUENCE_LENGTH);
+  }, MAIN_SEQUENCE_LENGTH);
+}
+
+function waitForIntersectionClearOrTimeout(timeout, callback) {
+  setTimeout(callback, timeout);
+}
+
+/* ============================================================
+   Initialization
+============================================================ */
+window.addEventListener("load", () => {
+  loadCarPngs();
+  loadPedestrianPngs();
+
+  runLightSequences();
+  animate();
+});

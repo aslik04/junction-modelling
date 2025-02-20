@@ -114,7 +114,26 @@ def end_session_api():
 @app.route('/')
 def index():
     session_id = create_session()
-    return render_template('index.html', session_id=session_id) 
+    return render_template('index.html', session_id=session_id)
+
+@app.route('/parameters')
+def parameters():
+    # Renders the template below (in the 'templates' folder as 'index.html')
+    return render_template('parameters.html')
+
+@app.route('/upload-file', methods=['POST'])
+def uploadfile():
+    if 'file' not in request.files:
+        return "No file part in the request.", 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return "No file selected.", 400
+
+    # Do something with the uploaded file here, e.g. save it:
+    # file.save("some/path/" + file.filename)
+
+    return f"File '{file.filename}' uploaded successfully!"
 
 
 

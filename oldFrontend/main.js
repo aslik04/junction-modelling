@@ -7,7 +7,7 @@ import {
   moveRightTurnCar
 } from "./carMovement.js";
 import { loadCarPngs, loadPedestrianPngs } from "./images.js";
-import { getJunctionData, canvas2D, puffinCrossingStripeLength } from "./config.js";
+import { getJunctionData, canvas2D, puffinCrossingStripeLength, pixelWidthOfLane } from "./config.js";
 import {
   drawNorthTrafficLight,
   drawEastTrafficLight,
@@ -23,16 +23,9 @@ import {
   drawWestRightTurnLight
 } from "./trafficLights.js";
 
-// Configuration
-const SAFE_GAP = 5;           // Gap between cars
-const PAUSE_DURATION = 5000;  // 5 seconds pause at stop line
-const CAR_SPEED = 2;          // Car speed
-const SPAWN_INTERVAL = 3000;  // Spawn new cars every 3s
-
-// Global array for all cars (all directions)
-let cars = [];
-
-// Global main traffic light states.
+/* ============================================================
+   Global State for Traffic Lights
+============================================================ */
 const trafficLightStates = {
   north: { red: true, amber: false, green: false },
   east:  { red: true, amber: false, green: false },
@@ -40,7 +33,6 @@ const trafficLightStates = {
   west:  { red: true, amber: false, green: false }
 };
 
-// Global right-turn light states.
 const rightTurnLightStates = {
   north: { off: true, on: false },
   east:  { off: true, on: false },
@@ -48,8 +40,33 @@ const rightTurnLightStates = {
   west:  { off: true, on: false }
 };
 
-// Puffin lights remain off.
-const puffinOff = { off: true, on: false };
+const pedestrianLightStates = {
+  north: { off: true, on: false },
+  east:  { off: true, on: false },
+  south: { off: true, on: false },
+  west:  { off: true, on: false }
+};
+
+// Configuration
+const SAFE_GAP = 5;           // Gap between cars
+const PAUSE_DURATION = 5000;  // 5 seconds pause at stop line
+const CAR_SPEED = 2;          // Car speed
+const SPAWN_INTERVAL = 3000;  // Spawn new cars every 3s
+
+/* ============================================================
+   Sequence Timing Parameters (in ms)
+============================================================*/
+const VERTICAL_SEQUENCE_LENGTH = 12000;        // Cycle length for north/south
+const HORIZONTAL_SEQUENCE_LENGTH = 15000;      // Cycle length for east/west
+const VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = 2000;   // Extra vertical right-turn time
+const HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = 2500; // Extra horizontal right-turn time
+
+// Pedestrian times (not currently used)
+const VERTICAL_PEDESTRIAN_SEQUENCE_LENGTH = 8000;
+const HORIZONTAL_PEDESTRIAN_SEQUENCE_LENGTH = 9000;
+
+// Global array for all cars (all directions)
+let cars = [];
 
 /*==============================
   Canvas Resize
@@ -61,17 +78,23 @@ function updateCanvasSize() {
   canvas.height = middleSection.clientHeight;
 }
 
+/* ============================================================
+   Draw Traffic Lights
+============================================================*/
 function drawTrafficLights() {
+  // Main traffic lights
   drawNorthTrafficLight(trafficLightStates.north);
   drawEastTrafficLight(trafficLightStates.east);
   drawSouthTrafficLight(trafficLightStates.south);
   drawWestTrafficLight(trafficLightStates.west);
 
-  drawNorthPuffinLight(puffinOff);
-  drawEastPuffinLight(puffinOff);
-  drawSouthPuffinLight(puffinOff);
-  drawWestPuffinLight(puffinOff);
+  // Pedestrian lights (currently off)
+  drawNorthPuffinLight(pedestrianLightStates.north);
+  drawEastPuffinLight(pedestrianLightStates.east);
+  drawSouthPuffinLight(pedestrianLightStates.south);
+  drawWestPuffinLight(pedestrianLightStates.west);
 
+  // Right-turn lights
   drawNorthRightTurnLight(rightTurnLightStates.north);
   drawEastRightTurnLight(rightTurnLightStates.east);
   drawSouthRightTurnLight(rightTurnLightStates.south);
@@ -476,55 +499,49 @@ function spawnCar() {
 }
 
 /* ============================================================
-   Traffic Light Sequencing
-============================================================ */
-// Vertical sequence (affects north and south). For speed=1, green lasts ~8 seconds; total cycle ~12 seconds.
+   Traffic Light Sequencing – Separate Cycles
+============================================================*/
+// Vertical sequence (north/south)
 function runVerticalSequence() {
-  // t=0: main lights red; right-turn off.
+  // t = 0: main lights red; right-turn off.
   trafficLightStates.north = { red: true, amber: false, green: false };
   trafficLightStates.south = { red: true, amber: false, green: false };
   rightTurnLightStates.north = { off: true, on: false };
   rightTurnLightStates.south = { off: true, on: false };
 
-  // t=0.5 sec: main lights become red+amber.
   setTimeout(() => {
     trafficLightStates.north = { red: true, amber: true, green: false };
     trafficLightStates.south = { red: true, amber: true, green: false };
   }, 500);
 
-  // t=1 sec: main lights turn green.
   setTimeout(() => {
     trafficLightStates.north = { red: false, amber: false, green: true };
     trafficLightStates.south = { red: false, amber: false, green: true };
   }, 1000);
 
-  // Remain green until t=9 sec.
-  // t=9 sec: main lights turn amber and right-turn lights turn on.
   setTimeout(() => {
     trafficLightStates.north = { red: false, amber: true, green: false };
     trafficLightStates.south = { red: false, amber: true, green: false };
     rightTurnLightStates.north = { off: false, on: true };
     rightTurnLightStates.south = { off: false, on: true };
-  }, 9000);
+  }, VERTICAL_SEQUENCE_LENGTH - 3000);
 
-  // t=10 sec: main lights return to red.
   setTimeout(() => {
     trafficLightStates.north = { red: true, amber: false, green: false };
     trafficLightStates.south = { red: true, amber: false, green: false };
-  }, 10000);
+  }, VERTICAL_SEQUENCE_LENGTH - 2000);
 
-  // t=12 sec: wait until intersection clears (or 2 sec timeout) then turn off right-turn lights.
   setTimeout(() => {
-    waitForIntersectionClearOrTimeout(2000, () => {
+    waitForIntersectionClearOrTimeout(VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH, () => {
       rightTurnLightStates.north = { off: true, on: false };
       rightTurnLightStates.south = { off: true, on: false };
     });
-  }, 10000);
+  }, VERTICAL_SEQUENCE_LENGTH);
 
-  return 12000;
+  return VERTICAL_SEQUENCE_LENGTH;
 }
 
-// Horizontal sequence (affects east and west); same timings.
+// Horizontal sequence (east/west)
 function runHorizontalSequence() {
   trafficLightStates.east = { red: true, amber: false, green: false };
   trafficLightStates.west = { red: true, amber: false, green: false };
@@ -546,36 +563,44 @@ function runHorizontalSequence() {
     trafficLightStates.west = { red: false, amber: true, green: false };
     rightTurnLightStates.east = { off: false, on: true };
     rightTurnLightStates.west = { off: false, on: true };
-  }, 9000);
+  }, HORIZONTAL_SEQUENCE_LENGTH - 3000);
 
   setTimeout(() => {
     trafficLightStates.east = { red: true, amber: false, green: false };
     trafficLightStates.west = { red: true, amber: false, green: false };
-  }, 10000);
+  }, HORIZONTAL_SEQUENCE_LENGTH - 2000);
 
   setTimeout(() => {
-    waitForIntersectionClearOrTimeout(2000, () => {
+    waitForIntersectionClearOrTimeout(HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH, () => {
       rightTurnLightStates.east = { off: true, on: false };
       rightTurnLightStates.west = { off: true, on: false };
     });
-  }, 10000);
+  }, HORIZONTAL_SEQUENCE_LENGTH);
 
-  return 12000;
+  return HORIZONTAL_SEQUENCE_LENGTH;
 }
 
 function runLightSequences() {
+  // First run vertical
   runVerticalSequence();
+
+  // After VERTICAL_SEQUENCE_LENGTH, run horizontal
   setTimeout(() => {
     runHorizontalSequence();
-    setTimeout(runLightSequences, 12000);
-  }, 12000);
+    // After HORIZONTAL_SEQUENCE_LENGTH, repeat
+    setTimeout(runLightSequences, HORIZONTAL_SEQUENCE_LENGTH);
+  }, VERTICAL_SEQUENCE_LENGTH);
+}
+
+function waitForIntersectionClearOrTimeout(timeout, callback) {
+  setTimeout(callback, timeout);
 }
 
 window.addEventListener("load", () => {
   loadCarPngs();
   loadPedestrianPngs();
-  updateCanvasSize();
   runLightSequences();
+  updateCanvasSize();
   spawnCar();
   setInterval(spawnCar, SPAWN_INTERVAL);
   animate();

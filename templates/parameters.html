@@ -18,15 +18,18 @@
       padding: 0;
       box-sizing: border-box;
     }
-    html, body {
+
+    html,
+    body {
       width: 100%;
       height: 100%;
       overflow: hidden; /* Prevent scrolling */
     }
+
     body {
-      background-color: #a2bf89;  /* Green background */
+      background-color: #a2bf89; /* Green background */
       font-family: 'SF Pro', sans-serif;
-      font-weight: 400;          /* Normal weight everywhere */
+      font-weight: 400; /* Normal weight everywhere */
       color: #6b6b6b;
       display: flex;
       flex-direction: column;
@@ -34,49 +37,51 @@
 
     /* Main container to manage vertical space */
     .main-container {
-      flex: 1;                  /* Take remaining vertical space */
+      flex: 1; /* Take remaining vertical space */
       display: flex;
       flex-direction: column;
     }
 
     /* Header: left-aligned heading with top margin */
     .header {
-      margin: 4vh 5vw 0 5vw;    /* 4vh top, 5vw sides, 0 bottom */
+      margin: 4vh 5vw 0 5vw; /* 4vh top, 5vw sides, 0 bottom */
     }
+
     .header h1 {
       color: #f8f5e9;
       font-size: 3vw;
-      text-align: left;         /* left-aligned */
+      text-align: left; /* left-aligned */
     }
 
     /* Content area for top row + bottom box */
     .content {
-      flex: 1;                  /* Fill remaining space */
-      margin: 2vh 5vw 4vh 5vw;  /* 2vh top, 5vw sides, 4vh bottom */
+      flex: 1; /* Fill remaining space */
+      margin: 2vh 5vw 4vh 5vw; /* 2vh top, 5vw sides, 4vh bottom */
       display: flex;
       flex-direction: column;
-      gap: 2vh;                 /* vertical gap between top row & bottom box */
+      gap: 2vh; /* vertical gap between top row & bottom box */
     }
 
     /* Top row: two side-by-side boxes */
     .top-row {
       display: flex;
       gap: 2vw;
-      flex: 1;                  /* let top row grow to fill vertical space */
+      flex: 1; /* let top row grow to fill vertical space */
     }
 
     /* Boxes (left & right, plus bottom) */
     .box,
     .bottom-box {
       background-color: #f8f5e9;
-      border-radius: 1.2vw;     /* more rounding */
+      border-radius: 1.2vw; /* more rounding */
       padding: 2vh;
       display: flex;
       flex-direction: column;
     }
+
     .box {
-      flex: 1;                  /* each top box grows equally */
-      min-height: 0;            /* let flex container control the height */
+      flex: 1; /* each top box grows equally */
+      min-height: 0; /* let flex container control the height */
     }
 
     /* Titles inside the boxes */
@@ -95,6 +100,7 @@
       display: flex;
       align-items: center;
     }
+
     .dropdown-heading span.symbol {
       margin-right: 8px;
       color: #8da676;
@@ -108,21 +114,25 @@
       margin-left: 1vw;
       margin-bottom: 2vh;
     }
+
     .dropdown-content ul {
       list-style: none;
       padding: 0;
       margin: 0;
     }
+
     .dropdown-content li {
       display: flex;
       align-items: center;
       margin: 1vh 0;
     }
+
     .dropdown-content li label {
       flex: 0 0 8vw;
       margin-right: 1vw;
       font-size: 1vw;
     }
+
     .dropdown-content li input[type="text"] {
       flex: 1;
       padding: 0.5vh 1vw;
@@ -135,15 +145,18 @@
     .slider-container {
       margin: 2vh 0;
     }
+
     .slider-container label {
       display: block;
       margin-bottom: 1vh;
       font-weight: 400;
       font-size: 1vw;
     }
+
     .slider-container input[type="range"] {
       width: 60%;
     }
+
     /* Numbers below the slider */
     .slider-values {
       display: flex;
@@ -151,6 +164,7 @@
       width: 60%;
       margin-top: 1vh;
     }
+
     .slider-values span {
       font-size: 1vw;
     }
@@ -161,6 +175,7 @@
       align-items: center;
       margin-bottom: 2vh;
     }
+
     .checkbox-container label {
       margin-left: 1vw;
       font-size: 1vw;
@@ -168,7 +183,7 @@
 
     /* Bottom box (spans full width) */
     .bottom-box {
-      flex: 0.4;                /* ~40% of the remaining content height */
+      flex: 0.4; /* ~40% of the remaining content height */
       align-items: center;
       justify-content: center;
       text-align: center;
@@ -184,6 +199,7 @@
       max-width: 600px;
       margin: 0 auto;
     }
+
     .drag-drop-box p {
       font-size: 1.2vw;
       margin: 1vh 0;
@@ -191,20 +207,26 @@
 
     /* Hide the file input (custom UI) */
     #file-input {
-      display: none; 
+      display: none;
     }
 
     /* Upload button style */
     .upload-button {
       margin-top: 3vh;
+      width: 30vw;
       padding: 1vh 2vw;
-      background-color: #8da676;
-      color: #f8f5e9;
+      background-color: #f8f5e9;
+      color: #a2bf89;
       border: none;
       border-radius: 2vw;
       cursor: pointer;
-      font-size: 1vw;
+      font-size: 1.5vw;
+      border-radius: 6vw;
+      margin: 3vh auto 0; /* Centering the button */
+      display: block; /* Ensure proper centering */
+      font-weight: bold;
     }
+
     .upload-button:hover {
       background-color: #789563;
     }
@@ -234,15 +256,11 @@
       .drag-drop-box p {
         font-size: 3vw;
       }
-      .upload-button {
-        font-size: 3vw;
-        border-radius: 6vw;
-      }
     }
   </style>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       // Toggle logic for each drop-down (only one open at a time)
       const dropdowns = document.querySelectorAll('.dropdown-heading');
       dropdowns.forEach(heading => {
@@ -267,7 +285,7 @@
         });
       });
 
-      // Drag & Drop functionality
+      // Drag & Drop functionality for file upload area
       const dropZone = document.querySelector('.drag-drop-box');
       const fileInput = document.getElementById('file-input');
       dropZone.addEventListener('dragover', (e) => {
@@ -287,6 +305,33 @@
       dropZone.addEventListener('click', () => {
         fileInput.click();
       });
+
+      // When the Start button is clicked, copy the parameter values into the hidden form and submit it.
+      document.getElementById("startButton").addEventListener("click", function() {
+        // Northbound
+        document.getElementById("hidden_nb_exiting_east").value = document.getElementById("nb_exiting_east").value;
+        document.getElementById("hidden_nb_exiting_south").value = document.getElementById("nb_exiting_south").value;
+        document.getElementById("hidden_nb_exiting_west").value = document.getElementById("nb_exiting_west").value;
+        // Eastbound
+        document.getElementById("hidden_eb_exiting_north").value = document.getElementById("eb_exiting_north").value;
+        document.getElementById("hidden_eb_exiting_south").value = document.getElementById("eb_exiting_south").value;
+        document.getElementById("hidden_eb_exiting_west").value = document.getElementById("eb_exiting_west").value;
+        // Southbound
+        document.getElementById("hidden_sb_exiting_north").value = document.getElementById("sb_exiting_north").value;
+        document.getElementById("hidden_sb_exiting_east").value = document.getElementById("sb_exiting_east").value;
+        document.getElementById("hidden_sb_exiting_west").value = document.getElementById("sb_exiting_west").value;
+        // Westbound
+        document.getElementById("hidden_wb_exiting_north").value = document.getElementById("wb_exiting_north").value;
+        document.getElementById("hidden_wb_exiting_east").value = document.getElementById("wb_exiting_east").value;
+        document.getElementById("hidden_wb_exiting_south").value = document.getElementById("wb_exiting_south").value;
+        // Junction Settings
+        document.getElementById("hidden_lanes").value = document.getElementById("lanes").value;
+        document.getElementById("hidden_left-turn").value = document.getElementById("left-turn").checked ? "on" : "";
+        document.getElementById("hidden_pedestrian_events").value = document.getElementById("pedestrian-events").value;
+        
+        // Submit the hidden form.
+        document.getElementById("hiddenForm").submit();
+      });
     });
   </script>
 </head>
@@ -299,161 +344,125 @@
 
     <!-- Content -->
     <div class="content">
-      <!-- Top row -->
-      <div class="top-row">
-        <!-- Left box -->
-        <div class="box">
-          <h2>Configurable Parameters</h2>
-
-          <!-- Northbound -->
-          <div class="dropdown-heading">
-            <span class="symbol">—</span> Northbound
-          </div>
-          <div class="dropdown-content">
-            <ul>
-              <li>
-                <label for="nb_incoming">Incoming</label>
-                <input type="text" id="nb_incoming" name="nb_incoming">
-              </li>
-              <li>
-                <label for="nb_exiting_east">Exiting east</label>
-                <input type="text" id="nb_exiting_east" name="nb_exiting_east">
-              </li>
-              <li>
-                <label for="nb_exiting_south">Exiting south</label>
-                <input type="text" id="nb_exiting_south" name="nb_exiting_south">
-              </li>
-              <li>
-                <label for="nb_exiting_west">Exiting west</label>
-                <input type="text" id="nb_exiting_west" name="nb_exiting_west">
-              </li>
-            </ul>
-          </div>
-
-          <!-- Eastbound -->
-          <div class="dropdown-heading">
-            <span class="symbol">—</span> Eastbound
-          </div>
-          <div class="dropdown-content">
-            <ul>
-              <li>
-                <label for="eb_incoming">Incoming</label>
-                <input type="text" id="eb_incoming" name="eb_incoming">
-              </li>
-              <li>
-                <label for="eb_exiting_north">Exiting north</label>
-                <input type="text" id="eb_exiting_north" name="eb_exiting_north">
-              </li>
-              <li>
-                <label for="eb_exiting_south">Exiting south</label>
-                <input type="text" id="eb_exiting_south" name="eb_exiting_south">
-              </li>
-              <li>
-                <label for="eb_exiting_west">Exiting west</label>
-                <input type="text" id="eb_exiting_west" name="eb_exiting_west">
-              </li>
-            </ul>
-          </div>
-
-          <!-- Southbound -->
-          <div class="dropdown-heading">
-            <span class="symbol">—</span> Southbound
-          </div>
-          <div class="dropdown-content">
-            <ul>
-              <li>
-                <label for="sb_incoming">Incoming</label>
-                <input type="text" id="sb_incoming" name="sb_incoming">
-              </li>
-              <li>
-                <label for="sb_exiting_north">Exiting north</label>
-                <input type="text" id="sb_exiting_north" name="sb_exiting_north">
-              </li>
-              <li>
-                <label for="sb_exiting_east">Exiting east</label>
-                <input type="text" id="sb_exiting_east" name="sb_exiting_east">
-              </li>
-              <li>
-                <label for="sb_exiting_west">Exiting west</label>
-                <input type="text" id="sb_exiting_west" name="sb_exiting_west">
-              </li>
-            </ul>
-          </div>
-
-          <!-- Westbound -->
-          <div class="dropdown-heading">
-            <span class="symbol">—</span> Westbound
-          </div>
-          <div class="dropdown-content">
-            <ul>
-              <li>
-                <label for="wb_incoming">Incoming</label>
-                <input type="text" id="wb_incoming" name="wb_incoming">
-              </li>
-              <li>
-                <label for="wb_exiting_north">Exiting north</label>
-                <input type="text" id="wb_exiting_north" name="wb_exiting_north">
-              </li>
-              <li>
-                <label for="wb_exiting_east">Exiting east</label>
-                <input type="text" id="wb_exiting_east" name="wb_exiting_east">
-              </li>
-              <li>
-                <label for="wb_exiting_south">Exiting south</label>
-                <input type="text" id="wb_exiting_south" name="wb_exiting_south">
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Right box -->
-        <div class="box">
-          <h2>Junction Settings</h2>
-          <!-- Number of lanes slider -->
-          <div class="slider-container">
-            <label for="lanes">Number of lanes</label>
-            <input type="range" id="lanes" name="lanes" min="1" max="5" value="2">
-            <div class="slider-values">
-              <span>1</span>
-              <span>2</span>
-              <span>3</span>
-              <span>4</span>
-              <span>5</span>
+      <!-- Top row: Visible parameters form -->
+      <form id="parameterForm">
+        <div class="top-row">
+          <!-- Left box -->
+          <div class="box">
+            <h2>Configurable Parameters</h2>
+            <!-- Northbound -->
+            <div class="dropdown-heading">
+              <span class="symbol">—</span> Northbound
+            </div>
+            <div class="dropdown-content">
+              <ul>
+                <li>
+                  <label for="nb_exiting_east">Exiting east</label>
+                  <input type="text" id="nb_exiting_east" name="nb_exiting_east">
+                </li>
+                <li>
+                  <label for="nb_exiting_south">Exiting south</label>
+                  <input type="text" id="nb_exiting_south" name="nb_exiting_south">
+                </li>
+                <li>
+                  <label for="nb_exiting_west">Exiting west</label>
+                  <input type="text" id="nb_exiting_west" name="nb_exiting_west">
+                </li>
+              </ul>
+            </div>
+            <!-- Eastbound -->
+            <div class="dropdown-heading">
+              <span class="symbol">—</span> Eastbound
+            </div>
+            <div class="dropdown-content">
+              <ul>
+                <li>
+                  <label for="eb_exiting_north">Exiting north</label>
+                  <input type="text" id="eb_exiting_north" name="eb_exiting_north">
+                </li>
+                <li>
+                  <label for="eb_exiting_south">Exiting south</label>
+                  <input type="text" id="eb_exiting_south" name="eb_exiting_south">
+                </li>
+                <li>
+                  <label for="eb_exiting_west">Exiting west</label>
+                  <input type="text" id="eb_exiting_west" name="eb_exiting_west">
+                </li>
+              </ul>
+            </div>
+            <!-- Southbound -->
+            <div class="dropdown-heading">
+              <span class="symbol">—</span> Southbound
+            </div>
+            <div class="dropdown-content">
+              <ul>
+                <li>
+                  <label for="sb_exiting_north">Exiting north</label>
+                  <input type="text" id="sb_exiting_north" name="sb_exiting_north">
+                </li>
+                <li>
+                  <label for="sb_exiting_east">Exiting east</label>
+                  <input type="text" id="sb_exiting_east" name="sb_exiting_east">
+                </li>
+                <li>
+                  <label for="sb_exiting_west">Exiting west</label>
+                  <input type="text" id="sb_exiting_west" name="sb_exiting_west">
+                </li>
+              </ul>
+            </div>
+            <!-- Westbound -->
+            <div class="dropdown-heading">
+              <span class="symbol">—</span> Westbound
+            </div>
+            <div class="dropdown-content">
+              <ul>
+                <li>
+                  <label for="wb_exiting_north">Exiting north</label>
+                  <input type="text" id="wb_exiting_north" name="wb_exiting_north">
+                </li>
+                <li>
+                  <label for="wb_exiting_east">Exiting east</label>
+                  <input type="text" id="wb_exiting_east" name="wb_exiting_east">
+                </li>
+                <li>
+                  <label for="wb_exiting_south">Exiting south</label>
+                  <input type="text" id="wb_exiting_south" name="wb_exiting_south">
+                </li>
+              </ul>
             </div>
           </div>
-          <!-- Left-turn lane checkbox -->
-          <div class="checkbox-container">
-            <input type="checkbox" id="left-turn" name="left-turn" checked>
-            <label for="left-turn">Left-turn lane</label>
-          </div>
-          <!-- Pedestrians -->
-          <div class="dropdown-heading">
-            <span class="symbol">—</span> Pedestrians
-          </div>
-          <div class="dropdown-content">
-            <ul>
-              <li>
-                <label for="ped_north">Crossing north</label>
-                <input type="text" id="ped_north" name="ped_north">
-              </li>
-              <li>
-                <label for="ped_east">Crossing east</label>
-                <input type="text" id="ped_east" name="ped_east">
-              </li>
-              <li>
-                <label for="ped_south">Crossing south</label>
-                <input type="text" id="ped_south" name="ped_south">
-              </li>
-              <li>
-                <label for="ped_west">Crossing west</label>
-                <input type="text" id="ped_west" name="ped_west">
-              </li>
-            </ul>
+          <!-- Right box -->
+          <div class="box">
+            <h2>Junction Settings</h2>
+            <!-- Number of lanes slider -->
+            <div class="slider-container">
+              <label for="lanes">Number of lanes</label>
+              <input type="range" id="lanes" name="lanes" min="1" max="5" value="2">
+              <div class="slider-values">
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+                <span>4</span>
+                <span>5</span>
+              </div>
+            </div>
+            <!-- Left-turn lane checkbox -->
+            <div class="checkbox-container">
+              <input type="checkbox" id="left-turn" name="left-turn" checked>
+              <label for="left-turn">Left-turn lane</label>
+            </div>
+            <!-- Pedestrians -->
+            <div style="display: flex; align-items: center; margin: 2vh 0 1vh;">
+              <label for="pedestrian-events" style="font-size: 1.2vw; font-weight: 400; margin-right: 1vw; cursor: default;">
+                Pedestrian events per hour
+              </label>
+              <input type="number" id="pedestrian-events" name="pedestrian-events" min="0" max="5" style="padding: 0.5vh 1vw; font-size: 1vw; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
           </div>
         </div>
-      </div>
+      </form>
 
-      <!-- Bottom box -->
+      <!-- Bottom box: File Upload area (remains in its own form) -->
       <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data" style="flex: 0;">
         <div class="bottom-box">
           <div class="drag-drop-box">
@@ -463,9 +472,36 @@
           </div>
           <input type="file" name="file" id="file-input" />
           <br>
-          <button type="submit" class="upload-button">Upload</button>
         </div>
       </form>
+
+      <!-- Hidden Final Submission Form: Contains hidden copies of parameter values and the Start button -->
+      <form id="hiddenForm" action="/parameters" method="POST" enctype="multipart/form-data">
+        <!-- Hidden inputs for parameters -->
+        <input type="hidden" id="hidden_nb_exiting_east" name="nb_exiting_east" value="">
+        <input type="hidden" id="hidden_nb_exiting_south" name="nb_exiting_south" value="">
+        <input type="hidden" id="hidden_nb_exiting_west" name="nb_exiting_west" value="">
+
+        <input type="hidden" id="hidden_eb_exiting_north" name="eb_exiting_north" value="">
+        <input type="hidden" id="hidden_eb_exiting_south" name="eb_exiting_south" value="">
+        <input type="hidden" id="hidden_eb_exiting_west" name="eb_exiting_west" value="">
+
+        <input type="hidden" id="hidden_sb_exiting_north" name="sb_exiting_north" value="">
+        <input type="hidden" id="hidden_sb_exiting_east" name="sb_exiting_east" value="">
+        <input type="hidden" id="hidden_sb_exiting_west" name="sb_exiting_west" value="">
+
+        <input type="hidden" id="hidden_wb_exiting_north" name="wb_exiting_north" value="">
+        <input type="hidden" id="hidden_wb_exiting_east" name="wb_exiting_east" value="">
+        <input type="hidden" id="hidden_wb_exiting_south" name="wb_exiting_south" value="">
+
+        <input type="hidden" id="hidden_lanes" name="lanes" value="">
+        <input type="hidden" id="hidden_left-turn" name="left-turn" value="">
+        <input type="hidden" id="hidden_pedestrian_events" name="pedestrian-events" value="">
+        
+        <!-- The visible Start button -->
+        <button class="upload-button" type="button" id="startButton">Start</button>
+      </form>
+
     </div>
   </div>
 </body>

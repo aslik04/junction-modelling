@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, url_for, redirect
 from models import db, Configuration, LeaderboardResult, Session
 from sqlalchemy import inspect
 import csv
@@ -116,9 +116,12 @@ def index():
     session_id = create_session()
     return render_template('index.html', session_id=session_id)
 
-@app.route('/parameters')
+@app.route('/parameters', methods=['GET', 'POST'])
 def parameters():
-    # Renders the template below (in the 'templates' folder as 'index.html')
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        print(list(data.values()))  # Print parameters as an array in the console
+        return redirect(url_for('junctionPage'))
     return render_template('parameters.html')
 
 @app.route('/upload-file', methods=['POST'])
@@ -212,7 +215,9 @@ def simulate():
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
 
-
+@app.route('/junctionPage')
+def junctionPage():
+    return render_template('junctionPage.html')
 
 @app.route('/leaderboards')
 def leaderboards():

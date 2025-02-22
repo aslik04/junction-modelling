@@ -10,3 +10,7 @@ Werkzeug==2.0.3
 WTForms==3.0.0
 itsdangerous==2.0.1
 pytest==7.2.2
+
+# Added for FastAPI-based junction page
+fastapi==0.95.2
+uvicorn==0.22.0

@@ -1,3 +1,7 @@
+/*************************************************************************
+ * main.js
+ *************************************************************************/
+
 import { junctionDrawing } from "./junction.js";
 import { getJunctionData, junctionCanvas, canvas2D } from "./config.js";
 import {
@@ -17,17 +21,26 @@ import {
 import { spawnPedestrian, updatePedestrians, drawPedestrians } from "./pedestrianManager.js";
 import { loadPedestrianPngs } from "./images.js";
 
+/*************************************************************************
+ * Load images
+ *************************************************************************/
 loadPedestrianPngs();
 
+/*************************************************************************
+ * Dynamically size the canvas
+ *************************************************************************/
 function updateCanvasSize() {
   const lanes = getJunctionData().numOfLanes;
   const container = document.getElementById("junctionContainer");
   const canvas = document.getElementById("junctionCanvas");
+  // scale by lanes
   canvas.width = container.clientWidth * (1 + lanes / 10);
   canvas.height = container.clientHeight * (1 + lanes / 10);
 }
 
-// Local state copies for the simulation
+/*************************************************************************
+ * Local states for lights / pedestrians
+ *************************************************************************/
 let trafficLightStates = {
   north: { red: true, amber: false, green: false },
   east:  { red: true, amber: false, green: false },
@@ -47,8 +60,7 @@ let pedestrianLightStates = {
   west:  { off: true, on: false }
 };
 
-// To prevent spawning duplicate pedestrians for the same event,
-// track active pedestrian events for each direction.
+// Track active pedestrian events so we don't spawn duplicates
 const activePedestrianEvents = {
   north: false,
   east: false,
@@ -56,49 +68,105 @@ const activePedestrianEvents = {
   west: false
 };
 
+/*************************************************************************
+ * Cars from server
+ *************************************************************************/
+let carsFromServer = [];
+
+/*************************************************************************
+ * The render function
+ *************************************************************************/
 function render() {
-  // Clear the entire canvas
   canvas2D.clearRect(0, 0, junctionCanvas.width, junctionCanvas.height);
 
-  // Draw the junction (roads, lanes, crosswalks, etc.)
+  // 1) Draw the junction
   junctionDrawing();
 
-  // Draw traffic lights
+  // 2) Draw traffic lights
   drawNorthTrafficLight(trafficLightStates.north);
   drawEastTrafficLight(trafficLightStates.east);
   drawSouthTrafficLight(trafficLightStates.south);
   drawWestTrafficLight(trafficLightStates.west);
 
-  // Draw pedestrian (puffin) lights
+  // 3) Draw pedestrian lights
   drawNorthPuffinLight(pedestrianLightStates.north);
   drawEastPuffinLight(pedestrianLightStates.east);
   drawSouthPuffinLight(pedestrianLightStates.south);
   drawWestPuffinLight(pedestrianLightStates.west);
 
-  // Draw right-turn lights
+  // 4) Draw right-turn lights
   drawNorthRightTurnLight(rightTurnLightStates.north);
   drawEastRightTurnLight(rightTurnLightStates.east);
   drawSouthRightTurnLight(rightTurnLightStates.south);
   drawWestRightTurnLight(rightTurnLightStates.west);
 
-  // Update and draw any active pedestrians
+  // 5) Update + draw pedestrians
   updatePedestrians();
   drawPedestrians();
+
+  // 6) Draw cars from the server
+  carsFromServer.forEach(car => {
+    drawCarOnCanvas(car);
+  });
 }
 
+/*************************************************************************
+ * Draw a single car from the server
+ *************************************************************************/
+function drawCarOnCanvas(car) {
+  canvas2D.save();
+  canvas2D.translate(car.x, car.y);
+
+  // If turnType is "right", rotate by car.currentRightTurnAngle
+  let angle = 0;
+  if (car.turnType === "right") {
+    angle = car.currentRightTurnAngle;
+  } else {
+    if (car.direction === "north") angle = 0;
+    else if (car.direction === "east") angle = Math.PI / 2;
+    else if (car.direction === "south") angle = Math.PI;
+    else if (car.direction === "west") angle = -Math.PI / 2;
+  }
+  canvas2D.rotate(angle);
+
+  // Just a 16×40 rectangle for demonstration
+  canvas2D.fillStyle = "blue";
+  canvas2D.fillRect(-8, -20, 16, 40);
+
+  canvas2D.restore();
+}
+
+/*************************************************************************
+ * The animation loop
+ *************************************************************************/
 function animate() {
   requestAnimationFrame(animate);
   render();
 }
 
+/*************************************************************************
+ * Connect to the backend via WebSocket
+ *************************************************************************/
 const ws = new WebSocket("ws://localhost:8000/ws");
 
+// Only send data after the socket is open
 ws.onopen = () => {
   console.log("Connected to backend");
+  
+  // Now it's safe to call ws.send(...)
+  const w = junctionCanvas.width;
+  const h = junctionCanvas.height;
+  ws.send(JSON.stringify({
+    type: "canvasSize",
+    width: w,
+    height: h
+  }));
 };
 
 ws.onmessage = (evt) => {
   const data = JSON.parse(evt.data);
+
+  // traffic light states
   if (data.trafficLightStates) {
     trafficLightStates = data.trafficLightStates;
   }
@@ -107,18 +175,21 @@ ws.onmessage = (evt) => {
   }
   if (data.pedestrianLightStates) {
     pedestrianLightStates = data.pedestrianLightStates;
-
-    // For each direction, if the pedestrian light is on and no pedestrian is active for that event, spawn one.
+    // spawn pedestrians if needed
     ["north", "east", "south", "west"].forEach(direction => {
       if (pedestrianLightStates[direction].on && !activePedestrianEvents[direction]) {
         spawnPedestrian(direction);
         activePedestrianEvents[direction] = true;
       }
-      // Reset the flag when the light is off, so new events can spawn pedestrians.
       if (!pedestrianLightStates[direction].on) {
         activePedestrianEvents[direction] = false;
       }
     });
+  }
+
+  // If server sends "cars"
+  if (data.cars) {
+    carsFromServer = data.cars;
   }
 };
 
@@ -126,7 +197,16 @@ ws.onclose = () => {
   console.log("Disconnected from backend");
 };
 
+/*************************************************************************
+ * On page load
+ *************************************************************************/
 window.addEventListener("load", () => {
+  // 1) Size the canvas
   updateCanvasSize();
+
+  // 2) DO NOT call ws.send(...) here again or you'll get "Still in CONNECTING"
+  // Instead, rely on the ws.onopen callback
+
+  // 3) Start animation
   animate();
 });

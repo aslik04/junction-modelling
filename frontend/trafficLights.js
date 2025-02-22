@@ -110,7 +110,7 @@ function drawRightTurnLight(xCoord, yCoord, angle, sequence = { off: true, on: f
     const size = pixelWidthOfLane;
     const radiusOfLight = size / 3;
   
-    const colour = sequence.on ? "#00FF00" : "grey";
+    const colour = sequence.on ? "#00FF00" : "red";
   
     canvas2D.save();
     canvas2D.translate(xCoord, yCoord);
@@ -145,7 +145,7 @@ export function drawNorthTrafficLight(sequence) {
     
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
-    const xCoord = leftVertical - pixelWidthOfLane - 20;
+    const xCoord = leftVertical - pixelWidthOfLane * 2;
     const yCoord = bottomHorizontal + widthOfPC;
 
     drawTrafficLight(xCoord, yCoord, 0, sequence);
@@ -162,7 +162,7 @@ export function drawEastTrafficLight(sequence) {
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
     const xCoord = leftVertical - widthOfPC;
-    const yCoord = leftVertical - pixelWidthOfLane - 20;
+    const yCoord = leftVertical - pixelWidthOfLane * 2;
 
     drawTrafficLight(xCoord, yCoord, Math.PI / 2, sequence);
 }
@@ -178,7 +178,7 @@ export function drawSouthTrafficLight(sequence) {
 
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
-    const xCoord = rightVertical + pixelWidthOfLane + 20;
+    const xCoord = rightVertical + pixelWidthOfLane * 2;
     const yCoord = topHorizontal - widthOfPC;
 
     drawTrafficLight(xCoord, yCoord, Math.PI, sequence);
@@ -195,7 +195,7 @@ export function drawWestTrafficLight(sequence) {
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
     const xCoord = rightVertical + widthOfPC;
-    const yCoord = rightVertical + pixelWidthOfLane + 20;
+    const yCoord = rightVertical + pixelWidthOfLane * 2;
 
     drawTrafficLight(xCoord, yCoord, -Math.PI / 2, sequence);
 }
@@ -211,7 +211,7 @@ export function drawNorthPuffinLight(sequence) {
     
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
-    const xCoord = leftVertical - pixelWidthOfLane - 40;
+    const xCoord = leftVertical - pixelWidthOfLane * 3;
     const yCoord = bottomHorizontal + widthOfPC;
 
     drawPuffinLight(xCoord, yCoord, 0, sequence);
@@ -228,7 +228,7 @@ export function drawEastPuffinLight(sequence) {
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
     const xCoord = leftVertical - widthOfPC;
-    const yCoord = leftVertical - pixelWidthOfLane - 40;
+    const yCoord = leftVertical - pixelWidthOfLane * 3;
 
     drawPuffinLight(xCoord, yCoord, Math.PI / 2, sequence);
 }
@@ -244,7 +244,7 @@ export function drawSouthPuffinLight(sequence) {
 
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
-    const xCoord = rightVertical + pixelWidthOfLane + 40;
+    const xCoord = rightVertical + pixelWidthOfLane * 3;
     const yCoord = topHorizontal - widthOfPC;
 
     drawPuffinLight(xCoord, yCoord, Math.PI, sequence);
@@ -261,7 +261,7 @@ export function drawWestPuffinLight(sequence) {
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
     const xCoord = rightVertical + widthOfPC;
-    const yCoord = rightVertical + pixelWidthOfLane + 40;
+    const yCoord = rightVertical + pixelWidthOfLane * 3;
 
     drawPuffinLight(xCoord, yCoord, -Math.PI / 2, sequence);
 }
@@ -278,7 +278,7 @@ export function drawNorthRightTurnLight(sequence) {
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
     const xCoord = leftVertical - pixelWidthOfLane;
-    const yCoord = bottomHorizontal + widthOfPC + 40;
+    const yCoord = bottomHorizontal + widthOfPC + pixelWidthOfLane * 2;
 
     drawRightTurnLight(xCoord, yCoord, 0, sequence);
 }
@@ -293,7 +293,7 @@ export function drawEastRightTurnLight(sequence) {
 
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
-    const xCoord = leftVertical - widthOfPC - 40;
+    const xCoord = leftVertical - widthOfPC - pixelWidthOfLane * 2;
     const yCoord = leftVertical - pixelWidthOfLane;
 
     drawRightTurnLight(xCoord, yCoord, Math.PI / 2, sequence);
@@ -311,7 +311,7 @@ export function drawSouthRightTurnLight(sequence) {
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
     const xCoord = rightVertical + pixelWidthOfLane;
-    const yCoord = topHorizontal - widthOfPC - 40;
+    const yCoord = topHorizontal - widthOfPC - pixelWidthOfLane * 2;
 
     drawRightTurnLight(xCoord, yCoord, Math.PI, sequence);
 }
@@ -326,7 +326,7 @@ export function drawWestRightTurnLight(sequence) {
 
     const widthOfPC = puffinCrossingStripeLength() + 5;
 
-    const xCoord = rightVertical + widthOfPC + 40;
+    const xCoord = rightVertical + widthOfPC + pixelWidthOfLane * 2;
     const yCoord = rightVertical + pixelWidthOfLane;
 
     drawRightTurnLight(xCoord, yCoord, -Math.PI / 2, sequence);

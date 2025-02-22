@@ -20,6 +20,7 @@ import {
  * Canvas is cleared and each element of the junction is drawn based on user input.
  */
 export function junctionDrawing() {
+    canvas2D.save();
     // To prevent repeated code utilised method with returns object of data regarding junction
     const {numOfLanes, roadSize, canvasX, canvasY, topHorizontal, bottomHorizontal, leftVertical, rightVertical} = getJunctionData();
 
@@ -33,6 +34,7 @@ export function junctionDrawing() {
     // Drawing for the markings in lanes and the puffin crossing for each direction.
     drawLanes(numOfLanes, topHorizontal, bottomHorizontal, leftVertical, rightVertical, canvasX, canvasY);
     drawPuffinCrossing(topHorizontal, bottomHorizontal, leftVertical, rightVertical);
+    canvas2D.restore();
 }
 
 /**

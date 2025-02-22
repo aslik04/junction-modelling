@@ -168,6 +168,10 @@ ws.onopen = () => {
 ws.onmessage = (evt) => {
   const data = JSON.parse(evt.data);
 
+  if (data.simulatedTime !== undefined) {
+    document.getElementById("timeSimulated").textContent = `Time Simulated: ${data.simulatedTime}`;
+  }
+
   // traffic light states
   if (data.trafficLightStates) {
     trafficLightStates = data.trafficLightStates;

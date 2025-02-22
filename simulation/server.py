@@ -21,6 +21,7 @@ app.mount("/static", StaticFiles(directory="../static"), name="static")
 
 connected_clients = []
 traffic_light_logic = TrafficLightLogic()
+simulationSpeedMultiplier = 1.0  # Default multiplier
 
 async def broadcast_to_all(data_str):
     for ws in connected_clients:
@@ -35,6 +36,35 @@ traffic_light_logic.set_broadcast_callback(broadcast_to_all)
 # Global: junction_data is set dynamically from the client, which sends canvas size
 ###############################################################################
 junction_data = None
+
+# Simulation time variables (in seconds)
+simulationTime = 0
+lastUpdateTime = None
+
+async def update_simulation_time():
+    global simulationTime, lastUpdateTime, simulationSpeedMultiplier
+    while True:
+        now = asyncio.get_event_loop().time()  # current time in seconds
+        if lastUpdateTime is None:
+            lastUpdateTime = now
+        delta = now - lastUpdateTime
+        lastUpdateTime = now
+        # At speed 1: 1 real second adds 60 simulation seconds.
+        simulationTime += delta * simulationSpeedMultiplier * 60
+        
+        # Calculate hours and minutes from simulationTime
+        simulatedHours = int(simulationTime // 3600)
+        simulatedMinutes = int((simulationTime % 3600) // 60)
+        
+        simulatedTimeStr = f"{simulatedHours}h {simulatedMinutes}m"
+        
+        message = {
+            "simulatedTime": simulatedTimeStr,
+            # ... include other simulation data if needed ...
+        }
+        await broadcast_to_all(json.dumps(message))
+        await asyncio.sleep(1/60)
+
 
 def create_junction_data(canvas_width, canvas_height, num_of_lanes=5, pixelWidthOfLane=20):
     road_size = 2 * num_of_lanes * pixelWidthOfLane
@@ -62,8 +92,6 @@ def create_junction_data(canvas_width, canvas_height, num_of_lanes=5, pixelWidth
         "heightOfCar": heightOfCar
     }
 
-simulationSpeedMultiplier = 1.0  # Default multiplier
-
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     global junction_data, simulationSpeedMultiplier
@@ -82,8 +110,8 @@ async def websocket_endpoint(ws: WebSocket):
                     junction_data = create_junction_data(width, height)
                 elif data.get("type") == "speedUpdate":
                     new_speed = data["speed"]
-                    simulationSpeedMultiplier = new_speed  # update global if needed
-                    traffic_light_logic.simulationSpeedMultiplier = new_speed  # update lights multiplier!
+                    simulationSpeedMultiplier = new_speed  # update global multiplier
+                    traffic_light_logic.simulationSpeedMultiplier = new_speed  # update in traffic lights
                     print("Updated simulation speed multiplier:", new_speed)
             except Exception as e:
                 print("Error processing message:", e)
@@ -91,13 +119,6 @@ async def websocket_endpoint(ws: WebSocket):
         print("WebSocket error:", e)
     finally:
         connected_clients.remove(ws)
-
-
-@app.on_event("startup")
-async def on_startup():
-    asyncio.create_task(traffic_light_logic.run_traffic_loop())
-    asyncio.create_task(spawn_car_loop())
-    asyncio.create_task(update_car_loop())
 
 ###############################################################################
 # Spawn Rates (vehicles per minute) for each direction/turn type
@@ -115,11 +136,6 @@ spawnRates = {
 cars = []
 
 def getLaneCandidates(numOfLanes):
-    """
-    If 1 lane: left=0, right=0, forward=[0]
-    If 2 lanes: left=0, right=1, forward=[0]
-    If >=3 lanes: left=0, right=numOfLanes-1, forward = [1..(numOfLanes-2)]
-    """
     if numOfLanes == 1:
         return 0, 0, [0]
     elif numOfLanes == 2:
@@ -139,26 +155,28 @@ forwardIndex = {
 
 async def spawn_car_loop():
     global cars, junction_data
+    # Wait until junction_data is available.
     while junction_data is None:
         await asyncio.sleep(0.1)
-
     numOfLanes = junction_data["numOfLanes"]
     leftLane, rightLane, forwardLanes = getLaneCandidates(numOfLanes)
-
     while True:
         for direction in ["north", "east", "south", "west"]:
             for turnType in ["left", "forward", "right"]:
-                vpm = spawnRates[direction][turnType]
-                if vpm <= 0:
+                base_vpm = spawnRates[direction][turnType]
+                # Multiply base rate by simulationSpeedMultiplier so that, for example,
+                # at multiplier 5, you spawn 5 times as many vehicles per real minute.
+                effective_vpm = base_vpm * simulationSpeedMultiplier
+                if effective_vpm <= 0:
                     continue
-                prob = vpm / 60.0
+                # Probability per second: effective vehicles per minute / 60
+                prob = effective_vpm / 60.0
                 if random.random() < prob:
                     if turnType == "left":
                         lane = leftLane
                     elif turnType == "right":
                         lane = rightLane
                     else:
-                        # forward
                         if forwardLanes:
                             idx = forwardIndex[direction] % len(forwardLanes)
                             lane = forwardLanes[idx]
@@ -169,6 +187,8 @@ async def spawn_car_loop():
                     cars.append(new_car)
                     print(f"Spawned {direction} {turnType} car in lane {lane}")
         await asyncio.sleep(1)
+
+
 
 def isOffCanvas(car):
     if (car.x < -200 or car.x > (junction_data["canvasWidth"] + 200) or
@@ -181,21 +201,21 @@ async def update_car_loop():
     while True:
         main_lights = traffic_light_logic.trafficLightStates
         right_lights = traffic_light_logic.rightTurnLightStates
-
         for c in cars:
-            # Update effective speed using the multiplier
-            base_speed = 2.0  # or whatever the base is when the car was spawned
+            base_speed = 2.0
             c.speed = base_speed * simulationSpeedMultiplier
             c.update(main_lights, right_lights, cars)
-
-        # Remove off-canvas cars and broadcast updated positions as before...
         cars = [c for c in cars if not isOffCanvas(c)]
         data = {"cars": [c.to_dict() for c in cars]}
         await broadcast_to_all(json.dumps(data))
-
-        # Adjust update frequency by dividing sleep time by the multiplier
         await asyncio.sleep((1/60) / simulationSpeedMultiplier)
 
+@app.on_event("startup")
+async def on_startup():
+    asyncio.create_task(traffic_light_logic.run_traffic_loop())
+    asyncio.create_task(spawn_car_loop())
+    asyncio.create_task(update_car_loop())
+    asyncio.create_task(update_simulation_time())
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

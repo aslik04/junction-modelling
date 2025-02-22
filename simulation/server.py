@@ -108,6 +108,7 @@ async def websocket_endpoint(ws: WebSocket):
                     width = data["width"]
                     height = data["height"]
                     junction_data = create_junction_data(width, height)
+                    print(f"Received canvasSize: {width}x{height}, junction_data set: {junction_data}")
                 elif data.get("type") == "speedUpdate":
                     new_speed = data["speed"]
                     simulationSpeedMultiplier = new_speed  # update global multiplier

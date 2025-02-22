@@ -154,15 +154,17 @@ window.ws = ws;  // Make ws available globally
 // Only send data after the socket is open
 ws.onopen = () => {
   console.log("Connected to backend");
-  
-  // Now it's safe to call ws.send(...)
-  const w = junctionCanvas.width;
-  const h = junctionCanvas.height;
-  ws.send(JSON.stringify({
-    type: "canvasSize",
-    width: w,
-    height: h
-  }));
+  setTimeout(() => {
+    updateCanvasSize();
+    const w = junctionCanvas.width;
+    const h = junctionCanvas.height;
+    console.log("Sending canvasSize:", w, h);
+    ws.send(JSON.stringify({
+      type: "canvasSize",
+      width: w,
+      height: h
+    }));
+  }, 500); // 500ms delay to ensure DOM/layout is ready
 };
 
 ws.onmessage = (evt) => {

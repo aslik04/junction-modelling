@@ -1,0 +1,32 @@
+<!-- results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results Page</title>
+    <style>
+        body { font-family: 'SF Pro', sans-serif; background-color:#f8f5e9; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
+        h1, h2 { text-align: center; }
+        .score { text-align: center; font-size: 24px; margin-bottom: 20px; }
+        .results-section { background-color: #f2dede; padding: 15px; border-radius: 10px; }
+        .direction { margin-bottom: 15px; }
+        .btn { background-color: #a2bf89; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Results</h1>
+        <div class="score">Overall Score: <strong>123.45</strong></div>
+        <div class="results-section">
+            <h2>Breakdown</h2>
+            <div class="direction"><strong>Northbound:</strong> AVG Wait Time: 15.73s, MAX Wait Time: 30.32s, MAX Queue Length: 11 cars</div>
+            <div class="direction"><strong>Southbound:</strong> AVG Wait Time: ##s, MAX Wait Time: ##s, MAX Queue Length: # cars</div>
+            <div class="direction"><strong>Eastbound:</strong> AVG Wait Time: ##s, MAX Wait Time: ##s, MAX Queue Length: # cars</div>
+            <div class="direction"><strong>Westbound:</strong> AVG Wait Time: ##s, MAX Wait Time: ##s, MAX Queue Length: # cars</div> 
+        </div>
+        <button class="btn">See Leaderboards</button>
+    </div>
+</body>
+</html>

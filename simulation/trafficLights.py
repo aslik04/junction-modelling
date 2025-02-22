@@ -55,7 +55,7 @@ class TrafficLightLogic:
         # -------------------------------
         self.pedestrianPerMinute = 4  # Change this to set the desired number of pedestrian events per minute
         self.pedestrianDuration = 2   # Fixed 3-second crossing
-        self.gap = 2                # Gap (in seconds) after each cycle
+        self.gap = 1                # Gap (in seconds) after each cycle
 
         self._broadcast_callback = None
 
@@ -144,7 +144,7 @@ class TrafficLightLogic:
 
     async def run_vertical_sequence(self):
         while self.rightTurnLightStates["east"]["on"] or self.rightTurnLightStates["west"]["on"]:
-            await asyncio.sleep(self.gap + 1 / self.simulationSpeedMultiplier)
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
         # Red→green transition (2 sec)
         self.trafficLightStates["north"] = {"red": True, "amber": False, "green": False}
         self.trafficLightStates["south"] = {"red": True, "amber": False, "green": False}
@@ -179,7 +179,7 @@ class TrafficLightLogic:
 
     async def run_horizontal_sequence(self):
         while self.rightTurnLightStates["north"]["on"] or self.rightTurnLightStates["south"]["on"]:
-            await asyncio.sleep(self.gap + 1 / self.simulationSpeedMultiplier)
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
         # Red→green transition (2 sec)
         self.trafficLightStates["east"] = {"red": True, "amber": False, "green": False}
         self.trafficLightStates["west"] = {"red": True, "amber": False, "green": False}
@@ -221,6 +221,7 @@ class TrafficLightLogic:
             self.trafficLightStates[d] = {"red": True, "amber": False, "green": False}
             self.rightTurnLightStates[d] = {"off": True, "on": False}
             self.leftTurnLightStates[d] = {"off": True, "on": False}
+            await asyncio.sleep(0.5)
             self.pedestrianLightStates[d] = {"off": False, "on": True}
         await self._broadcast_state()
         await asyncio.sleep(self.pedestrianDuration / self.simulationSpeedMultiplier)

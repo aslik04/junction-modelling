@@ -20,13 +20,15 @@ export const carPngs = [];
 export function loadCarPngs() {
     // The list of cars from our selection of images
     const fileNames = ["redCar", "greenCar", "yellowCar", "purpleCar", "blueCar"];
-
-    // Looping through the entire array of cars
     fileNames.forEach(name => {
-        const png = new Image();
-        png.src = `cars/${name}.png`;
-        carPngs.push(png);
+      const img = new Image();
+      // The key is to use /static/pedestrian/ so it fetches from the server.
+      img.src = `/static/cars/${name}.png`;
+      img.onload = () => console.log(`Loaded car image: ${name}`);
+      img.onerror = () => console.error(`Failed to load car image: ${name}`);
+      carPngs.push(img);
     });
+    console.log("carpngs length =", carPngs.length);
 }
 
 /**

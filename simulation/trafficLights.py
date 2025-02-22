@@ -4,6 +4,7 @@ import random
 
 class TrafficLightLogic:
     def __init__(self):
+        self.simulationSpeedMultiplier = 1.0  # <--- ADD THIS
         # -------------------------------
         #  Traffic Light States
         # -------------------------------
@@ -40,8 +41,8 @@ class TrafficLightLogic:
         #     • A fixed 2-sec green→amber→red transition,
         #     • A right-turn phase.
         # -------------------------------
-        self.VERTICAL_SEQUENCE_LENGTH = 5        # Green phase for north/south
-        self.HORIZONTAL_SEQUENCE_LENGTH = 5       # Green phase for east/west
+        self.VERTICAL_SEQUENCE_LENGTH = 5       # Green phase for north/south
+        self.HORIZONTAL_SEQUENCE_LENGTH = 5    # Green phase for east/west
 
         self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = 5
         self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = 5
@@ -52,9 +53,9 @@ class TrafficLightLogic:
         #  - When a pedestrian event occurs, pedestrian lights are on for a fixed 3 seconds.
         #  - There is a fixed gap (self.gap seconds) after each cycle (vertical or horizontal) during which a pedestrian event may occur.
         # -------------------------------
-        self.pedestrianPerMinute = 3  # Change this to set the desired number of pedestrian events per minute
+        self.pedestrianPerMinute = 4  # Change this to set the desired number of pedestrian events per minute
         self.pedestrianDuration = 2   # Fixed 3-second crossing
-        self.gap = 1                  # Gap (in seconds) after each cycle
+        self.gap = 2                # Gap (in seconds) after each cycle
 
         self._broadcast_callback = None
 
@@ -143,70 +144,70 @@ class TrafficLightLogic:
 
     async def run_vertical_sequence(self):
         while self.rightTurnLightStates["east"]["on"] or self.rightTurnLightStates["west"]["on"]:
-            await asyncio.sleep(1)
+            await asyncio.sleep(self.gap + 1 / self.simulationSpeedMultiplier)
         # Red→green transition (2 sec)
         self.trafficLightStates["north"] = {"red": True, "amber": False, "green": False}
         self.trafficLightStates["south"] = {"red": True, "amber": False, "green": False}
         await self._broadcast_state()
-        await asyncio.sleep(1)
+        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
         self.trafficLightStates["north"] = {"red": True, "amber": True, "green": False}
         self.trafficLightStates["south"] = {"red": True, "amber": True, "green": False}
         await self._broadcast_state()
-        await asyncio.sleep(1)
+        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
         # Green phase
         self.trafficLightStates["north"] = {"red": False, "amber": False, "green": True}
         self.trafficLightStates["south"] = {"red": False, "amber": False, "green": True}
         await self._broadcast_state()
-        await asyncio.sleep(self.VERTICAL_SEQUENCE_LENGTH)
+        await asyncio.sleep(self.VERTICAL_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
         # Green→amber→red transition (2 sec)
         self.trafficLightStates["north"] = {"red": False, "amber": True, "green": False}
         self.trafficLightStates["south"] = {"red": False, "amber": True, "green": False}
         await self._broadcast_state()
-        await asyncio.sleep(1)
+        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
         self.trafficLightStates["north"] = {"red": True, "amber": False, "green": False}
         self.trafficLightStates["south"] = {"red": True, "amber": False, "green": False}
         await self._broadcast_state()
-        await asyncio.sleep(1)
+        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
         # Right-turn phase
         self.rightTurnLightStates["north"] = {"off": False, "on": True}
         self.rightTurnLightStates["south"] = {"off": False, "on": True}
         await self._broadcast_state()
-        await asyncio.sleep(self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH)
+        await asyncio.sleep(self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
         self.rightTurnLightStates["north"] = {"off": True, "on": False}
         self.rightTurnLightStates["south"] = {"off": True, "on": False}
         await self._broadcast_state()
 
     async def run_horizontal_sequence(self):
         while self.rightTurnLightStates["north"]["on"] or self.rightTurnLightStates["south"]["on"]:
-            await asyncio.sleep(1)
+            await asyncio.sleep(self.gap + 1 / self.simulationSpeedMultiplier)
         # Red→green transition (2 sec)
         self.trafficLightStates["east"] = {"red": True, "amber": False, "green": False}
         self.trafficLightStates["west"] = {"red": True, "amber": False, "green": False}
         await self._broadcast_state()
-        await asyncio.sleep(1)
+        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
         self.trafficLightStates["east"] = {"red": True, "amber": True, "green": False}
         self.trafficLightStates["west"] = {"red": True, "amber": True, "green": False}
         await self._broadcast_state()
-        await asyncio.sleep(1)
+        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
         # Green phase
         self.trafficLightStates["east"] = {"red": False, "amber": False, "green": True}
         self.trafficLightStates["west"] = {"red": False, "amber": False, "green": True}
         await self._broadcast_state()
-        await asyncio.sleep(self.HORIZONTAL_SEQUENCE_LENGTH)
+        await asyncio.sleep(self.HORIZONTAL_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
         # Green→amber→red transition (2 sec)
         self.trafficLightStates["east"] = {"red": False, "amber": True, "green": False}
         self.trafficLightStates["west"] = {"red": False, "amber": True, "green": False}
         await self._broadcast_state()
-        await asyncio.sleep(1)
+        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
         self.trafficLightStates["east"] = {"red": True, "amber": False, "green": False}
         self.trafficLightStates["west"] = {"red": True, "amber": False, "green": False}
         await self._broadcast_state()
-        await asyncio.sleep(1)
+        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
         # Right-turn phase
         self.rightTurnLightStates["east"] = {"off": False, "on": True}
         self.rightTurnLightStates["west"] = {"off": False, "on": True}
         await self._broadcast_state()
-        await asyncio.sleep(self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH)
+        await asyncio.sleep(self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
         self.rightTurnLightStates["east"] = {"off": True, "on": False}
         self.rightTurnLightStates["west"] = {"off": True, "on": False}
         await self._broadcast_state()
@@ -222,7 +223,7 @@ class TrafficLightLogic:
             self.leftTurnLightStates[d] = {"off": True, "on": False}
             self.pedestrianLightStates[d] = {"off": False, "on": True}
         await self._broadcast_state()
-        await asyncio.sleep(self.pedestrianDuration)
+        await asyncio.sleep(self.pedestrianDuration / self.simulationSpeedMultiplier)
         for d in ["north", "east", "south", "west"]:
             self.pedestrianLightStates[d] = {"off": True, "on": False}
         await self._broadcast_state()
@@ -249,7 +250,7 @@ class TrafficLightLogic:
         while True:
             # Run vertical cycle then gap
             await self.run_vertical_sequence()
-            await asyncio.sleep(self.gap)
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
             gaps_this_minute += 1
 
             now = loop.time()
@@ -268,7 +269,7 @@ class TrafficLightLogic:
 
             # Run horizontal cycle then gap
             await self.run_horizontal_sequence()
-            await asyncio.sleep(self.gap)
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
             gaps_this_minute += 1
 
             now = loop.time()
@@ -282,5 +283,6 @@ class TrafficLightLogic:
             p_gap = (remaining_events / remaining_gaps) if remaining_gaps > 0 else 0
 
             if random.random() < p_gap:
+                await asyncio.sleep(4 / self.simulationSpeedMultiplier)
                 await self.run_pedestrian_event()
                 events_this_minute += 1

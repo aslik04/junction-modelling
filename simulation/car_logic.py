@@ -1,4 +1,5 @@
 import math
+import random
 
 class Car:
     def __init__(self, direction, lane, speed, turn_type, jd):
@@ -27,6 +28,8 @@ class Car:
 
         self.width = jd["widthOfCar"]   # e.g. 16
         self.height = jd["heightOfCar"] # e.g. 40
+
+        self.pngIndex = random.randint(0, 4)
 
         # Car “front” states:
         self.completedLeft = False
@@ -315,7 +318,7 @@ class Car:
                 self.rightTurnPhase = 2
                 self.currentRightTurnAngle += math.pi / 4
 
-            elif self.direction == "west" and self.y <= top - margin:
+            elif self.direction == "west" and self.y <= top + margin:
                 self.direction = "north"
                 self.rightTurnPhase = 2
                 self.currentRightTurnAngle += math.pi / 4
@@ -398,5 +401,8 @@ class Car:
             "turnType": self.turn_type,
             "x": self.x,
             "y": self.y,
-            "currentRightTurnAngle": self.currentRightTurnAngle
+            "currentRightTurnAngle": self.currentRightTurnAngle,
+            "pngIndex": self.pngIndex, 
+            "width": self.width,
+            "height": self.height
         }

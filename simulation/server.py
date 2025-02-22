@@ -62,12 +62,13 @@ def create_junction_data(canvas_width, canvas_height, num_of_lanes=5, pixelWidth
         "heightOfCar": heightOfCar
     }
 
+simulationSpeedMultiplier = 1.0  # Default multiplier
+
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
-    global junction_data
+    global junction_data, simulationSpeedMultiplier
     await ws.accept()
     connected_clients.append(ws)
-    # Immediately broadcast current traffic light state if you wish
     await traffic_light_logic._broadcast_state()
 
     try:
@@ -78,15 +79,19 @@ async def websocket_endpoint(ws: WebSocket):
                 if data.get("type") == "canvasSize":
                     width = data["width"]
                     height = data["height"]
-                    print(f"Received canvas size: {width} x {height}")
                     junction_data = create_junction_data(width, height)
-                    print("Updated junction_data:", junction_data)
+                elif data.get("type") == "speedUpdate":
+                    new_speed = data["speed"]
+                    simulationSpeedMultiplier = new_speed  # update global if needed
+                    traffic_light_logic.simulationSpeedMultiplier = new_speed  # update lights multiplier!
+                    print("Updated simulation speed multiplier:", new_speed)
             except Exception as e:
                 print("Error processing message:", e)
     except Exception as e:
         print("WebSocket error:", e)
     finally:
         connected_clients.remove(ws)
+
 
 @app.on_event("startup")
 async def on_startup():
@@ -98,10 +103,10 @@ async def on_startup():
 # Spawn Rates (vehicles per minute) for each direction/turn type
 ###############################################################################
 spawnRates = {
-    "north": {"forward": 20,  "left": 18, "right": 15},
-    "east":  {"forward": 20, "left": 15,  "right": 18},
-    "south": {"forward": 15, "left": 17,  "right": 14},
-    "west":  {"forward": 25, "left": 10, "right": 13}
+    "north": {"forward": 200,  "left": 180, "right": 150},
+    "east":  {"forward": 200, "left": 150,  "right": 180},
+    "south": {"forward": 105, "left": 170,  "right": 140},
+    "west":  {"forward": 205, "left": 100, "right": 130}
 }
 
 ###############################################################################
@@ -177,18 +182,20 @@ async def update_car_loop():
         main_lights = traffic_light_logic.trafficLightStates
         right_lights = traffic_light_logic.rightTurnLightStates
 
-        # Update each car with the current signals, + reference to all cars
         for c in cars:
+            # Update effective speed using the multiplier
+            base_speed = 2.0  # or whatever the base is when the car was spawned
+            c.speed = base_speed * simulationSpeedMultiplier
             c.update(main_lights, right_lights, cars)
 
-        # Remove cars that go off-canvas
+        # Remove off-canvas cars and broadcast updated positions as before...
         cars = [c for c in cars if not isOffCanvas(c)]
-
-        # Broadcast
         data = {"cars": [c.to_dict() for c in cars]}
         await broadcast_to_all(json.dumps(data))
 
-        await asyncio.sleep(1/60)
+        # Adjust update frequency by dividing sleep time by the multiplier
+        await asyncio.sleep((1/60) / simulationSpeedMultiplier)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

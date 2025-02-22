@@ -145,6 +145,7 @@
     /* Slider styling: fill the sliderBox height */
     #speedRange {
       -webkit-appearance: none;
+      appearance: none;
       width: 90%;
       height: 20%;
       background: #f8f5e9;
@@ -182,7 +183,7 @@
       color: #f8f5e9;
       margin: 0 auto;
       margin-top: 0.5rem;
-      translate: 0.24rem;
+      translate: -0.24rem;
     }
     #rangeTicks span.activeTick {
       color: #f8f5e9;
@@ -207,20 +208,20 @@
 
     <!-- Bottom: Speed container with label & slider -->
     <div class="speed-container">
-      <div id="speedLabel">Vehicle Speed (1)</div>
+      <div id="speedLabel">Simulation Speed (1)</div>
       <div id="sliderBox">
-        <input type="range" id="speedRange" min="1" max="10" step="1" value="1">
+        <input type="range" id="speedRange" min="0.5" max="5" step="0.5" value="1">
         <div id="rangeTicks">
+          <span>0.5</span>
           <span>1</span>
+          <span>1.5</span>
           <span>2</span>
+          <span>2.5</span>
           <span>3</span>
+          <span>3.5</span>
           <span>4</span>
+          <span>4.5</span>
           <span>5</span>
-          <span>6</span>
-          <span>7</span>
-          <span>8</span>
-          <span>9</span>
-          <span>10</span>
         </div>
       </div>
     </div>
@@ -243,11 +244,17 @@
 
     // On slider input
     slider.addEventListener("input", () => {
-      speedLabel.textContent = "Vehicle Speed (" + slider.value + ")";
+      speedLabel.textContent = "Simulation Speed (" + slider.value + ")";
       tickMarks.forEach(tick => {
         tick.classList.toggle("activeTick", tick.textContent === slider.value);
       });
+      // Send the updated simulation speed multiplier to the server
+      ws.send(JSON.stringify({
+        type: "speedUpdate",
+        speed: parseFloat(slider.value)
+      }));
     });
+
 
     // Optional: handle Back & End button clicks
     document.getElementById("backBtn").addEventListener("click", () => {

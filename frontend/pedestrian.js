@@ -141,9 +141,12 @@ export function movePedestrian(pedestrian) {
         return;
     }
 
-    // Updates the x and y coordinates by appending their horizontal and vertical speeds respectively.
-    pedestrian.x += pedestrian.dx;
-    pedestrian.y += pedestrian.dy;
+    // Get the current multiplier (default to 1 if not set)
+    const multiplier = window.simulationSpeedMultiplier || 1.0;
+
+    // Scale the displacement by the current multiplier:
+    pedestrian.x += pedestrian.dx * multiplier;
+    pedestrian.y += pedestrian.dy * multiplier;
 
     // In the case (dy = 0), this means we are moving horizontal, and only north and south crossings.
     if (pedestrian.dy === 0) {

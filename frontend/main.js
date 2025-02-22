@@ -19,12 +19,13 @@ import {
   drawWestRightTurnLight
 } from "./trafficLights.js";
 import { spawnPedestrian, updatePedestrians, drawPedestrians } from "./pedestrianManager.js";
-import { loadPedestrianPngs } from "./images.js";
+import { loadPedestrianPngs, carPngs, loadCarPngs } from "./images.js";
 
 /*************************************************************************
  * Load images
  *************************************************************************/
 loadPedestrianPngs();
+loadCarPngs();
 
 /*************************************************************************
  * Dynamically size the canvas
@@ -114,6 +115,8 @@ function render() {
  * Draw a single car from the server
  *************************************************************************/
 function drawCarOnCanvas(car) {
+  let png = carPngs[car.pngIndex];
+
   canvas2D.save();
   canvas2D.translate(car.x, car.y);
 
@@ -129,9 +132,7 @@ function drawCarOnCanvas(car) {
   }
   canvas2D.rotate(angle);
 
-  // Just a 16×40 rectangle for demonstration
-  canvas2D.fillStyle = "blue";
-  canvas2D.fillRect(-8, -20, 16, 40);
+  canvas2D.drawImage(png, -car.width / 2, -car.height / 2, car.width, car.height);
 
   canvas2D.restore();
 }
@@ -148,6 +149,7 @@ function animate() {
  * Connect to the backend via WebSocket
  *************************************************************************/
 const ws = new WebSocket("ws://localhost:8000/ws");
+window.ws = ws;  // Make ws available globally
 
 // Only send data after the socket is open
 ws.onopen = () => {
@@ -203,10 +205,24 @@ ws.onclose = () => {
 window.addEventListener("load", () => {
   // 1) Size the canvas
   updateCanvasSize();
-
   // 2) DO NOT call ws.send(...) here again or you'll get "Still in CONNECTING"
   // Instead, rely on the ws.onopen callback
 
   // 3) Start animation
   animate();
+});
+
+slider.addEventListener("input", () => {
+  const newSpeed = parseFloat(slider.value);
+  speedLabel.textContent = "Vehicle Speed (" + newSpeed + ")";
+  tickMarks.forEach(tick => {
+    tick.classList.toggle("activeTick", tick.textContent === slider.value);
+  });
+  // Send speed update to the server:
+  ws.send(JSON.stringify({
+    type: "speedUpdate",
+    speed: newSpeed
+  }));
+  // Update the client-side multiplier as well:
+  window.simulationSpeedMultiplier = newSpeed;
 });

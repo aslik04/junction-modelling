@@ -220,7 +220,7 @@ window.addEventListener("load", () => {
 
 slider.addEventListener("input", () => {
   const newSpeed = parseFloat(slider.value);
-  speedLabel.textContent = "Vehicle Speed (" + newSpeed + ")";
+  speedLabel.textContent = "Simulation Speed (" + newSpeed + ")";
   tickMarks.forEach(tick => {
     tick.classList.toggle("activeTick", tick.textContent === slider.value);
   });

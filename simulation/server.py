@@ -5,11 +5,13 @@ import uvicorn
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-
+import requests
+from typing import Dict, Any
 from trafficLights import TrafficLightLogic
 from car_logic import Car
 
 app = FastAPI()
+db_path = "sqlite:///traffic_junction.db"
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,6 +19,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 app.mount("/static", StaticFiles(directory="../static"), name="static")
 
 connected_clients = []
@@ -124,12 +128,22 @@ async def websocket_endpoint(ws: WebSocket):
 ###############################################################################
 # Spawn Rates (vehicles per minute) for each direction/turn type
 ###############################################################################
-spawnRates = {
-    "north": {"forward": 200,  "left": 180, "right": 150},
-    "east":  {"forward": 200, "left": 150,  "right": 180},
-    "south": {"forward": 105, "left": 170,  "right": 140},
-    "west":  {"forward": 205, "left": 100, "right": 130}
-}
+spawnRates: Dict[str, Any] = {}
+
+@app.post("/update_spawn_rates")
+def update_spawn_rates(data: Dict[str, Any]):
+    """Receive spawn rates from app.py and update the dictionary."""
+    global spawnRates
+    spawnRates = data  # Store the latest spawn rates
+    print("Spawn rates updated:", spawnRates)  # Debugging
+    return {"message": "Spawn rates updated successfully"}
+
+@app.get("/spawn_rates")
+def get_spawn_rates():
+    """Return the stored spawn rates."""
+    return spawnRates if spawnRates else {"message": "No spawn rates available yet"}
+
+
 
 ###############################################################################
 # Our global list of Car objects

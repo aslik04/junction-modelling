@@ -1,10 +1,11 @@
 import os
+import sys
 import time
 import subprocess
 import csv
 import io
 import random
-
+import requests
 from flask import Flask, request, jsonify, render_template, url_for, redirect, send_from_directory
 from models import db, Configuration, LeaderboardResult, Session
 from sqlalchemy import inspect
@@ -28,20 +29,21 @@ with app.app_context():
 # Spawn FastAPI (server.py) automatically
 # ------------------------------------------------------
 server_process = None
-
 def start_fastapi():
     """
-    Start the FastAPI server (server.py) if it's not already running.
+    Start the FastAPI server (`server.py`) if it's not already running.
     Adjust 'cwd' if 'server.py' is in a different location.
     """
     global server_process
-    # If no server process or if the old one exited, start a new one
     if server_process is None or server_process.poll() is not None:
-        # 'cwd="simulation"' assumes server.py is in a folder named 'simulation'
-        server_process = subprocess.Popen(["python", "server.py"], cwd="simulation")
+        python_executable = sys.executable
+        # Ensure `server.py` runs in the correct folder
+        server_process = subprocess.Popen([python_executable, "server.py"], cwd=os.getcwd())
         time.sleep(3)  # Give FastAPI time to start on port 8000
+        print("✅ FastAPI server started.")
 
-@app.before_first_request
+
+@app.before_request
 def ensure_fastapi_running():
     """
     This runs before handling the first request,
@@ -96,6 +98,38 @@ def save_session_leaderboard_result(session_id, run_id, avg_wait_time,
     db.session.add(result)
     db.session.commit()
 
+def get_latest_spawn_rates():
+    """
+    Retrieves the latest spawn rates from the database.
+    """
+    latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
+
+    if not latest_config:
+        return {}  # Return empty if no data exists
+
+    return {
+        "north": {
+            "forward": latest_config.north_vph,
+            "left": latest_config.north_exit_west_vph,
+            "right": latest_config.north_exit_east_vph
+        },
+        "south": {
+            "forward": latest_config.south_vph,
+            "left": latest_config.south_exit_west_vph,
+            "right": latest_config.south_exit_east_vph
+        },
+        "east": {
+            "forward": latest_config.east_vph,
+            "left": latest_config.east_exit_south_vph,
+            "right": latest_config.east_exit_north_vph
+        },
+        "west": {
+            "forward": latest_config.west_vph,
+            "left": latest_config.west_exit_south_vph,
+            "right": latest_config.west_exit_north_vph
+        }
+    }
+
 # To Process CSV data instead of input text boxes
 def process_csv(file):
     stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
@@ -147,10 +181,128 @@ def index():
 @app.route('/parameters', methods=['GET', 'POST'])
 def parameters():
     if request.method == 'POST':
-        data = request.form.to_dict()
-        print(list(data.values()))  # Print parameters as an array in the console
-        return redirect(url_for('junctionPage'))
+        try:
+            data = request.form  # ✅ Directly use request.form
+
+            print("📥 Received Form Data:", data)  # Debugging
+
+            # Find or create a session
+            session = Session.query.filter_by(active=True).first()
+            if not session:
+                session = Session(active=True)
+                db.session.add(session)
+                db.session.commit()
+            
+            def safe_int(value):
+                return int(value) if value.strip().isdigit() else 0  # Returns 0 if empty or non-numeric
+
+
+            # Calculate VPH totals for each direction
+            north_vph = (
+                int(data.get('nb_exiting_east', 0)) +
+                int(data.get('nb_exiting_west', 0)) +
+                int(data.get('nb_exiting_south', 0))
+            )
+
+            south_vph = (
+                int(data.get('sb_exiting_north', 0)) +
+                int(data.get('sb_exiting_east', 0)) +
+                int(data.get('sb_exiting_west', 0))
+            )
+
+            east_vph = (
+                int(data.get('eb_exiting_north', 0)) +
+                int(data.get('eb_exiting_south', 0)) +
+                int(data.get('eb_exiting_west', 0))
+            )
+
+            west_vph = (
+                int(data.get('wb_exiting_north', 0)) +
+                int(data.get('wb_exiting_south', 0)) +
+                int(data.get('wb_exiting_east', 0))
+            )
+
+            # Store user input in the database
+            config = Configuration(
+                session_id=session.id,
+
+                # Junction Settings
+                lanes=int(data.get('lanes', 2)),  
+                left_turn_lane=('left-turn' in data),  
+                pedestrian_crossings=safe_int(data.get('pedestrian-events', '0')),  
+
+                # Northbound
+                north_vph=north_vph,
+                north_exit_east_vph=int(data.get('nb_exiting_east', 0)),
+                north_exit_south_vph=int(data.get('nb_exiting_south', 0)),
+                north_exit_west_vph=int(data.get('nb_exiting_west', 0)),
+
+                # Southbound
+                south_vph=south_vph,
+                south_exit_north_vph=int(data.get('sb_exiting_north', 0)),
+                south_exit_east_vph=int(data.get('sb_exiting_east', 0)),
+                south_exit_west_vph=int(data.get('sb_exiting_west', 0)),
+
+                # Eastbound
+                east_vph=east_vph,
+                east_exit_north_vph=int(data.get('eb_exiting_north', 0)),
+                east_exit_south_vph=int(data.get('eb_exiting_south', 0)),
+                east_exit_west_vph=int(data.get('eb_exiting_west', 0)),
+
+                # Westbound
+                west_vph=west_vph,
+                west_exit_north_vph=int(data.get('wb_exiting_north', 0)),
+                west_exit_south_vph=int(data.get('wb_exiting_south', 0)),
+                west_exit_east_vph=int(data.get('wb_exiting_east', 0))
+            )
+
+            db.session.add(config)
+            db.session.commit()
+            print(f"✅ Data stored with run_id {config.run_id}")
+
+            # Construct the spawn rates dictionary
+            spawn_rates = {
+                "north": {
+                    "forward": int(data.get('nb_exiting_east', 0)),
+                    "left": int(data.get('nb_exiting_west', 0)),
+                    "right": int(data.get('nb_exiting_south', 0))
+                },
+                "south": {
+                    "forward": int(data.get('sb_exiting_north', 0)),
+                    "left": int(data.get('sb_exiting_west', 0)),
+                    "right": int(data.get('sb_exiting_east', 0))
+                },
+                "east": {
+                    "forward": int(data.get('eb_exiting_north', 0)),
+                    "left": int(data.get('eb_exiting_west', 0)),
+                    "right": int(data.get('eb_exiting_south', 0))
+                },
+                "west": {
+                    "forward": int(data.get('wb_exiting_north', 0)),
+                    "left": int(data.get('wb_exiting_south', 0)),
+                    "right": int(data.get('wb_exiting_east', 0))
+                }
+            }
+
+            print("✅ Parsed Spawn Rates:", spawn_rates)  # Debugging
+
+            # Send spawn rates to `server.py`
+            try:
+                response = requests.post("http://127.0.0.1:8000/update_spawn_rates", json=spawn_rates)
+                if response.status_code == 200:
+                    print("✅ Spawn rates sent successfully to server.py.")
+            except requests.exceptions.RequestException as e:
+                print(f"⚠️ Could not reach server.py: {e}")
+
+            return redirect(url_for('junctionPage')) 
+
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ Error: {e}")
+            return jsonify({'error': str(e)}), 400
+
     return render_template('parameters.html')
+
 
 @app.route('/upload-file', methods=['POST'])
 def uploadfile():
@@ -175,36 +327,79 @@ def upload():
                 return render_template('success.html', message='parameters saved')
             else:
                 data = request.form
+
+                # Store the user input in the database
                 config = Configuration(
-                    run_id=data.get('run_id'),
-                    # lanes=data.get('lanes'),
+                    run_id=int(data.get('run_id', 0)),
                     pedestrian_crossings='pedestrian_crossings' in data,
-                    pedestrian_time=data.get('pedestrian_time'),
-                    pedestrian_frequency=data.get('pedestrian_frequency'),
-                    north_vph=data.get('north_vph'),
-                    north_exit_east_vph=data.get('north_exit_east_vph'),
-                    north_exit_west_vph=data.get('north_exit_west_vph'),
-                    north_exit_south_vph=data.get('north_exit_south_vph'),
-                    south_vph=data.get('south_vph'),
-                    south_exit_east_vph=data.get('south_exit_east_vph'),
-                    south_exit_west_vph=data.get('south_exit_west_vph'),
-                    south_exit_north_vph=data.get('south_exit_north_vph'),
-                    east_vph=data.get('east_vph'),
-                    east_exit_north_vph=data.get('east_exit_north_vph'),
-                    east_exit_south_vph=data.get('east_exit_south_vph'),
-                    east_exit_west_vph=data.get('east_exit_west_vph'),
-                    west_vph=data.get('west_vph'),
-                    west_exit_north_vph=data.get('west_exit_north_vph'),
-                    west_exit_south_vph=data.get('west_exit_south_vph'),
-                    west_exit_east_vph=data.get('west_exit_east_vph')
+                    pedestrian_time=int(data.get('pedestrian_time', 0)),
+                    pedestrian_frequency=int(data.get('pedestrian_frequency', 0)),
+                    north_vph=int(data.get('north_vph', 0)),
+                    north_exit_east_vph=int(data.get('north_exit_east_vph', 0)),
+                    north_exit_west_vph=int(data.get('north_exit_west_vph', 0)),
+                    north_exit_south_vph=int(data.get('north_exit_south_vph', 0)),
+                    south_vph=int(data.get('south_vph', 0)),
+                    south_exit_east_vph=int(data.get('south_exit_east_vph', 0)),
+                    south_exit_west_vph=int(data.get('south_exit_west_vph', 0)),
+                    south_exit_north_vph=int(data.get('south_exit_north_vph', 0)),
+                    east_vph=int(data.get('east_vph', 0)),
+                    east_exit_north_vph=int(data.get('east_exit_north_vph', 0)),
+                    east_exit_south_vph=int(data.get('east_exit_south_vph', 0)),
+                    east_exit_west_vph=int(data.get('east_exit_west_vph', 0)),
+                    west_vph=int(data.get('west_vph', 0)),
+                    west_exit_north_vph=int(data.get('west_exit_north_vph', 0)),
+                    west_exit_south_vph=int(data.get('west_exit_south_vph', 0)),
+                    west_exit_east_vph=int(data.get('west_exit_east_vph', 0))
                 )
+
                 db.session.add(config)
-                db.session.commit()
-                return render_template('success.html')
+                db.session.commit()  # Save to the database
+                print("✅ Data successfully stored in the database.")
+
+            # ✅ Corrected Indentation: Spawn rates dictionary is now **outside** the commit block
+            spawn_rates = {
+                "north": {
+                    "forward": int(data.get('north_vph', 0)),
+                    "left": int(data.get('north_exit_west_vph', 0)),
+                    "right": int(data.get('north_exit_east_vph', 0))
+                },
+                "south": {
+                    "forward": int(data.get('south_vph', 0)),
+                    "left": int(data.get('south_exit_west_vph', 0)),
+                    "right": int(data.get('south_exit_east_vph', 0))
+                },
+                "east": {
+                    "forward": int(data.get('east_vph', 0)),
+                    "left": int(data.get('east_exit_south_vph', 0)),
+                    "right": int(data.get('east_exit_north_vph', 0))
+                },
+                "west": {
+                    "forward": int(data.get('west_vph', 0)),
+                    "left": int(data.get('west_exit_south_vph', 0)),
+                    "right": int(data.get('west_exit_north_vph', 0))
+                }
+            }
+
+            print("✅ Form Data Parsed:", spawn_rates)  # Debugging
+
+            # Send this dictionary to `server.py`
+            try:
+                response = requests.post("http://127.0.0.1:8000/update_spawn_rates", json=spawn_rates)
+                if response.status_code == 200:
+                    print("✅ Spawn rates sent successfully to server.py.")
+                else:
+                    print(f"❌ Error sending spawn rates to server.py: {response.text}")
+            except requests.exceptions.RequestException as e:
+                print(f"⚠️ Could not reach server.py: {e}")
+
+            return render_template('success.html')
+
         except Exception as e:
             db.session.rollback()
             return jsonify({'error': str(e)}), 400
+
     return render_template('upload.html')
+
 
 @app.route('/simulate', methods=['POST'])
 def simulate():

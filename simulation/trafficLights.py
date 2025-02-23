@@ -55,7 +55,7 @@ class TrafficLightLogic:
         # -------------------------------
         self.pedestrianPerMinute = 4  # Change this to set the desired number of pedestrian events per minute
         self.pedestrianDuration = 2   # Fixed 3-second crossing
-        self.gap = 1                # Gap (in seconds) after each cycle
+        self.gap = 2                # Gap (in seconds) after each cycle
 
         self._broadcast_callback = None
 

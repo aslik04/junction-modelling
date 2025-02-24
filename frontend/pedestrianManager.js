@@ -10,11 +10,16 @@ let activePedestrians = [];
  */
 export function spawnPedestrian(direction) {
   const { leftVertical, rightVertical, topHorizontal, bottomHorizontal } = getJunctionData();
+  const fps = 60;
+  const pedestrianDuration = parseInt(localStorage.getItem("pedestrianDuration"), 10) || 0;
+
+  console.log(pedestrianDuration);
+
   let distance = (direction === "north" || direction === "south")
     ? Math.abs(rightVertical - leftVertical)
     : Math.abs(bottomHorizontal - topHorizontal);
 
-  const speed = distance / 120; // ~2s at 60 FPS
+  const speed = distance / (fps * pedestrianDuration); // ~2s at 60 FPS
   const ped = makePedestrian(direction, speed);
   activePedestrians.push(ped);
 }

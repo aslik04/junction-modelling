@@ -345,6 +345,25 @@
     });
   </script>
   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const pedestrianDurationInput = document.getElementById("pedestrian-duration");
+      // Check if a value exists in localStorage
+      const storedDuration = localStorage.getItem("pedestrianDuration");
+      if (storedDuration !== null) {
+        // Use the stored value if it exists
+        pedestrianDurationInput.value = storedDuration;
+      } else {
+        // Otherwise, set a default value (e.g., "2") and store it
+        pedestrianDurationInput.value = "2";
+        localStorage.setItem("pedestrianDuration", "2");
+      }
+      // Update localStorage whenever the input changes
+      pedestrianDurationInput.addEventListener("input", function() {
+        localStorage.setItem("pedestrianDuration", this.value);
+      });
+    });
+  </script>  
+  <script>
     // Function to compute sequence lengths (mirroring your Python function)
     function getSequenceLengths(vehicleData) {
       let main_vertical = 0, main_horizontal = 0, vertical_right = 0, horizontal_right = 0;

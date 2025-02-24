@@ -381,17 +381,19 @@
     
     // Function to compute cycle times (using 2-second transitions as in your Python code)
     function getCycleTimes(seqLengths) {
-      const verticalCycleTime = 2 + seqLengths.main_vertical + 2 + seqLengths.vertical_right;
-      const horizontalCycleTime = 2 + seqLengths.main_horizontal + 2 + seqLengths.horizontal_right;
+      const gap = 2;
+      const verticalCycleTime = (5 * gap) + seqLengths.main_vertical + seqLengths.vertical_right;
+      const horizontalCycleTime = (5 * gap) + seqLengths.main_horizontal + seqLengths.horizontal_right;
       return { verticalCycleTime, horizontalCycleTime };
     }
     
     // Function to compute maximum gaps per minute given a cycle gap time
     function getMaxGapsPerMinute(seqLengths, gap) {
       const cycleTimes = getCycleTimes(seqLengths);
-      const maxVerticalGaps = 60 / (cycleTimes.verticalCycleTime + gap);
-      const maxHorizontalGaps = 60 / (cycleTimes.horizontalCycleTime + gap);
-      return maxVerticalGaps + maxHorizontalGaps;
+      // Full cycle includes a vertical cycle + gap + horizontal cycle + gap.
+      const fullCycleTime = cycleTimes.verticalCycleTime + cycleTimes.horizontalCycleTime + 2 * gap;
+      // Each full cycle yields 2 gaps.
+      return 2 * (60 / fullCycleTime);
     }
     
     // Function to update calculations in real time
@@ -423,7 +425,8 @@
       // Get sequence lengths based on current vehicle data
       const seqLengths = getSequenceLengths(vehicleData);
       // Define gap duration (in seconds) as needed; for example:
-      const gap = 2;  // This can be dynamic or configured elsewhere
+      // THIS WONT WORK UNTIL pedestrian time is implemented dont remove
+      const gap = document.getElementById('pedestrian-time').value;
     
       // Calculate max pedestrian events (gaps per minute)
       const maxGaps = getMaxGapsPerMinute(seqLengths, gap);

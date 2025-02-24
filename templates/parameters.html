@@ -343,6 +343,222 @@
       });
     });
   </script>
+  <script>
+    // Function to compute sequence lengths (mirroring your Python function)
+    function getSequenceLengths(vehicleData) {
+      let main_vertical = 0, main_horizontal = 0, vertical_right = 0, horizontal_right = 0;
+      const increment = 4;
+      
+      // Parse values and ensure numbers
+      const north = vehicleData.north || {};
+      const south = vehicleData.south || {};
+      const east  = vehicleData.east  || {};
+      const west  = vehicleData.west  || {};
+    
+      const vertical_total = (parseInt(north.forward) || 0) + (parseInt(north.left) || 0) +
+                             (parseInt(south.forward) || 0) + (parseInt(south.left) || 0);
+      const horizontal_total = (parseInt(east.forward) || 0) + (parseInt(east.left) || 0) +
+                               (parseInt(west.forward) || 0) + (parseInt(west.left) || 0);
+      const vertical_right_total = (parseInt(north.right) || 0) + (parseInt(south.right) || 0);
+      const horizontal_right_total = (parseInt(east.right) || 0) + (parseInt(west.right) || 0);
+      
+      const total = vertical_total + horizontal_total + vertical_right_total + horizontal_right_total;
+      
+      if (total > 0) {
+        const raw_main_vertical = 60 * (vertical_total / total);
+        const raw_main_horizontal = 60 * (horizontal_total / total);
+        const raw_vertical_right = 60 * (vertical_right_total / total);
+        const raw_horizontal_right = 60 * (horizontal_right_total / total);
+        
+        main_vertical = Math.ceil(raw_main_vertical / increment);
+        main_horizontal = Math.ceil(raw_main_horizontal / increment);
+        vertical_right = Math.ceil(raw_vertical_right / increment);
+        horizontal_right = Math.ceil(raw_horizontal_right / increment);
+      }
+      
+      return { main_vertical, main_horizontal, vertical_right, horizontal_right };
+    }
+    
+    // Function to compute cycle times (using 2-second transitions as in your Python code)
+    function getCycleTimes(seqLengths) {
+      const verticalCycleTime = 2 + seqLengths.main_vertical + 2 + seqLengths.vertical_right;
+      const horizontalCycleTime = 2 + seqLengths.main_horizontal + 2 + seqLengths.horizontal_right;
+      return { verticalCycleTime, horizontalCycleTime };
+    }
+    
+    // Function to compute maximum gaps per minute given a cycle gap time
+    function getMaxGapsPerMinute(seqLengths, gap) {
+      const cycleTimes = getCycleTimes(seqLengths);
+      const maxVerticalGaps = 60 / (cycleTimes.verticalCycleTime + gap);
+      const maxHorizontalGaps = 60 / (cycleTimes.horizontalCycleTime + gap);
+      return maxVerticalGaps + maxHorizontalGaps;
+    }
+    
+    // Function to update calculations in real time
+    function updateCalculations() {
+      // Read current vehicle input values from the form
+      const vehicleData = {
+        north: {
+          forward: document.getElementById('nb_forward').value,
+          left: document.getElementById('nb_left').value,
+          right: document.getElementById('nb_right').value
+        },
+        east: {
+          forward: document.getElementById('eb_forward').value,
+          left: document.getElementById('eb_left').value,
+          right: document.getElementById('eb_right').value
+        },
+        south: {
+          forward: document.getElementById('sb_forward').value,
+          left: document.getElementById('sb_left').value,
+          right: document.getElementById('sb_right').value
+        },
+        west: {
+          forward: document.getElementById('wb_forward').value,
+          left: document.getElementById('wb_left').value,
+          right: document.getElementById('wb_right').value
+        }
+      };
+    
+      // Get sequence lengths based on current vehicle data
+      const seqLengths = getSequenceLengths(vehicleData);
+      // Define gap duration (in seconds) as needed; for example:
+      const gap = 2;  // This can be dynamic or configured elsewhere
+    
+      // Calculate max pedestrian events (gaps per minute)
+      const maxGaps = getMaxGapsPerMinute(seqLengths, gap);
+    
+      // Update the pedestrian events input's max attribute or display the value somewhere
+      const pedInput = document.getElementById('pedestrian-events');
+      pedInput.max = maxGaps;
+      // Optionally, update a display element to show the calculated value:
+      // document.getElementById('maxGapsDisplay').textContent = maxGaps.toFixed(2);
+    }
+    
+    // Attach the update function to all vehicle input fields so it runs on every change
+    document.addEventListener('DOMContentLoaded', function () {
+      const vehicleInputs = [
+        'nb_forward', 'nb_left', 'nb_right',
+        'eb_forward', 'eb_left', 'eb_right',
+        'sb_forward', 'sb_left', 'sb_right',
+        'wb_forward', 'wb_left', 'wb_right'
+      ];
+    
+      vehicleInputs.forEach(function(id) {
+        const inputField = document.getElementById(id);
+        if (inputField) {
+          inputField.addEventListener('input', updateCalculations);
+        }
+      });
+    });
+    </script>
+<script>
+  // Replicate your Python calculations in JavaScript
+  
+  // Calculate sequence lengths based on vehicle data
+  function getSequenceLengths(vehicleData) {
+    let main_vertical = 0, main_horizontal = 0, vertical_right = 0, horizontal_right = 0;
+    const increment = 4;
+  
+    const north = vehicleData.north || {};
+    const south = vehicleData.south || {};
+    const east  = vehicleData.east  || {};
+    const west  = vehicleData.west  || {};
+  
+    const vertical_total = (parseInt(north.forward) || 0) + (parseInt(north.left) || 0) +
+                           (parseInt(south.forward) || 0) + (parseInt(south.left) || 0);
+    const horizontal_total = (parseInt(east.forward) || 0) + (parseInt(east.left) || 0) +
+                             (parseInt(west.forward) || 0) + (parseInt(west.left) || 0);
+    const vertical_right_total = (parseInt(north.right) || 0) + (parseInt(south.right) || 0);
+    const horizontal_right_total = (parseInt(east.right) || 0) + (parseInt(west.right) || 0);
+  
+    const total = vertical_total + horizontal_total + vertical_right_total + horizontal_right_total;
+    
+    if (total > 0) {
+      const raw_main_vertical = 60 * (vertical_total / total);
+      const raw_main_horizontal = 60 * (horizontal_total / total);
+      const raw_vertical_right = 60 * (vertical_right_total / total);
+      const raw_horizontal_right = 60 * (horizontal_right_total / total);
+      
+      main_vertical = Math.ceil(raw_main_vertical / increment);
+      main_horizontal = Math.ceil(raw_main_horizontal / increment);
+      vertical_right = Math.ceil(raw_vertical_right / increment);
+      horizontal_right = Math.ceil(raw_horizontal_right / increment);
+    }
+    
+    return { main_vertical, main_horizontal, vertical_right, horizontal_right };
+  }
+  
+  // Compute cycle times (using 2-second transitions as in Python)
+  function getCycleTimes(seqLengths) {
+    const verticalCycleTime = 2 + seqLengths.main_vertical + 2 + seqLengths.vertical_right;
+    const horizontalCycleTime = 2 + seqLengths.main_horizontal + 2 + seqLengths.horizontal_right;
+    return { verticalCycleTime, horizontalCycleTime };
+  }
+  
+  // Calculate max gap opportunities per minute (to be used as max pedestrian events)
+  function getMaxGapsPerMinute(seqLengths, gap) {
+    const cycleTimes = getCycleTimes(seqLengths);
+    const maxVerticalGaps = 60 / (cycleTimes.verticalCycleTime + gap);
+    const maxHorizontalGaps = 60 / (cycleTimes.horizontalCycleTime + gap);
+    return maxVerticalGaps + maxHorizontalGaps;
+  }
+  
+  // This function reads the current vehicle data, calculates max gaps,
+  // and updates the max attribute of the pedestrian events input.
+  function updatePedestrianMax() {
+    const vehicleData = {
+      north: {
+        forward: document.getElementById('nb_forward').value,
+        left: document.getElementById('nb_left').value,
+        right: document.getElementById('nb_right').value
+      },
+      east: {
+        forward: document.getElementById('eb_forward').value,
+        left: document.getElementById('eb_left').value,
+        right: document.getElementById('eb_right').value
+      },
+      south: {
+        forward: document.getElementById('sb_forward').value,
+        left: document.getElementById('sb_left').value,
+        right: document.getElementById('sb_right').value
+      },
+      west: {
+        forward: document.getElementById('wb_forward').value,
+        left: document.getElementById('wb_left').value,
+        right: document.getElementById('wb_right').value
+      }
+    };
+  
+    const seqLengths = getSequenceLengths(vehicleData);
+    const gap = 2; // Adjust gap duration as needed
+    const maxGaps = getMaxGapsPerMinute(seqLengths, gap);
+    
+    // Update the pedestrian events input's max attribute
+    const pedInput = document.getElementById('pedestrian-events');
+    pedInput.max = Math.floor(maxGaps); // You can round or format as needed
+  
+    // Optional: update a placeholder or display to show the calculated maximum value
+    // e.g., pedInput.placeholder = `Max: ${Math.floor(maxGaps)}`;
+  }
+  
+  // Attach updatePedestrianMax to all vehicle input events
+  document.addEventListener('DOMContentLoaded', function () {
+    const vehicleInputs = [
+      'nb_forward', 'nb_left', 'nb_right',
+      'eb_forward', 'eb_left', 'eb_right',
+      'sb_forward', 'sb_left', 'sb_right',
+      'wb_forward', 'wb_left', 'wb_right'
+    ];
+  
+    vehicleInputs.forEach(function(id) {
+      const field = document.getElementById(id);
+      if (field) {
+        field.addEventListener('input', updatePedestrianMax);
+      }
+    });
+  });
+  </script>      
 </head>
 <body>
   <div class="main-container">

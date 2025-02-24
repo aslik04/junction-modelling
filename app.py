@@ -38,7 +38,9 @@ def start_fastapi():
     if server_process is None or server_process.poll() is not None:
         python_executable = sys.executable
         # Ensure `server.py` runs in the correct folder
-        server_process = subprocess.Popen([python_executable, "simulation/server.py"], cwd=os.getcwd())
+        server_dir = os.path.join(os.path.dirname(__file__), "simulation")
+        server_script = os.path.join(server_dir, "server.py")
+        server_process = subprocess.Popen([python_executable, server_script], cwd=server_dir)
         time.sleep(3)  # Give FastAPI time to start on port 8000
         print("✅ FastAPI server started.")
 
@@ -109,26 +111,59 @@ def get_latest_spawn_rates():
 
     return {
         "north": {
-            "forward": latest_config.north_vph,
-            "left": latest_config.north_exit_west_vph,
-            "right": latest_config.north_exit_east_vph
+            "forward": latest_config.north_forward_vph,
+            "left": latest_config.north_left_vph,
+            "right": latest_config.north_right_vph
         },
         "south": {
-            "forward": latest_config.south_vph,
-            "left": latest_config.south_exit_west_vph,
-            "right": latest_config.south_exit_east_vph
+            "forward": latest_config.south_forward_vph,
+            "left": latest_config.south_left_vph,
+            "right": latest_config.south_right_vph
         },
         "east": {
-            "forward": latest_config.east_vph,
-            "left": latest_config.east_exit_south_vph,
-            "right": latest_config.east_exit_north_vph
+            "forward": latest_config.east_forward_vph,
+            "left": latest_config.east_left_vph,
+            "right": latest_config.east_right_vph
         },
         "west": {
-            "forward": latest_config.west_vph,
-            "left": latest_config.west_exit_south_vph,
-            "right": latest_config.west_exit_north_vph
+            "forward": latest_config.west_forward_vph,
+            "left": latest_config.west_left_vph,
+            "right": latest_config.west_right_vph
         }
     }
+
+def get_latest_junction_settings():
+    """
+    Retrieves the latest spawn rates from the database.
+    """
+    try:
+        latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
+
+        if latest_config:
+            return {
+                "lanes": latest_config.lanes,
+                "left_turn_lane": latest_config.left_turn_lane,
+                "bus_lane": latest_config.bus_lane,
+                "pedestrian_time": latest_config.pedestrian_time,
+                "pedestrian_frequency": latest_config.pedestrian_frequency
+            }
+        else:
+            return {
+                "lanes": 5,
+                "left_turn_lane": False,
+                "bus_lane": False,
+                "pedestrian_time": 0,
+                "pedestrian_frequency": 0
+            }
+    except Exception as e:
+        print("Error retrieving configuration:", e)
+        return {
+            "lanes": 5,
+            "left_turn_lane": False,
+            "bus_lane": False,
+            "pedestrian_time": 0,
+            "pedestrian_frequency": 0
+        }
 
 # To Process CSV data instead of input text boxes
 def process_csv(file):
@@ -137,27 +172,25 @@ def process_csv(file):
     configurations = []
     for row in csv_input:
         config = Configuration(
-            run_id=row['run_id'],
             # lanes=row['lanes'],
-            pedestrian_crossings=str(row['pedestrian_crossings']).strip().lower() == 'true',
             pedestrian_time=row['pedestrian_time'],
             pedestrian_frequency=row['pedestrian_frequency'],
-            north_vph=row['north_vph'],
-            north_exit_east_vph=row['north_exit_east_vph'],
-            north_exit_west_vph=row['north_exit_west_vph'],
-            north_exit_south_vph=row['north_exit_south_vph'],
-            south_vph=row['south_vph'],
-            south_exit_east_vph=row['south_exit_east_vph'],
-            south_exit_west_vph=row['south_exit_west_vph'],
-            south_exit_north_vph=row['south_exit_north_vph'],
-            east_vph=row['east_vph'],
-            east_exit_north_vph=row['east_exit_north_vph'],
-            east_exit_south_vph=row['east_exit_south_vph'],
-            east_exit_west_vph=row['east_exit_west_vph'],
-            west_vph=row['west_vph'],
-            west_exit_north_vph=row['west_exit_north_vph'],
-            west_exit_south_vph=row['west_exit_south_vph'],
-            west_exit_east_vph=row['west_exit_east_vph']
+
+            north_forward_vph=row['north_forward_vph'],
+            north_left_vph=row['north_left_vph'],
+            north_right_vph=row['north_right_vph'],
+
+            south_forward_vph=row['south_forward_vph'],
+            south_left_vph=row['south_left_vph'],
+            south_right_vph=row['south_right_vph'],
+
+            east_forward_vph=row['east_forward_vph'],
+            east_left_vph=row['east_left_vph'],
+            east_right_vph=row['east_right_vph'],
+
+            west_forward_vph=row['west_forward_vph'],
+            west_left_vph=row['west_left_vph'],
+            west_right_vph=row['west_right_vph']
         )
         configurations.append(config)
     return configurations
@@ -199,27 +232,27 @@ def parameters():
 
             # Calculate VPH totals for each direction
             north_vph = (
-                int(data.get('nb_exiting_east', 0)) +
-                int(data.get('nb_exiting_west', 0)) +
-                int(data.get('nb_exiting_south', 0))
+                int(data.get('nb_forward', 0)) +
+                int(data.get('nb_left', 0)) +
+                int(data.get('nb_right', 0))
             )
 
             south_vph = (
-                int(data.get('sb_exiting_north', 0)) +
-                int(data.get('sb_exiting_east', 0)) +
-                int(data.get('sb_exiting_west', 0))
+                int(data.get('sb_forward', 0)) +
+                int(data.get('sb_left', 0)) +
+                int(data.get('sb_right', 0))
             )
 
             east_vph = (
-                int(data.get('eb_exiting_north', 0)) +
-                int(data.get('eb_exiting_south', 0)) +
-                int(data.get('eb_exiting_west', 0))
+                int(data.get('eb_forward', 0)) +
+                int(data.get('eb_left', 0)) +
+                int(data.get('eb_right', 0))
             )
 
             west_vph = (
-                int(data.get('wb_exiting_north', 0)) +
-                int(data.get('wb_exiting_south', 0)) +
-                int(data.get('wb_exiting_east', 0))
+                int(data.get('wb_forward', 0)) +
+                int(data.get('wb_left', 0)) +
+                int(data.get('wb_right', 0))
             )
 
             # Store user input in the database
@@ -227,33 +260,33 @@ def parameters():
                 session_id=session.id,
 
                 # Junction Settings
-                lanes=int(data.get('lanes', 2)),  
+                lanes=int(data.get('lanes', 5)),  
                 left_turn_lane=('left-turn' in data),  
-                pedestrian_crossings=safe_int(data.get('pedestrian-events', '0')),  
+                pedestrian_frequency=safe_int(data.get('pedestrian-events', '0')),  
 
-                # Northbound
+                # North
                 north_vph=north_vph,
-                north_exit_east_vph=int(data.get('nb_exiting_east', 0)),
-                north_exit_south_vph=int(data.get('nb_exiting_south', 0)),
-                north_exit_west_vph=int(data.get('nb_exiting_west', 0)),
+                north_forward_vph=int(data.get('nb_forward', 0)),
+                north_left_vph=int(data.get('nb_left', 0)),
+                north_right_vph=int(data.get('nb_right', 0)),
 
-                # Southbound
+                # South
                 south_vph=south_vph,
-                south_exit_north_vph=int(data.get('sb_exiting_north', 0)),
-                south_exit_east_vph=int(data.get('sb_exiting_east', 0)),
-                south_exit_west_vph=int(data.get('sb_exiting_west', 0)),
+                south_forward_vph=int(data.get('sb_forward', 0)),
+                south_left_vph=int(data.get('sb_left', 0)),
+                south_right_vph=int(data.get('sb_right', 0)),
 
-                # Eastbound
+                # East
                 east_vph=east_vph,
-                east_exit_north_vph=int(data.get('eb_exiting_north', 0)),
-                east_exit_south_vph=int(data.get('eb_exiting_south', 0)),
-                east_exit_west_vph=int(data.get('eb_exiting_west', 0)),
+                east_forward_vph=int(data.get('eb_forward', 0)),
+                east_left_vph=int(data.get('eb_left', 0)),
+                east_right_vph=int(data.get('eb_right', 0)),
 
-                # Westbound
+                # West
                 west_vph=west_vph,
-                west_exit_north_vph=int(data.get('wb_exiting_north', 0)),
-                west_exit_south_vph=int(data.get('wb_exiting_south', 0)),
-                west_exit_east_vph=int(data.get('wb_exiting_east', 0))
+                west_forward_vph=int(data.get('wb_forward', 0)),
+                west_left_vph=int(data.get('wb_left', 0)),
+                west_right_vph=int(data.get('wb_right', 0))
             )
 
             db.session.add(config)
@@ -263,24 +296,24 @@ def parameters():
             # Construct the spawn rates dictionary
             spawn_rates = {
                 "north": {
-                    "forward": int(data.get('nb_exiting_east', 0)),
-                    "left": int(data.get('nb_exiting_west', 0)),
-                    "right": int(data.get('nb_exiting_south', 0))
+                    "forward": int(data.get('nb_forward', 0)),
+                    "left": int(data.get('nb_left', 0)),
+                    "right": int(data.get('nb_right', 0))
                 },
                 "south": {
-                    "forward": int(data.get('sb_exiting_north', 0)),
-                    "left": int(data.get('sb_exiting_west', 0)),
-                    "right": int(data.get('sb_exiting_east', 0))
+                    "forward": int(data.get('sb_forward', 0)),
+                    "left": int(data.get('sb_left', 0)),
+                    "right": int(data.get('sb_right', 0))
                 },
                 "east": {
-                    "forward": int(data.get('eb_exiting_north', 0)),
-                    "left": int(data.get('eb_exiting_west', 0)),
-                    "right": int(data.get('eb_exiting_south', 0))
+                    "forward": int(data.get('eb_forward', 0)),
+                    "left": int(data.get('eb_left', 0)),
+                    "right": int(data.get('eb_right', 0))
                 },
                 "west": {
-                    "forward": int(data.get('wb_exiting_north', 0)),
-                    "left": int(data.get('wb_exiting_south', 0)),
-                    "right": int(data.get('wb_exiting_east', 0))
+                    "forward": int(data.get('wb_forward', 0)),
+                    "left": int(data.get('wb_left', 0)),
+                    "right": int(data.get('wb_right', 0))
                 }
             }
 
@@ -294,6 +327,27 @@ def parameters():
             except requests.exceptions.RequestException as e:
                 print(f"⚠️ Could not reach server.py: {e}")
 
+            # Construct the junction settings dictionary
+            junction_settings = {
+                "lanes": int(data.get('lanes', 5)),
+                "left_turn_lane": 'left-turn' in data,
+                "bus_lane": 'bus_lane' in data,
+                "pedestrian_time": int(data.get('pedestrian_time', 0)),
+                "pedestrian_frequency": safe_int(data.get('pedestrian-events', '0'))
+            }
+
+            print("✅ Parsed Junction Settings:", junction_settings)  # Debugging
+
+            # Send junction settings to server.py
+            try:
+                response = requests.post("http://127.0.0.1:8000/update_junction_settings", json=junction_settings)
+                if response.status_code == 200:
+                    print("✅ Junction settings sent successfully to server.py.")
+                else:
+                    print(f"❌ Error sending junction settings: {response.text}")
+            except requests.exceptions.RequestException as e:
+                print(f"⚠️ Could not reach server.py: {e}")
+
             return redirect(url_for('junctionPage')) 
 
         except Exception as e:
@@ -302,6 +356,16 @@ def parameters():
             return jsonify({'error': str(e)}), 400
 
     return render_template('parameters.html')
+
+
+@app.route("/junction_settings_proxy", methods=["GET"])
+def junction_settings_proxy():
+    # Make an HTTP request from Flask to FastAPI
+    try:
+        resp = requests.get("http://127.0.0.1:8000/junction_settings")
+        return jsonify(resp.json())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/upload-file', methods=['POST'])
@@ -331,25 +395,24 @@ def upload():
                 # Store the user input in the database
                 config = Configuration(
                     run_id=int(data.get('run_id', 0)),
-                    pedestrian_crossings='pedestrian_crossings' in data,
                     pedestrian_time=int(data.get('pedestrian_time', 0)),
                     pedestrian_frequency=int(data.get('pedestrian_frequency', 0)),
                     north_vph=int(data.get('north_vph', 0)),
-                    north_exit_east_vph=int(data.get('north_exit_east_vph', 0)),
-                    north_exit_west_vph=int(data.get('north_exit_west_vph', 0)),
-                    north_exit_south_vph=int(data.get('north_exit_south_vph', 0)),
+                    north_forward_vph=int(data.get('north_forward_vph', 0)),
+                    north_left_vph=int(data.get('north_left_vph', 0)),
+                    north_right_vph=int(data.get('north_right_vph', 0)),
                     south_vph=int(data.get('south_vph', 0)),
-                    south_exit_east_vph=int(data.get('south_exit_east_vph', 0)),
-                    south_exit_west_vph=int(data.get('south_exit_west_vph', 0)),
-                    south_exit_north_vph=int(data.get('south_exit_north_vph', 0)),
+                    south_forward_vph=int(data.get('south_forward_vph', 0)),
+                    south_left_vph=int(data.get('south_left_vph', 0)),
+                    south_right_vph=int(data.get('south_right_vph', 0)),
                     east_vph=int(data.get('east_vph', 0)),
-                    east_exit_north_vph=int(data.get('east_exit_north_vph', 0)),
-                    east_exit_south_vph=int(data.get('east_exit_south_vph', 0)),
-                    east_exit_west_vph=int(data.get('east_exit_west_vph', 0)),
+                    east_forward_vph=int(data.get('east_forward_vph', 0)),
+                    east_left_vph=int(data.get('east_left_vph', 0)),
+                    east_right_vph=int(data.get('east_right_vph', 0)),
                     west_vph=int(data.get('west_vph', 0)),
-                    west_exit_north_vph=int(data.get('west_exit_north_vph', 0)),
-                    west_exit_south_vph=int(data.get('west_exit_south_vph', 0)),
-                    west_exit_east_vph=int(data.get('west_exit_east_vph', 0))
+                    west_forward_vph=int(data.get('west_forward_vph', 0)),
+                    west_left_vph=int(data.get('west_left_vph', 0)),
+                    west_right_vph=int(data.get('west_right_vph', 0))
                 )
 
                 db.session.add(config)
@@ -359,24 +422,24 @@ def upload():
             # ✅ Corrected Indentation: Spawn rates dictionary is now **outside** the commit block
             spawn_rates = {
                 "north": {
-                    "forward": int(data.get('north_vph', 0)),
-                    "left": int(data.get('north_exit_west_vph', 0)),
-                    "right": int(data.get('north_exit_east_vph', 0))
+                    "forward": int(data.get('north_forward_vph', 0)),
+                    "left": int(data.get('north_left_vph', 0)),
+                    "right": int(data.get('north_right_vph', 0))
                 },
                 "south": {
-                    "forward": int(data.get('south_vph', 0)),
-                    "left": int(data.get('south_exit_west_vph', 0)),
-                    "right": int(data.get('south_exit_east_vph', 0))
+                    "forward": int(data.get('south_forward_vph', 0)),
+                    "left": int(data.get('south_left_vph', 0)),
+                    "right": int(data.get('south_right_vph', 0))
                 },
                 "east": {
-                    "forward": int(data.get('east_vph', 0)),
-                    "left": int(data.get('east_exit_south_vph', 0)),
-                    "right": int(data.get('east_exit_north_vph', 0))
+                    "forward": int(data.get('east_forward_vph', 0)),
+                    "left": int(data.get('east_left_vph', 0)),
+                    "right": int(data.get('east_right_vph', 0))
                 },
                 "west": {
-                    "forward": int(data.get('west_vph', 0)),
-                    "left": int(data.get('west_exit_south_vph', 0)),
-                    "right": int(data.get('west_exit_north_vph', 0))
+                    "forward": int(data.get('west_forward_vph', 0)),
+                    "left": int(data.get('west_left_vph', 0)),
+                    "right": int(data.get('west_right_vph', 0))
                 }
             }
 

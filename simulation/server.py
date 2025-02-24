@@ -6,6 +6,7 @@ import os
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse 
 import requests
 from typing import Dict, Any
 from trafficLights import TrafficLightLogic
@@ -48,6 +49,7 @@ junction_data = None
 # Simulation time variables (in seconds)
 simulationTime = 0
 lastUpdateTime = None
+simulation_running = True
 
 # Simulation metrics in fast simulation/scoring
 max_wait_time = 0      # max wait time (s)
@@ -55,9 +57,31 @@ total_wait_time = 0    # total wait time for all cars
 wait_count = 0         # number of cars measured
 max_queue_length = 0   # maximum number of cars in queue
 
+@app.post("/stop_simulation")
+async def stop_simulation():
+    """
+    Stop the running simulation properly.
+    """
+    global simulation_running, connected_clients, cars
+
+    if not simulation_running:
+        return JSONResponse(status_code=400, content={"error": "No running simulation found"})
+    print("Stopping sim")
+    simulation_running = False
+    cars.clear()
+    for ws in connected_clients:
+        try:
+            await ws.close()
+        except:
+            pass  # Ignore errors
+    connected_clients.clear()
+    print("Simulation successfully stopped.")
+    return JSONResponse(status_code=200, content={"message": "Simulation stopped successfully"})
+
+
 async def update_simulation_time():
-    global simulationTime, lastUpdateTime, simulationSpeedMultiplier
-    while True:
+    global simulation_running, simulationTime, lastUpdateTime, simulationSpeedMultiplier
+    while simulation_running:
         now = asyncio.get_event_loop().time()  # current time in seconds
         if lastUpdateTime is None:
             lastUpdateTime = now
@@ -76,6 +100,8 @@ async def update_simulation_time():
             "simulatedTime": simulatedTimeStr,
             # ... include other simulation data if needed ...
         }
+        if not simulation_running:
+            break
         await broadcast_to_all(json.dumps(message))
         await asyncio.sleep(1/60)
 
@@ -199,13 +225,16 @@ forwardIndex = {
 }
 
 async def spawn_car_loop():
-    global cars, junction_data
+    global simulation_running, cars, junction_data
     # Wait until junction_data is available.
     while junction_data is None:
         await asyncio.sleep(0.1)
     numOfLanes = junction_data["numOfLanes"]
     leftLane, rightLane, forwardLanes = getLaneCandidates(numOfLanes)
-    while True:
+    while simulation_running:
+        if not simulation_running:
+            print("Stopping car spawning loop")
+            break
         for direction in ["north", "east", "south", "west"]:
             for turnType in ["left", "forward", "right"]:
                 base_vpm = spawnRates[direction][turnType]
@@ -233,6 +262,8 @@ async def spawn_car_loop():
                     new_car.wait_recorded = False        # ensure wait time recorded only once
                     cars.append(new_car)
                     print(f"Spawned {direction} {turnType} car in lane {lane}")
+        if not simulation_running: 
+            break
         await asyncio.sleep(1)
 
 
@@ -244,8 +275,11 @@ def isOffCanvas(car):
     return False
 
 async def update_car_loop():
-    global cars, junction_data
-    while True:
+    global cars, junction_data, simulation_running
+    while simulation_running:
+        if not simulation_running:
+            print("Stopping car update loop")
+            break 
         main_lights = traffic_light_logic.trafficLightStates
         right_lights = traffic_light_logic.rightTurnLightStates
         for c in cars:
@@ -292,6 +326,8 @@ async def update_car_loop():
 
         data = {"cars": [c.to_dict() for c in cars]}
         await broadcast_to_all(json.dumps(data))
+        if not simulation_running:
+            break
         await asyncio.sleep((1/60) / simulationSpeedMultiplier)
 
 
@@ -353,6 +389,8 @@ def reset_simulation():
 
 @app.on_event("startup")
 async def on_startup():
+    global simulation_running
+    simulation_running = True
     asyncio.create_task(traffic_light_logic.run_traffic_loop())
     asyncio.create_task(spawn_car_loop())
     asyncio.create_task(update_car_loop())

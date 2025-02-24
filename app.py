@@ -573,10 +573,6 @@ def all_time_leaderboard():
         return jsonify({"message": "no results found"}), 200
     return jsonify([r.serialize() for r in results])
 
-# Route for displaying the simulation results page
-@app.route('/results')
-def results():
-    return render_template('results.html')
 
 # Route for displaying the session leaderboard page 
 @app.route('/session-leaderboard')

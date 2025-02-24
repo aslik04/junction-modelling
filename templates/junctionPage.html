@@ -203,7 +203,7 @@
       <div id="junctionContainer">
         <canvas id="junctionCanvas" width="300" height="300"></canvas>
       </div>
-      <button class="sim-button" id="endBtn" onclick="window.location.href='/end_simulation';">End</button>
+      <button class="sim-button" id="endBtn">End</button>
     </div>
 
     <!-- Bottom: Speed container with label & slider -->
@@ -264,25 +264,38 @@
 
 
     document.getElementById("endBtn").addEventListener("click", async () => {
-        console.log("End button clicked. Fetching session and run ID...");
+      console.log("End button clicked. Stopping simulation...");
 
-        // Fetch session_id and run_id from Flask
-        try {
-            let response = await fetch('/get_session_run_id');
-            let data = await response.json();
-            
-            if (data.error) {
-                console.error("Error fetching IDs:", data.error);
-                return;
-            }
+      try {
+          let stopResponse = await fetch('http://127.0.0.1:8000/stop_simulation', { method: 'POST' });
+          let stopData = await stopResponse.json();
+          
+          if (stopResponse.ok) {
+              console.log("✅ Simulation stopped successfully:", stopData.message);
+              
+              // ✅ Forcefully close WebSocket to prevent reconnection
+              if (window.ws) {
+                  console.log("🔌 Closing WebSocket connection...");
+                  window.ws.close();
+              }
 
-            // Redirect to results page with correct session_id and run_id
-            window.location.href = `/results?session_id=${data.session_id}&run_id=${data.run_id}`;
-        } catch (error) {
-            console.error("Error fetching session/run ID:", error);
-        }
+              // ✅ Redirect to results after stopping the simulation
+              let response = await fetch('/get_session_run_id');
+              let data = await response.json();
+              
+              if (data.error) {
+                  console.error("Error fetching IDs:", data.error);
+                  return;
+              }
+
+              window.location.href = `/results?session_id=${data.session_id}&run_id=${data.run_id}`;
+          } else {
+              console.error("❌ Error stopping simulation:", stopData.error);
+          }
+      } catch (error) {
+          console.error("❌ Error sending stop request:", error);
+      }
     });
-
 
 
   </script>

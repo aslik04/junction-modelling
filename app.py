@@ -38,7 +38,7 @@ def start_fastapi():
     if server_process is None or server_process.poll() is not None:
         python_executable = sys.executable
         # Ensure `server.py` runs in the correct folder
-        server_process = subprocess.Popen([python_executable, "server.py"], cwd=os.getcwd())
+        server_process = subprocess.Popen([python_executable, "simulation/server.py"], cwd=os.getcwd())
         time.sleep(3)  # Give FastAPI time to start on port 8000
         print("✅ FastAPI server started.")
 

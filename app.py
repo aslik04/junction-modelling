@@ -211,6 +211,59 @@ def index():
     session_id = create_session()
     return render_template('index.html', session_id=session_id)
 
+@app.route('/get_session_run_id', methods=['GET'])
+def get_session_run_id():
+    try:
+        # Get the latest active session
+        session = Session.query.filter_by(active=True).order_by(Session.id.desc()).first()
+        if not session:
+            # Create a new session if none exist
+            session = Session(active=True)
+            db.session.add(session)
+            db.session.commit()
+
+        # Get the latest run_id from Configuration
+        latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
+        run_id = latest_config.run_id if latest_config else 1  # Default to 1 if no configs exist
+
+        return jsonify({"session_id": session.id, "run_id": run_id})
+    
+    except Exception as e:
+        print(f"❌ Error retrieving session and run_id: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/results')
+def results():
+    try:
+        session_id = request.args.get('session_id', type=int)
+        run_id = request.args.get('run_id', type=int)
+
+        if not session_id or not run_id:
+            return jsonify({"error": "Missing session_id or run_id"}), 400
+
+        # Generate dummy simulation results
+        avg_wait_time = round(random.uniform(5, 20), 2)
+        max_wait_time = round(random.uniform(avg_wait_time, 40), 2)
+        max_queue_length = random.randint(10, 50)
+        score = round(avg_wait_time + (max_wait_time / 2) + (max_queue_length / 5), 2)
+
+        # Save results to the leaderboard
+        save_session_leaderboard_result(session_id, run_id, avg_wait_time, max_wait_time, max_queue_length, score)
+
+        return render_template(
+            'results.html',
+            avg_wait_time=avg_wait_time,
+            max_wait_time=max_wait_time,
+            max_queue_length=max_queue_length,
+            score=score
+        )
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return jsonify({'error': str(e)}), 400
+
+
 @app.route('/parameters', methods=['GET', 'POST'])
 def parameters():
     if request.method == 'POST':

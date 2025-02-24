@@ -308,22 +308,22 @@
 
       // When the Start button is clicked, copy the parameter values into the hidden form and submit it.
       document.getElementById("startButton").addEventListener("click", function() {
-        // Northbound
-        document.getElementById("hidden_nb_exiting_east").value = document.getElementById("nb_exiting_east").value;
-        document.getElementById("hidden_nb_exiting_south").value = document.getElementById("nb_exiting_south").value;
-        document.getElementById("hidden_nb_exiting_west").value = document.getElementById("nb_exiting_west").value;
-        // Eastbound
-        document.getElementById("hidden_eb_exiting_north").value = document.getElementById("eb_exiting_north").value;
-        document.getElementById("hidden_eb_exiting_south").value = document.getElementById("eb_exiting_south").value;
-        document.getElementById("hidden_eb_exiting_west").value = document.getElementById("eb_exiting_west").value;
-        // Southbound
-        document.getElementById("hidden_sb_exiting_north").value = document.getElementById("sb_exiting_north").value;
-        document.getElementById("hidden_sb_exiting_east").value = document.getElementById("sb_exiting_east").value;
-        document.getElementById("hidden_sb_exiting_west").value = document.getElementById("sb_exiting_west").value;
-        // Westbound
-        document.getElementById("hidden_wb_exiting_north").value = document.getElementById("wb_exiting_north").value;
-        document.getElementById("hidden_wb_exiting_east").value = document.getElementById("wb_exiting_east").value;
-        document.getElementById("hidden_wb_exiting_south").value = document.getElementById("wb_exiting_south").value;
+        // North
+        document.getElementById("hidden_nb_forward").value = document.getElementById("nb_forward").value;
+        document.getElementById("hidden_nb_left").value = document.getElementById("nb_left").value;
+        document.getElementById("hidden_nb_right").value = document.getElementById("nb_right").value;
+        // East
+        document.getElementById("hidden_eb_forward").value = document.getElementById("eb_forward").value;
+        document.getElementById("hidden_eb_left").value = document.getElementById("eb_left").value;
+        document.getElementById("hidden_eb_right").value = document.getElementById("eb_right").value;
+        // South
+        document.getElementById("hidden_sb_forward").value = document.getElementById("sb_forward").value;
+        document.getElementById("hidden_sb_left").value = document.getElementById("sb_left").value;
+        document.getElementById("hidden_sb_right").value = document.getElementById("sb_right").value;
+        // West
+        document.getElementById("hidden_wb_forward").value = document.getElementById("wb_forward").value;
+        document.getElementById("hidden_wb_left").value = document.getElementById("wb_left").value;
+        document.getElementById("hidden_wb_right").value = document.getElementById("wb_right").value;
         // Junction Settings
         document.getElementById("hidden_lanes").value = document.getElementById("lanes").value;
         document.getElementById("hidden_left-turn").value = document.getElementById("left-turn").checked ? "on" : "";
@@ -331,6 +331,15 @@
         
         // Submit the hidden form.
         document.getElementById("hiddenForm").submit();
+      });
+    });
+  </script>
+  <!-- In parameters.html, inside a <script> tag or in an external JS file -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const lanesSlider = document.getElementById("lanes");
+      lanesSlider.addEventListener("input", function() {
+        localStorage.setItem("numOfLanes", this.value);
       });
     });
   </script>
@@ -350,83 +359,83 @@
           <!-- Left box -->
           <div class="box">
             <h2>Configurable Parameters</h2>
-            <!-- Northbound -->
+            <!-- North -->
             <div class="dropdown-heading">
-              <span class="symbol">—</span> Northbound
+              <span class="symbol">—</span> North
             </div>
             <div class="dropdown-content">
               <ul>
                 <li>
-                  <label for="nb_exiting_east">Exiting east</label>
-                  <input type="text" id="nb_exiting_east" name="nb_exiting_east">
+                  <label for="nb_forward">Forward</label>
+                  <input type="text" id="nb_forward" name="nb_forward">
                 </li>
                 <li>
-                  <label for="nb_exiting_south">Exiting south</label>
-                  <input type="text" id="nb_exiting_south" name="nb_exiting_south">
+                  <label for="nb_left">Turning Left</label>
+                  <input type="text" id="nb_left" name="nb_left">
                 </li>
                 <li>
-                  <label for="nb_exiting_west">Exiting west</label>
-                  <input type="text" id="nb_exiting_west" name="nb_exiting_west">
+                  <label for="nb_right">Turning Right</label>
+                  <input type="text" id="nb_right" name="nb_right">
                 </li>
               </ul>
             </div>
-            <!-- Eastbound -->
+            <!-- East -->
             <div class="dropdown-heading">
-              <span class="symbol">—</span> Eastbound
+              <span class="symbol">—</span> East
             </div>
             <div class="dropdown-content">
               <ul>
                 <li>
-                  <label for="eb_exiting_north">Exiting north</label>
-                  <input type="text" id="eb_exiting_north" name="eb_exiting_north">
+                  <label for="eb_forward">Forward</label>
+                  <input type="text" id="eb_forward" name="eb_forward">
                 </li>
                 <li>
-                  <label for="eb_exiting_south">Exiting south</label>
-                  <input type="text" id="eb_exiting_south" name="eb_exiting_south">
+                  <label for="eb_left">Turning Left</label>
+                  <input type="text" id="eb_left" name="eb_left">
                 </li>
                 <li>
-                  <label for="eb_exiting_west">Exiting west</label>
-                  <input type="text" id="eb_exiting_west" name="eb_exiting_west">
+                  <label for="eb_right">Turning Right</label>
+                  <input type="text" id="eb_right" name="eb_right">
                 </li>
               </ul>
             </div>
-            <!-- Southbound -->
+            <!-- South -->
             <div class="dropdown-heading">
-              <span class="symbol">—</span> Southbound
+              <span class="symbol">—</span> South
             </div>
             <div class="dropdown-content">
               <ul>
                 <li>
-                  <label for="sb_exiting_north">Exiting north</label>
-                  <input type="text" id="sb_exiting_north" name="sb_exiting_north">
+                  <label for="sb_forward">Forward</label>
+                  <input type="text" id="sb_forward" name="sb_forward">
                 </li>
                 <li>
-                  <label for="sb_exiting_east">Exiting east</label>
-                  <input type="text" id="sb_exiting_east" name="sb_exiting_east">
+                  <label for="sb_left">Turning Left</label>
+                  <input type="text" id="sb_left" name="sb_left">
                 </li>
                 <li>
-                  <label for="sb_exiting_west">Exiting west</label>
-                  <input type="text" id="sb_exiting_west" name="sb_exiting_west">
+                  <label for="sb_right">Turning Right</label>
+                  <input type="text" id="sb_right" name="sb_right">
                 </li>
               </ul>
             </div>
-            <!-- Westbound -->
+            <!-- West -->
             <div class="dropdown-heading">
-              <span class="symbol">—</span> Westbound
+              <span class="symbol">—</span> West
             </div>
             <div class="dropdown-content">
               <ul>
                 <li>
-                  <label for="wb_exiting_north">Exiting north</label>
-                  <input type="text" id="wb_exiting_north" name="wb_exiting_north">
+                  <label for="wb_forward">Forward</label>
+                  <input type="text" id="wb_forward" name="wb_forward">
                 </li>
                 <li>
-                  <label for="wb_exiting_east">Exiting east</label>
-                  <input type="text" id="wb_exiting_east" name="wb_exiting_east">
+                  <label for="wb_left">Turning Left</label>
+                  <input type="text" id="wb_left" name="wb_left">
                 </li>
                 <li>
-                  <label for="wb_exiting_south">Exiting south</label>
-                  <input type="text" id="wb_exiting_south" name="wb_exiting_south">
+                  <label for="wb_right">Turning Right</label>
+                  <input type="text" id="wb_right" name="wb_right">
                 </li>
               </ul>
             </div>
@@ -478,21 +487,21 @@
       <!-- Hidden Final Submission Form: Contains hidden copies of parameter values and the Start button -->
       <form id="hiddenForm" action="/parameters" method="POST" enctype="multipart/form-data">
         <!-- Hidden inputs for parameters -->
-        <input type="hidden" id="hidden_nb_exiting_east" name="nb_exiting_east" value="">
-        <input type="hidden" id="hidden_nb_exiting_south" name="nb_exiting_south" value="">
-        <input type="hidden" id="hidden_nb_exiting_west" name="nb_exiting_west" value="">
+        <input type="hidden" id="hidden_nb_forward" name="nb_forward" value="">
+        <input type="hidden" id="hidden_nb_left" name="nb_left" value="">
+        <input type="hidden" id="hidden_nb_right" name="nb_right" value="">
 
-        <input type="hidden" id="hidden_eb_exiting_north" name="eb_exiting_north" value="">
-        <input type="hidden" id="hidden_eb_exiting_south" name="eb_exiting_south" value="">
-        <input type="hidden" id="hidden_eb_exiting_west" name="eb_exiting_west" value="">
+        <input type="hidden" id="hidden_eb_forward" name="eb_forward" value="">
+        <input type="hidden" id="hidden_eb_left" name="eb_left" value="">
+        <input type="hidden" id="hidden_eb_right" name="eb_right" value="">
 
-        <input type="hidden" id="hidden_sb_exiting_north" name="sb_exiting_north" value="">
-        <input type="hidden" id="hidden_sb_exiting_east" name="sb_exiting_east" value="">
-        <input type="hidden" id="hidden_sb_exiting_west" name="sb_exiting_west" value="">
+        <input type="hidden" id="hidden_sb_forward" name="sb_forward" value="">
+        <input type="hidden" id="hidden_sb_left" name="sb_left" value="">
+        <input type="hidden" id="hidden_sb_right" name="sb_right" value="">
 
-        <input type="hidden" id="hidden_wb_exiting_north" name="wb_exiting_north" value="">
-        <input type="hidden" id="hidden_wb_exiting_east" name="wb_exiting_east" value="">
-        <input type="hidden" id="hidden_wb_exiting_south" name="wb_exiting_south" value="">
+        <input type="hidden" id="hidden_wb_forward" name="wb_forward" value="">
+        <input type="hidden" id="hidden_wb_left" name="wb_left" value="">
+        <input type="hidden" id="hidden_wb_right" name="wb_right" value="">
 
         <input type="hidden" id="hidden_lanes" name="lanes" value="">
         <input type="hidden" id="hidden_left-turn" name="left-turn" value="">

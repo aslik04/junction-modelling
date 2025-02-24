@@ -14,11 +14,6 @@ export const junctionCanvas = document.getElementById("junctionCanvas");
 export const canvas2D = junctionCanvas.getContext("2d");
 
 /**
- * @constant {HTMLInputElement} inputNumOfLanes : Amount of lanes user has inputted per direction (1 - 5).
- */
-export const inputNumOfLanes = document.getElementById("laneInputNum");
-
-/**
  * @constant {number} pixelWidthOfLane : How many pixels wide each lane in the junction is.
  */
 export const pixelWidthOfLane = 20;
@@ -70,18 +65,7 @@ export function puffinCrossingStripeLength() {
  *   - heightOfCar {number} : The height of a car (2 times lane width).
  */
 export function getJunctionData() {
-    /*I need to wait for input page to be completed before i can use user input for
-    now use default value of 5
-    
-    // Parses the input given by user to ensure it is a valid whole number (1 - 5).
-    const numOfLanes = parseInt(inputNumOfLanes.value, 10);
-
-    // User input invalid not between (1 - 5), or input is not a whole number.
-    if (numOfLanes < 1 || numOfLanes > 5 || isNaN(numOfLanes)) {
-        return;
-    }*/
-    // default value while waiting for input page
-    let numOfLanes = 5;
+    const numOfLanes = parseInt(localStorage.getItem("numOfLanes"), 10) || 5;
 
     // The total size of the road, incoming and outgoing lanes included.
     const roadSize = 2 * numOfLanes * pixelWidthOfLane;

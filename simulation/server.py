@@ -70,7 +70,7 @@ async def update_simulation_time():
         await asyncio.sleep(1/60)
 
 
-def create_junction_data(canvas_width, canvas_height, num_of_lanes=5, pixelWidthOfLane=20):
+def create_junction_data(canvas_width, canvas_height, num_of_lanes, pixelWidthOfLane=20):
     road_size = 2 * num_of_lanes * pixelWidthOfLane
     canvasX = canvas_width / 2
     canvasY = canvas_height / 2
@@ -111,7 +111,8 @@ async def websocket_endpoint(ws: WebSocket):
                 if data.get("type") == "canvasSize":
                     width = data["width"]
                     height = data["height"]
-                    junction_data = create_junction_data(width, height)
+                    num_of_lanes = junctionSettings.get("lanes", 5)
+                    junction_data = create_junction_data(width, height, num_of_lanes)
                     print(f"Received canvasSize: {width}x{height}, junction_data set: {junction_data}")
                 elif data.get("type") == "speedUpdate":
                     new_speed = data["speed"]
@@ -143,6 +144,22 @@ def get_spawn_rates():
     """Return the stored spawn rates."""
     return spawnRates if spawnRates else {"message": "No spawn rates available yet"}
 
+
+###############################################################################
+# Junction Settings
+###############################################################################
+junctionSettings: Dict[str, Any] = {}
+
+@app.post("/update_junction_settings")
+def update_junction_settings(data: Dict[str, Any]):
+    global junctionSettings
+    junctionSettings = data  # Store the latest junction settings
+    print("Junction settings updated:", junctionSettings)
+    return {"message": "Junction settings updated successfully"}
+
+@app.get("/junction_settings")
+def get_junction_settings():
+    return junctionSettings if junctionSettings else {"message": "No junction settings available yet"}
 
 
 ###############################################################################

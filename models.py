@@ -17,36 +17,36 @@ class Configuration(db.Model):
     run_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False)  # Each configuration belongs to a session
 
-    lanes = db.Column(db.Integer, nullable=False, default=2)  # Number of lanes
+    lanes = db.Column(db.Integer, nullable=False, default=5)  # Number of lanes
     left_turn_lane = db.Column(db.Boolean, nullable=False, default=False)  # Left-turn lane present
+    bus_lane = db.Column(db.Boolean, nullable=False, default=False)  # Bus lane present
 
-    pedestrian_crossings = db.Column(db.Integer, nullable=False, default=0)  
     pedestrian_time = db.Column(db.Integer)  # Time for pedestrians to cross (s)
     pedestrian_frequency = db.Column(db.Integer)  # Crossing requests per hour
 
-    # Northbound
+    # North
     north_vph = db.Column(db.Integer, nullable=False)
-    north_exit_east_vph = db.Column(db.Integer, nullable=False)
-    north_exit_west_vph = db.Column(db.Integer, nullable=False)
-    north_exit_south_vph = db.Column(db.Integer, nullable=False)
+    north_forward_vph = db.Column(db.Integer, nullable=False)
+    north_left_vph = db.Column(db.Integer, nullable=False)
+    north_right_vph = db.Column(db.Integer, nullable=False)
 
-    # Southbound
+    # South
     south_vph = db.Column(db.Integer, nullable=False)
-    south_exit_east_vph = db.Column(db.Integer, nullable=False)
-    south_exit_west_vph = db.Column(db.Integer, nullable=False)
-    south_exit_north_vph = db.Column(db.Integer, nullable=False)
+    south_forward_vph = db.Column(db.Integer, nullable=False)
+    south_left_vph = db.Column(db.Integer, nullable=False)
+    south_right_vph = db.Column(db.Integer, nullable=False)
 
-    # Eastbound
+    # East
     east_vph = db.Column(db.Integer, nullable=False)
-    east_exit_north_vph = db.Column(db.Integer, nullable=False)
-    east_exit_south_vph = db.Column(db.Integer, nullable=False)
-    east_exit_west_vph = db.Column(db.Integer, nullable=False)
+    east_forward_vph = db.Column(db.Integer, nullable=False)
+    east_left_vph = db.Column(db.Integer, nullable=False)
+    east_right_vph = db.Column(db.Integer, nullable=False)
 
-    # Westbound
+    # West
     west_vph = db.Column(db.Integer, nullable=False)
-    west_exit_north_vph = db.Column(db.Integer, nullable=False)
-    west_exit_south_vph = db.Column(db.Integer, nullable=False)
-    west_exit_east_vph = db.Column(db.Integer, nullable=False)
+    west_forward_vph = db.Column(db.Integer, nullable=False)
+    west_left_vph = db.Column(db.Integer, nullable=False)
+    west_right_vph = db.Column(db.Integer, nullable=False)
 
 
 class LeaderboardResult(db.Model):

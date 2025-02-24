@@ -327,8 +327,9 @@
         // Junction Settings
         document.getElementById("hidden_lanes").value = document.getElementById("lanes").value;
         document.getElementById("hidden_left-turn").value = document.getElementById("left-turn").checked ? "on" : "";
-        document.getElementById("hidden_pedestrian_events").value = document.getElementById("pedestrian-events").value;
-        
+        document.getElementById("hidden_pedestrian_frequency").value = document.getElementById("pedestrian-frequency").value;
+        document.getElementById("hidden_pedestrian_duration").value = document.getElementById("pedestrian-duration").value;
+
         // Submit the hidden form.
         document.getElementById("hiddenForm").submit();
       });
@@ -425,14 +426,14 @@
       // Get sequence lengths based on current vehicle data
       const seqLengths = getSequenceLengths(vehicleData);
       // Define gap duration (in seconds) as needed; for example:
-      // THIS WONT WORK UNTIL pedestrian time is implemented dont remove
-      const gap = document.getElementById('pedestrian-time').value;
+      // THIS WONT WORK UNTIL pedestrian time is implemented dont r
+      const gap = document.getElementById('pedestrian-duration').value;
     
-      // Calculate max pedestrian events (gaps per minute)
+      // Calculate max pedestrian frequency (gaps per minute)
       const maxGaps = getMaxGapsPerMinute(seqLengths, gap);
     
-      // Update the pedestrian events input's max attribute or display the value somewhere
-      const pedInput = document.getElementById('pedestrian-events');
+      // Update the pedestrian frequency input's max attribute or display the value somewhere
+      const pedInput = document.getElementById('pedestrian-frequency');
       pedInput.max = maxGaps;
       // Optionally, update a display element to show the calculated value:
       // document.getElementById('maxGapsDisplay').textContent = maxGaps.toFixed(2);
@@ -499,7 +500,7 @@
     return { verticalCycleTime, horizontalCycleTime };
   }
   
-  // Calculate max gap opportunities per minute (to be used as max pedestrian events)
+  // Calculate max gap opportunities per minute (to be used as max pedestrian frequency)
   function getMaxGapsPerMinute(seqLengths, gap) {
     const cycleTimes = getCycleTimes(seqLengths);
     const maxVerticalGaps = 60 / (cycleTimes.verticalCycleTime + gap);
@@ -508,7 +509,7 @@
   }
   
   // This function reads the current vehicle data, calculates max gaps,
-  // and updates the max attribute of the pedestrian events input.
+  // and updates the max attribute of the pedestrian frequency input.
   function updatePedestrianMax() {
     const vehicleData = {
       north: {
@@ -537,15 +538,15 @@
     const gap = 2; // Adjust gap duration as needed
     const maxGaps = getMaxGapsPerMinute(seqLengths, gap);
     
-    // Update the pedestrian events input's max attribute
-    const pedInput = document.getElementById('pedestrian-events');
+    // Update the pedestrian frequency input's max attribute
+    const pedInput = document.getElementById('pedestrian-frequency');
     pedInput.max = Math.floor(maxGaps); // You can round or format as needed
   
     // Optional: update a placeholder or display to show the calculated maximum value
     // e.g., pedInput.placeholder = `Max: ${Math.floor(maxGaps)}`;
   }
   
-  // Attach updatePedestrianMax to all vehicle input events
+  // Attach updatePedestrianMax to all vehicle input frequency
   document.addEventListener('DOMContentLoaded', function () {
     const vehicleInputs = [
       'nb_forward', 'nb_left', 'nb_right',
@@ -680,21 +681,17 @@
               <label for="left-turn">Left-turn lane</label>
             </div>
             <!-- Pedestrians -->
-            <!-- Pedestrian Events per Hour -->
             <div style="display: flex; align-items: center; margin: 2vh 0 1vh;">
-              <label for="pedestrian-events" style="font-size: 1.2vw; font-weight: 400; margin-right: 1vw; cursor: default;">
-                  Pedestrian events per hour
+              <label for="pedestrian-frequency" style="font-size: 1.2vw; font-weight: 400; margin-right: 1vw; cursor: default;">
+                Pedestrian Frequency per hour
               </label>
-              <input type="number" id="pedestrian-events" name="pedestrian-events" min="0" max="10" value="4"
-                  style="padding: 0.5vh 1vw; font-size: 1vw; border: 1px solid #ccc; border-radius: 4px;">
-
-            <!-- Pedestrian Crossing Duration -->
+              <input type="number" id="pedestrian-frequency" name="pedestrian-frequency" min="0" max="5" style="padding: 0.5vh 1vw; font-size: 1vw; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
             <div style="display: flex; align-items: center; margin: 2vh 0 1vh;">
               <label for="pedestrian-duration" style="font-size: 1.2vw; font-weight: 400; margin-right: 1vw; cursor: default;">
-                  Pedestrian crossing duration (seconds)
+                Pedestrian Duration per Event
               </label>
-              <input type="number" id="pedestrian-duration" name="pedestrian-duration" min="0" max="10" value="3"
-                  style="padding: 0.5vh 1vw; font-size: 1vw; border: 1px solid #ccc; border-radius: 4px;">
+              <input type="number" id="pedestrian-duration" name="pedestrian-duration" min="0" max="10" style="padding: 0.5vh 1vw; font-size: 1vw; border: 1px solid #ccc; border-radius: 4px;">
             </div>
           </div>
         </div>
@@ -734,9 +731,8 @@
 
         <input type="hidden" id="hidden_lanes" name="lanes" value="">
         <input type="hidden" id="hidden_left-turn" name="left-turn" value="">
-        <input type="hidden" id="hidden_pedestrian_events" name="pedestrian-events" value="">
+        <input type="hidden" id="hidden_pedestrian_frequency" name="pedestrian-frequency" value="">
         <input type="hidden" id="hidden_pedestrian_duration" name="pedestrian-duration" value="">
-
         
         <!-- The visible Start button -->
         <button class="upload-button" type="button" id="startButton">Start</button>

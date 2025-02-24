@@ -166,6 +166,7 @@ junctionSettings: Dict[str, Any] = {}
 def update_junction_settings(data: Dict[str, Any]):
     global junctionSettings
     junctionSettings = data  # Store the latest junction settings
+    traffic_light_logic.update_junction_settings(junctionSettings)
     print("Junction settings updated:", junctionSettings)
     return {"message": "Junction settings updated successfully"}
 

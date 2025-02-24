@@ -1,7 +1,6 @@
 import asyncio
 import json
 import random
-import requests
 import math
 from typing import Dict, Any
 
@@ -10,6 +9,9 @@ class TrafficLightLogic:
         self.simulationSpeedMultiplier = 1.0  # <--- ADD THIS
 
         self.vehicle_data = None  # Add this to hold vehicle input data
+
+        self.junction_settings = None
+
         # -------------------------------
         #  Traffic Light States
         # -------------------------------
@@ -65,24 +67,13 @@ class TrafficLightLogic:
         #  - When a pedestrian event occurs, pedestrian lights are on for a fixed 3 seconds.
         #  - There is a fixed gap (self.gap seconds) after each cycle (vertical or horizontal) during which a pedestrian event may occur.
         # -------------------------------
-        try:
-            response = requests.get("http://127.0.0.1:5000/junction_settings_proxy")
-            if response.status_code == 200:
-                settings = response.json()
-                self.pedestrianPerMinute = int(settings.get("pedestrian_frequency", 4))  # Ensure it's an integer
-                self.pedestrianDuration = int(settings.get("pedestrian_time", 3))  # Ensure it's an integer
+        self.pedestrianPerMinute = 0  # Change this to set the desired number of pedestrian events per minute
+        self.pedestrianDuration = 0   # Fixed 3-second crossing
 
-                print(f"✅ Pedestrian Frequency: {self.pedestrianPerMinute} per hour")
-                print(f"✅ Pedestrian Duration: {self.pedestrianDuration} seconds")
+        pedestrian_frequency, pedestrian_duration = self.get_pedestrian_data()
 
-            else:
-                print("⚠️ Failed to fetch pedestrian settings, using defaults.")
-                self.pedestrianPerMinute = 4
-                self.pedestrianDuration = 3
-        except requests.exceptions.RequestException as e:
-            print(f"⚠️ Error fetching settings: {e}")
-            self.pedestrianPerMinute = 4
-            self.pedestrianDuration = 3
+        self.pedestrianPerMinute = pedestrian_frequency
+        self.pedestrianDuration = pedestrian_duration
 
         self.gap = 2                # Gap (in seconds) after each cycle
 
@@ -172,6 +163,27 @@ class TrafficLightLogic:
         print("  vertical_right =", self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH)
         print("  horizontal_right =", self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH)
 
+    def update_junction_settings(self, junction_settings: Dict[str, Any]):
+        """
+        Update the traffic light logic with the latest vehicle input data,
+        and recalculate the sequence lengths based on the new data.
+        """
+        self.junction_settings = junction_settings
+        # Recalculate sequence lengths from the new vehicle data
+        pedestrian_frequency, pedestrian_duration = self.get_pedestrian_data()
+        self.pedestrianPerMinute = pedestrian_frequency
+        self.pedestrianDuration = pedestrian_duration
+
+    def get_pedestrian_data(self):
+        # Default base sequence lengths (if no vehicle data is provided)
+        pedestrian_frequency = pedestrian_duration = 0
+
+        if self.junction_settings:
+            pedestrian_duration = self.junction_settings.get("pedestrian_duration")
+            pedestrian_frequency = self.junction_settings.get("pedestrian_frequency")
+                    
+        return pedestrian_frequency, pedestrian_duration
+
 
     def updateDerivedStates(self):
         # Compute left-turn state:
@@ -235,8 +247,8 @@ class TrafficLightLogic:
           - A 2-sec green→amber→red transition,
           - A right-turn phase.
         """
-        verticalCycleTime = 2 + self.VERTICAL_SEQUENCE_LENGTH + 2 + self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH
-        horizontalCycleTime = 2 + self.HORIZONTAL_SEQUENCE_LENGTH + 2 + self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH
+        verticalCycleTime = (5 * 2) + self.VERTICAL_SEQUENCE_LENGTH + self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH
+        horizontalCycleTime = (5 * 2) + self.HORIZONTAL_SEQUENCE_LENGTH + self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH
         return verticalCycleTime, horizontalCycleTime
 
     def get_max_gaps_per_minute(self):
@@ -249,14 +261,13 @@ class TrafficLightLogic:
            maxGapsPerMinute = maxVerticalGaps + maxHorizontalGaps
         """
         verticalCycleTime, horizontalCycleTime = self.get_cycle_times()
-        maxVerticalGaps = 60 / (verticalCycleTime + self.gap)
-        maxHorizontalGaps = 60 / (horizontalCycleTime + self.gap)
-        return maxVerticalGaps + maxHorizontalGaps
+        totalCycleTime = verticalCycleTime + horizontalCycleTime + (2 * self.pedestrianDuration)
+        return 2 * (60 / totalCycleTime)
 
     async def run_vertical_sequence(self):
         while self.rightTurnLightStates["east"]["on"] or self.rightTurnLightStates["west"]["on"]:
             await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        if self.VERTICAL_SEQUENCE_LENGTH is not 0:
+        if self.VERTICAL_SEQUENCE_LENGTH != 0:
             # Red→green transition (2 sec)
             self.trafficLightStates["north"] = {"red": True, "amber": False, "green": False}
             self.trafficLightStates["south"] = {"red": True, "amber": False, "green": False}
@@ -281,7 +292,7 @@ class TrafficLightLogic:
             await self._broadcast_state()
             await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
             
-        if self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH is not 0:
+        if self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH != 0:
             # Right-turn phase
             self.rightTurnLightStates["north"] = {"off": False, "on": True}
             self.rightTurnLightStates["south"] = {"off": False, "on": True}
@@ -296,7 +307,7 @@ class TrafficLightLogic:
         while self.rightTurnLightStates["north"]["on"] or self.rightTurnLightStates["south"]["on"]:
             await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
 
-        if self.HORIZONTAL_SEQUENCE_LENGTH is not 0:
+        if self.HORIZONTAL_SEQUENCE_LENGTH != 0:
             # Red→green transition (2 sec)
             self.trafficLightStates["east"] = {"red": True, "amber": False, "green": False}
             self.trafficLightStates["west"] = {"red": True, "amber": False, "green": False}
@@ -321,7 +332,7 @@ class TrafficLightLogic:
             await self._broadcast_state()
             await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
 
-        if self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH is not 0:
+        if self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH != 0:
             # Right-turn phase
             self.rightTurnLightStates["east"] = {"off": False, "on": True}
             self.rightTurnLightStates["west"] = {"off": False, "on": True}

@@ -144,7 +144,7 @@ def get_latest_junction_settings():
                 "lanes": latest_config.lanes,
                 "left_turn_lane": latest_config.left_turn_lane,
                 "bus_lane": latest_config.bus_lane,
-                "pedestrian_time": latest_config.pedestrian_time,
+                "pedestrian_duration": latest_config.pedestrian_duration,
                 "pedestrian_frequency": latest_config.pedestrian_frequency
             }
         else:
@@ -152,7 +152,7 @@ def get_latest_junction_settings():
                 "lanes": 5,
                 "left_turn_lane": False,
                 "bus_lane": False,
-                "pedestrian_time": 0,
+                "pedestrian_duration": 0,
                 "pedestrian_frequency": 0
             }
     except Exception as e:
@@ -161,7 +161,7 @@ def get_latest_junction_settings():
             "lanes": 5,
             "left_turn_lane": False,
             "bus_lane": False,
-            "pedestrian_time": 0,
+            "pedestrian_duration": 0,
             "pedestrian_frequency": 0
         }
 
@@ -173,7 +173,7 @@ def process_csv(file):
     for row in csv_input:
         config = Configuration(
             # lanes=row['lanes'],
-            pedestrian_time=row['pedestrian_time'],
+            pedestrian_duration=row['pedestrian_duration'],
             pedestrian_frequency=row['pedestrian_frequency'],
 
             north_forward_vph=row['north_forward_vph'],
@@ -309,11 +309,11 @@ def parameters():
                 int(data.get('wb_right', 0))
             )
 
-            pedestrian_time = safe_int(request.form.get('pedestrian-duration', '0'))
-            pedestrian_frequency=int(data.get('pedestrian-events', 0))
+            pedestrian_duration = safe_int(request.form.get('pedestrian-duration', '0'))
+            pedestrian_frequency=int(data.get('pedestrian-frequency', 0))
 
-            print(f"🟢 Pedestrian Events per Hour: {pedestrian_frequency}")
-            print(f"🟢 Pedestrian Crossing Duration: {pedestrian_time} seconds (Type: {type(pedestrian_time)})")
+            print(f"🟢 Pedestrian frequency per Hour: {pedestrian_frequency}")
+            print(f"🟢 Pedestrian Crossing Duration: {pedestrian_duration} seconds (Type: {type(pedestrian_duration)})")
 
 
             # Store user input in the database
@@ -323,8 +323,8 @@ def parameters():
                 # Junction Settings
                 lanes=int(data.get('lanes', 5)),  
                 left_turn_lane=('left-turn' in data),  
-                pedestrian_time=safe_int(data.get('pedestrian-duration', 0)),  # Default 3 seconds
-                pedestrian_frequency=int(data.get('pedestrian-events', 0)),  # Default 4 events per min
+                pedestrian_duration=safe_int(data.get('pedestrian-duration', 0)),  # Default 3 seconds
+                pedestrian_frequency=int(data.get('pedestrian-frequency', 0)),  # Default 4 frequency per min
 
                 # North
                 north_vph=north_vph,
@@ -394,8 +394,8 @@ def parameters():
                 "lanes": int(data.get('lanes', 5)),
                 "left_turn_lane": 'left-turn' in data,
                 "bus_lane": 'bus_lane' in data,
-                "pedestrian_time": safe_int(data.get('pedestrian-duration', 0)),
-                "pedestrian_frequency": pedestrian_frequency
+                "pedestrian_duration": safe_int(data.get('pedestrian-duration', 0)),
+                "pedestrian_frequency":  safe_int(data.get('pedestrian-frequency', 0)),
             }
 
             print("✅ Parsed Junction Settings:", junction_settings)  # Debugging
@@ -457,7 +457,7 @@ def upload():
                 # Store the user input in the database
                 config = Configuration(
                     run_id=int(data.get('run_id', 0)),
-                    pedestrian_time=int(data.get('pedestrian_time', 0)),
+                    pedestrian_duration=int(data.get('pedestrian_duration', 0)),
                     pedestrian_frequency=int(data.get('pedestrian_frequency', 0)),
                     north_vph=int(data.get('north_vph', 0)),
                     north_forward_vph=int(data.get('north_forward_vph', 0)),

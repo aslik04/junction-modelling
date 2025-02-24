@@ -21,7 +21,7 @@ class Configuration(db.Model):
     left_turn_lane = db.Column(db.Boolean, nullable=False, default=False)  # Left-turn lane present
     bus_lane = db.Column(db.Boolean, default=False)  # Bus lane present
 
-    pedestrian_time = db.Column(db.Integer)  # Time for pedestrians to cross (s)
+    pedestrian_duration = db.Column(db.Integer)  # Time for pedestrians to cross (s)
     pedestrian_frequency = db.Column(db.Integer)  # Crossing requests per hour
 
     # North

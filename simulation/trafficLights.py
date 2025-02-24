@@ -1,10 +1,14 @@
 import asyncio
 import json
 import random
+import math
+from typing import Dict, Any
 
 class TrafficLightLogic:
     def __init__(self):
         self.simulationSpeedMultiplier = 1.0  # <--- ADD THIS
+
+        self.vehicle_data = None  # Add this to hold vehicle input data
         # -------------------------------
         #  Traffic Light States
         # -------------------------------
@@ -41,11 +45,18 @@ class TrafficLightLogic:
         #     • A fixed 2-sec green→amber→red transition,
         #     • A right-turn phase.
         # -------------------------------
-        self.VERTICAL_SEQUENCE_LENGTH = 5       # Green phase for north/south
-        self.HORIZONTAL_SEQUENCE_LENGTH = 5    # Green phase for east/west
+        self.VERTICAL_SEQUENCE_LENGTH = 0       # Green phase for north/south
+        self.HORIZONTAL_SEQUENCE_LENGTH = 0    # Green phase for east/west
+        self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = 0
+        self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = 0
 
-        self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = 5
-        self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = 5
+        main_vertical, main_horizontal, vertical_right, horizontal_right = self.get_sequence_lengths()
+        
+        self.VERTICAL_SEQUENCE_LENGTH = main_vertical       # Green phase for north/south
+        self.HORIZONTAL_SEQUENCE_LENGTH = main_horizontal    # Green phase for east/west
+
+        self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = vertical_right
+        self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = horizontal_right
 
         # -------------------------------
         #  Pedestrian Activation
@@ -61,6 +72,88 @@ class TrafficLightLogic:
 
     def set_broadcast_callback(self, cb):
         self._broadcast_callback = cb
+
+    def get_sequence_lengths(self):
+        """
+        Compute cycle times based on vehicle input data.
+        Returns four values: main_vertical, main_horizontal, vertical_right, horizontal_right.
+        """
+        # Default base sequence lengths (if no vehicle data is provided)
+        main_vertical = main_horizontal = vertical_right = horizontal_right = 0
+        increment = 4
+
+        if self.vehicle_data:
+            north = self.vehicle_data.get("north", {})
+            south = self.vehicle_data.get("south", {})
+            east  = self.vehicle_data.get("east", {})
+            west  = self.vehicle_data.get("west", {})
+
+            # For main phase, assume forward and left are the main moves.
+            vertical_total = (north.get("forward", 0) + north.get("left", 0) +
+                            south.get("forward", 0) + south.get("left", 0))
+            horizontal_total = (east.get("forward", 0) + east.get("left", 0) +
+                                west.get("forward", 0) + west.get("left", 0))
+            vertical_right_total = north.get("right", 0) + south.get("right", 0)
+            horizontal_right_total = east.get("right", 0) + west.get("right", 0)
+
+            total = vertical_total + horizontal_total + vertical_right_total + horizontal_right_total
+
+            # Print intermediate values for debugging:
+            print("[DEBUG] Vehicle Data Totals:")
+            print("  vertical_total =", vertical_total)
+            print("  horizontal_total =", horizontal_total)
+            print("  vertical_right_total =", vertical_right_total)
+            print("  horizontal_right_total =", horizontal_right_total)
+            print("  total =", total)
+
+            if total > 0:
+                # Calculate raw green times (in seconds) for each phase
+                raw_main_vertical = 60 * (vertical_total / total)
+                raw_main_horizontal = 60 * (horizontal_total / total)
+                raw_vertical_right = 60 * (vertical_right_total / total)
+                raw_horizontal_right = 60 * (horizontal_right_total / total)
+
+                # Print raw computed times:
+                print("[DEBUG] Raw cycle times:")
+                print("  raw_main_vertical =", raw_main_vertical)
+                print("  raw_main_horizontal =", raw_main_horizontal)
+                print("  raw_vertical_right =", raw_vertical_right)
+                print("  raw_horizontal_right =", raw_horizontal_right)
+
+                # Now quantize by increment (if desired)
+                main_vertical = math.ceil(raw_main_vertical / increment)
+                main_horizontal = math.ceil(raw_main_horizontal / increment)
+                vertical_right = math.ceil(raw_vertical_right / increment)
+                horizontal_right = math.ceil(raw_horizontal_right / increment)
+
+        print("[DEBUG] Final sequence lengths:")
+        print("  main_vertical =", main_vertical)
+        print("  main_horizontal =", main_horizontal)
+        print("  vertical_right =", vertical_right)
+        print("  horizontal_right =", horizontal_right)
+                    
+        return main_vertical, main_horizontal, vertical_right, horizontal_right
+
+    def update_vehicle_data(self, vehicle_data: Dict[str, Any]):
+        """
+        Update the traffic light logic with the latest vehicle input data,
+        and recalculate the sequence lengths based on the new data.
+        """
+        self.vehicle_data = vehicle_data
+        # Recalculate sequence lengths from the new vehicle data
+        main_vertical, main_horizontal, vertical_right, horizontal_right = self.get_sequence_lengths()
+        self.VERTICAL_SEQUENCE_LENGTH = main_vertical
+        self.HORIZONTAL_SEQUENCE_LENGTH = main_horizontal
+        self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = vertical_right
+        self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = horizontal_right
+
+        print("TrafficLightLogic: Vehicle data updated:", self.vehicle_data)
+        print("[DEBUG] Updated sequence lengths:")
+        print("  main_vertical =", self.VERTICAL_SEQUENCE_LENGTH)
+        print("  main_horizontal =", self.HORIZONTAL_SEQUENCE_LENGTH)
+        print("  vertical_right =", self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH)
+        print("  horizontal_right =", self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH)
+
 
     def updateDerivedStates(self):
         # Compute left-turn state:
@@ -145,71 +238,79 @@ class TrafficLightLogic:
     async def run_vertical_sequence(self):
         while self.rightTurnLightStates["east"]["on"] or self.rightTurnLightStates["west"]["on"]:
             await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        # Red→green transition (2 sec)
-        self.trafficLightStates["north"] = {"red": True, "amber": False, "green": False}
-        self.trafficLightStates["south"] = {"red": True, "amber": False, "green": False}
-        await self._broadcast_state()
-        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        self.trafficLightStates["north"] = {"red": True, "amber": True, "green": False}
-        self.trafficLightStates["south"] = {"red": True, "amber": True, "green": False}
-        await self._broadcast_state()
-        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        # Green phase
-        self.trafficLightStates["north"] = {"red": False, "amber": False, "green": True}
-        self.trafficLightStates["south"] = {"red": False, "amber": False, "green": True}
-        await self._broadcast_state()
-        await asyncio.sleep(self.VERTICAL_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
-        # Green→amber→red transition (2 sec)
-        self.trafficLightStates["north"] = {"red": False, "amber": True, "green": False}
-        self.trafficLightStates["south"] = {"red": False, "amber": True, "green": False}
-        await self._broadcast_state()
-        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        self.trafficLightStates["north"] = {"red": True, "amber": False, "green": False}
-        self.trafficLightStates["south"] = {"red": True, "amber": False, "green": False}
-        await self._broadcast_state()
-        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        # Right-turn phase
-        self.rightTurnLightStates["north"] = {"off": False, "on": True}
-        self.rightTurnLightStates["south"] = {"off": False, "on": True}
-        await self._broadcast_state()
-        await asyncio.sleep(self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
-        self.rightTurnLightStates["north"] = {"off": True, "on": False}
-        self.rightTurnLightStates["south"] = {"off": True, "on": False}
+        if self.VERTICAL_SEQUENCE_LENGTH is not 0:
+            # Red→green transition (2 sec)
+            self.trafficLightStates["north"] = {"red": True, "amber": False, "green": False}
+            self.trafficLightStates["south"] = {"red": True, "amber": False, "green": False}
+            await self._broadcast_state()
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
+            self.trafficLightStates["north"] = {"red": True, "amber": True, "green": False}
+            self.trafficLightStates["south"] = {"red": True, "amber": True, "green": False}
+            await self._broadcast_state()
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
+            # Green phase
+            self.trafficLightStates["north"] = {"red": False, "amber": False, "green": True}
+            self.trafficLightStates["south"] = {"red": False, "amber": False, "green": True}
+            await self._broadcast_state()
+            await asyncio.sleep(self.VERTICAL_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
+            # Green→amber→red transition (2 sec)
+            self.trafficLightStates["north"] = {"red": False, "amber": True, "green": False}
+            self.trafficLightStates["south"] = {"red": False, "amber": True, "green": False}
+            await self._broadcast_state()
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
+            self.trafficLightStates["north"] = {"red": True, "amber": False, "green": False}
+            self.trafficLightStates["south"] = {"red": True, "amber": False, "green": False}
+            await self._broadcast_state()
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
+            
+        if self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH is not 0:
+            # Right-turn phase
+            self.rightTurnLightStates["north"] = {"off": False, "on": True}
+            self.rightTurnLightStates["south"] = {"off": False, "on": True}
+            await self._broadcast_state()
+            await asyncio.sleep(self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
+            self.rightTurnLightStates["north"] = {"off": True, "on": False}
+            self.rightTurnLightStates["south"] = {"off": True, "on": False}
+
         await self._broadcast_state()
 
     async def run_horizontal_sequence(self):
         while self.rightTurnLightStates["north"]["on"] or self.rightTurnLightStates["south"]["on"]:
             await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        # Red→green transition (2 sec)
-        self.trafficLightStates["east"] = {"red": True, "amber": False, "green": False}
-        self.trafficLightStates["west"] = {"red": True, "amber": False, "green": False}
-        await self._broadcast_state()
-        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        self.trafficLightStates["east"] = {"red": True, "amber": True, "green": False}
-        self.trafficLightStates["west"] = {"red": True, "amber": True, "green": False}
-        await self._broadcast_state()
-        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        # Green phase
-        self.trafficLightStates["east"] = {"red": False, "amber": False, "green": True}
-        self.trafficLightStates["west"] = {"red": False, "amber": False, "green": True}
-        await self._broadcast_state()
-        await asyncio.sleep(self.HORIZONTAL_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
-        # Green→amber→red transition (2 sec)
-        self.trafficLightStates["east"] = {"red": False, "amber": True, "green": False}
-        self.trafficLightStates["west"] = {"red": False, "amber": True, "green": False}
-        await self._broadcast_state()
-        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        self.trafficLightStates["east"] = {"red": True, "amber": False, "green": False}
-        self.trafficLightStates["west"] = {"red": True, "amber": False, "green": False}
-        await self._broadcast_state()
-        await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
-        # Right-turn phase
-        self.rightTurnLightStates["east"] = {"off": False, "on": True}
-        self.rightTurnLightStates["west"] = {"off": False, "on": True}
-        await self._broadcast_state()
-        await asyncio.sleep(self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
-        self.rightTurnLightStates["east"] = {"off": True, "on": False}
-        self.rightTurnLightStates["west"] = {"off": True, "on": False}
+
+        if self.HORIZONTAL_SEQUENCE_LENGTH is not 0:
+            # Red→green transition (2 sec)
+            self.trafficLightStates["east"] = {"red": True, "amber": False, "green": False}
+            self.trafficLightStates["west"] = {"red": True, "amber": False, "green": False}
+            await self._broadcast_state()
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
+            self.trafficLightStates["east"] = {"red": True, "amber": True, "green": False}
+            self.trafficLightStates["west"] = {"red": True, "amber": True, "green": False}
+            await self._broadcast_state()
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
+            # Green phase
+            self.trafficLightStates["east"] = {"red": False, "amber": False, "green": True}
+            self.trafficLightStates["west"] = {"red": False, "amber": False, "green": True}
+            await self._broadcast_state()
+            await asyncio.sleep(self.HORIZONTAL_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
+            # Green→amber→red transition (2 sec)
+            self.trafficLightStates["east"] = {"red": False, "amber": True, "green": False}
+            self.trafficLightStates["west"] = {"red": False, "amber": True, "green": False}
+            await self._broadcast_state()
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
+            self.trafficLightStates["east"] = {"red": True, "amber": False, "green": False}
+            self.trafficLightStates["west"] = {"red": True, "amber": False, "green": False}
+            await self._broadcast_state()
+            await asyncio.sleep(self.gap / self.simulationSpeedMultiplier)
+
+        if self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH is not 0:
+            # Right-turn phase
+            self.rightTurnLightStates["east"] = {"off": False, "on": True}
+            self.rightTurnLightStates["west"] = {"off": False, "on": True}
+            await self._broadcast_state()
+            await asyncio.sleep(self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH / self.simulationSpeedMultiplier)
+            self.rightTurnLightStates["east"] = {"off": True, "on": False}
+            self.rightTurnLightStates["west"] = {"off": True, "on": False}
         await self._broadcast_state()
 
     async def run_pedestrian_event(self):

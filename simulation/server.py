@@ -146,6 +146,8 @@ def update_spawn_rates(data: Dict[str, Any]):
     """Receive spawn rates from app.py and update the dictionary."""
     global spawnRates
     spawnRates = data  # Store the latest spawn rates
+    # Pass the new vehicle data to the traffic light logic
+    traffic_light_logic.update_vehicle_data(spawnRates)
     print("Spawn rates updated:", spawnRates)  # Debugging
     return {"message": "Spawn rates updated successfully"}
 

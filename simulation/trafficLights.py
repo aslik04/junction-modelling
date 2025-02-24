@@ -1,6 +1,7 @@
 import asyncio
 import json
 import random
+import requests
 import math
 from typing import Dict, Any
 
@@ -64,8 +65,25 @@ class TrafficLightLogic:
         #  - When a pedestrian event occurs, pedestrian lights are on for a fixed 3 seconds.
         #  - There is a fixed gap (self.gap seconds) after each cycle (vertical or horizontal) during which a pedestrian event may occur.
         # -------------------------------
-        self.pedestrianPerMinute = 4  # Change this to set the desired number of pedestrian events per minute
-        self.pedestrianDuration = 2   # Fixed 3-second crossing
+        try:
+            response = requests.get("http://127.0.0.1:5000/junction_settings_proxy")
+            if response.status_code == 200:
+                settings = response.json()
+                self.pedestrianPerMinute = int(settings.get("pedestrian_frequency", 4))  # Ensure it's an integer
+                self.pedestrianDuration = int(settings.get("pedestrian_time", 3))  # Ensure it's an integer
+
+                print(f"✅ Pedestrian Frequency: {self.pedestrianPerMinute} per hour")
+                print(f"✅ Pedestrian Duration: {self.pedestrianDuration} seconds")
+
+            else:
+                print("⚠️ Failed to fetch pedestrian settings, using defaults.")
+                self.pedestrianPerMinute = 4
+                self.pedestrianDuration = 3
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️ Error fetching settings: {e}")
+            self.pedestrianPerMinute = 4
+            self.pedestrianDuration = 3
+
         self.gap = 2                # Gap (in seconds) after each cycle
 
         self._broadcast_callback = None

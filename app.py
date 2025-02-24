@@ -267,6 +267,7 @@ def results():
 @app.route('/parameters', methods=['GET', 'POST'])
 def parameters():
     if request.method == 'POST':
+        print("📥 Received Form Data:", request.form)
         try:
             data = request.form  # ✅ Directly use request.form
 
@@ -308,6 +309,13 @@ def parameters():
                 int(data.get('wb_right', 0))
             )
 
+            pedestrian_time = safe_int(request.form.get('pedestrian-duration', '0'))
+            pedestrian_frequency=int(data.get('pedestrian-events', 0))
+
+            print(f"🟢 Pedestrian Events per Hour: {pedestrian_frequency}")
+            print(f"🟢 Pedestrian Crossing Duration: {pedestrian_time} seconds (Type: {type(pedestrian_time)})")
+
+
             # Store user input in the database
             config = Configuration(
                 session_id=session.id,
@@ -315,7 +323,8 @@ def parameters():
                 # Junction Settings
                 lanes=int(data.get('lanes', 5)),  
                 left_turn_lane=('left-turn' in data),  
-                pedestrian_frequency=safe_int(data.get('pedestrian-events', '0')),  
+                pedestrian_time=safe_int(data.get('pedestrian-duration', 0)),  # Default 3 seconds
+                pedestrian_frequency=int(data.get('pedestrian-events', 0)),  # Default 4 events per min
 
                 # North
                 north_vph=north_vph,
@@ -385,8 +394,8 @@ def parameters():
                 "lanes": int(data.get('lanes', 5)),
                 "left_turn_lane": 'left-turn' in data,
                 "bus_lane": 'bus_lane' in data,
-                "pedestrian_time": int(data.get('pedestrian_time', 0)),
-                "pedestrian_frequency": safe_int(data.get('pedestrian-events', '0'))
+                "pedestrian_time": safe_int(data.get('pedestrian-duration', 0)),
+                "pedestrian_frequency": pedestrian_frequency
             }
 
             print("✅ Parsed Junction Settings:", junction_settings)  # Debugging

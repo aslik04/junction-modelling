@@ -45,6 +45,23 @@ def start_fastapi():
         print("✅ FastAPI server started.")
 
 
+def stop_fastapi():
+    """
+    Stop the FastAPI server if it's running.
+    """
+    global server_process
+    if server_process and server_process.poll() is None:  # Check if the process is running
+        server_process.terminate()  # Send termination signal
+        try:
+            server_process.wait(timeout=5)  # Give it some time to terminate
+        except subprocess.TimeoutExpired:
+            server_process.kill()  # Force kill if it doesn't stop in time
+        print("⛔ FastAPI server stopped.")
+        server_process = None
+    else:
+        print("⚠️ No FastAPI server is currently running.")
+
+
 @app.before_request
 def ensure_fastapi_running():
     """
@@ -52,6 +69,37 @@ def ensure_fastapi_running():
     ensuring FastAPI is running so that ws://localhost:8000/ws is available.
     """
     start_fastapi()
+
+def stop_fastapi():
+    """
+    Stops the FastAPI server if it's running.
+    """
+    global server_process
+    if server_process and server_process.poll() is None:  # If server is running
+        server_process.terminate()  # Terminate the process
+        server_process.wait()  # Ensure it stops completely
+        server_process = None
+        print("⏹️ FastAPI server stopped.")
+
+# ✅ Endpoint to start FastAPI when Start button is pressed
+@app.route('/start_simulation', methods=['POST'])
+def start_simulation():
+    start_fastapi()
+    return jsonify({"message": "FastAPI server started"}), 200
+
+# ✅ Endpoint to stop FastAPI when Back button is pressed
+@app.route('/stop_simulation', methods=['POST'])
+def stop_simulation():
+    stop_fastapi()
+    return jsonify({"message": "FastAPI server stopped"}), 200
+
+# ✅ Redirect to parameters when back button is pressed
+@app.route('/back_to_parameters', methods=['GET'])
+def back_to_parameters():
+    stop_fastapi()
+    return redirect(url_for('parameters'))
+
+
 
 # ------------------------------------------------------
 # Serve files from 'frontend' folder (NOT in static/)

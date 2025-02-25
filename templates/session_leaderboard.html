@@ -1,26 +1,253 @@
-<!-- session leaderboard page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Session Leaderboard</title>
     <style>
-        body { font-family: 'SF Pro', sans-serif; background-color: #f8f5e9; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #a2bf89; color: white; }
+        /* Load SF Pro font (same as leaderboards.html) */
+        @font-face {
+            font-family: 'SF Pro';
+            src: url("{{ url_for('static', filename='fonts/SF-Pro.ttf') }}") format('truetype');
+            font-style: normal;
+            font-weight: 400;
+        }
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
+            background-color: #a2bf89; /* Match the green background */
+            font-family: 'SF Pro', sans-serif;
+            color: #6b6b6b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5vh 0;
+        }
+        /* Header */
+        .header {
+            width: 90%;
+            text-align: center;
+            margin-bottom: 4vh;
+        }
+        .header h1 {
+            font-size: 3vw;
+            color: #f8f5e9;
+            font-weight: 600;
+        }
+        /* Leaderboard Container */
+        .leaderboard-container {
+            background-color: #f8f5e9;
+            border-radius: 1.2vw;
+            padding: 2vh 3vw;
+            width: 80%;
+            max-width: 1200px; /* slightly wider for more columns */
+            text-align: center;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        /* Leaderboard Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 1.2vw;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 1.2vh;
+            text-align: center;
+            font-size: 1.2vw;
+        }
+        th {
+            background-color: #8da676;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f1f1f1;
+        }
+        tr:hover {
+            background-color: #dce7c5;
+            transition: 0.3s;
+        }
+        /* Make table rows clickable */
+        tbody tr {
+            cursor: pointer;
+        }
+        /* Navigation Container */
+        .nav-container {
+            width: 80%;
+            max-width: 1200px;
+            margin-top: 3vh;
+            display: flex;
+            justify-content: space-between;
+        }
+        .nav-container a {
+            text-decoration: none;
+            color: #f8f5e9;
+            background-color: #8da676;
+            padding: 1.2vh 2.5vw;
+            border-radius: 2vw;
+            font-size: 1.2vw;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .nav-container a:hover {
+            background-color: #789563;
+        }
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 6vw;
+            }
+            th, td {
+                font-size: 4vw;
+            }
+            .nav-container a {
+                font-size: 3vw;
+                padding: 2vh 4vw;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Session Leaderboard</h1>
+    <!-- Header with bar chart emojis on either side -->
+    <div class="header">
+        <h1>📊 Session Leaderboards 📊</h1>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="leaderboard-container">
         <table>
-            <tr><th>Run #</th><th>North Max Queue</th><th>South Max Queue</th><th>East Max Queue</th><th>West Max Queue</th><th>Score</th></tr>
-            <tr><td>1</td><td>11</td><td>9</td><td>8</td><td>10</td><td>123.45</td></tr>
+            <thead>
+                <tr>
+                    <th>Recent Runs</th>
+                    <th>Run ID</th>
+                    <th>AVG Wait Time (s)</th>
+                    <th>MAX Wait Time (s)</th>
+                    <th>MAX Queue Length</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- "Best" row (clickable) -->
+                <tr onclick="handleRowClick(this)">
+                    <td>Best</td>
+                    <td>001</td>
+                    <td>12.34</td>
+                    <td>23.45</td>
+                    <td>10</td>
+                    <td>98.76</td>
+                </tr>
+                <!-- 9 additional clickable rows -->
+                <tr onclick="handleRowClick(this)">
+                    <td>1</td>
+                    <td>002</td>
+                    <td>13.00</td>
+                    <td>24.00</td>
+                    <td>9</td>
+                    <td>95.00</td>
+                </tr>
+                <tr onclick="handleRowClick(this)">
+                    <td>2</td>
+                    <td>003</td>
+                    <td>14.50</td>
+                    <td>25.50</td>
+                    <td>11</td>
+                    <td>93.25</td>
+                </tr>
+                <tr onclick="handleRowClick(this)">
+                    <td>3</td>
+                    <td>004</td>
+                    <td>15.00</td>
+                    <td>26.00</td>
+                    <td>10</td>
+                    <td>92.00</td>
+                </tr>
+                <tr onclick="handleRowClick(this)">
+                    <td>4</td>
+                    <td>005</td>
+                    <td>13.75</td>
+                    <td>24.50</td>
+                    <td>9</td>
+                    <td>94.50</td>
+                </tr>
+                <tr onclick="handleRowClick(this)">
+                    <td>5</td>
+                    <td>006</td>
+                    <td>14.00</td>
+                    <td>25.00</td>
+                    <td>10</td>
+                    <td>93.00</td>
+                </tr>
+                <tr onclick="handleRowClick(this)">
+                    <td>6</td>
+                    <td>007</td>
+                    <td>13.50</td>
+                    <td>24.75</td>
+                    <td>11</td>
+                    <td>92.50</td>
+                </tr>
+                <tr onclick="handleRowClick(this)">
+                    <td>7</td>
+                    <td>008</td>
+                    <td>15.25</td>
+                    <td>26.25</td>
+                    <td>10</td>
+                    <td>91.75</td>
+                </tr>
+                <tr onclick="handleRowClick(this)">
+                    <td>8</td>
+                    <td>009</td>
+                    <td>14.25</td>
+                    <td>25.25</td>
+                    <td>9</td>
+                    <td>93.75</td>
+                </tr>
+                <tr onclick="handleRowClick(this)">
+                    <td>9</td>
+                    <td>010</td>
+                    <td>13.80</td>
+                    <td>24.80</td>
+                    <td>10</td>
+                    <td>94.00</td>
+                </tr>
+            </tbody>
         </table>
     </div>
+
+    <!-- Bottom Nav Buttons with emojis on both sides -->
+    <div class="nav-container">
+        <!-- Bottom left: Back to Inputs with home emojis on both sides -->
+        <a href="/parameters">🏠 Back to Inputs</a>
+        <!-- Bottom right: See All-Time Leaderboards with trophy emojis on both sides -->
+        <a href="/leaderboards">🏆 See All-Time Leaderboards</a>
+    </div>
+
+    <script>
+        // Placeholder function for handling row clicks.
+        // It should eventually return the parameters as a JSON file.
+        function handleRowClick(row) {
+            // Example: Construct a JSON object from the row's cells.
+            const cells = row.getElementsByTagName("td");
+            const data = {
+                recentRun: cells[0].innerText,
+                runId: cells[1].innerText,
+                avgWaitTime: cells[2].innerText,
+                maxWaitTime: cells[3].innerText,
+                maxQueueLength: cells[4].innerText,
+                score: cells[5].innerText
+            };
+            // For now, just log the JSON data to the console.
+            console.log(JSON.stringify(data));
+            // TODO: Add backend call or file download logic as needed.
+        }
+    </script>
 </body>
 </html>

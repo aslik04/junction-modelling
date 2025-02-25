@@ -32,14 +32,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 5vh 0;
+            padding: 2vh 0;
         }
 
         /* Header */
         .header {
             width: 90%;
             text-align: center;
-            margin-bottom: 4vh;
+            margin-bottom: 2vh;
         }
 
         .header h1 {
@@ -53,8 +53,11 @@
             background-color: #f8f5e9;
             border-radius: 1.2vw;
             padding: 2vh 3vw;
-            width: 80%;
+            width: 90%;
             max-width: 1000px;
+            /* Height scales with viewport; adjust as needed */
+            max-height: calc(100vh - 20vh);
+            overflow-y: auto;
             text-align: center;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
         }
@@ -88,13 +91,14 @@
             transition: 0.3s;
         }
 
-        /* Navigation */
+        /* Navigation Buttons */
         .nav-container {
-            text-align: center;
             margin-top: 3vh;
+            display: flex;
+            gap: 2vw;
         }
 
-        .nav-container a {
+        .nav-button {
             text-decoration: none;
             color: #f8f5e9;
             background-color: #8da676;
@@ -102,10 +106,10 @@
             border-radius: 2vw;
             font-size: 1.2vw;
             font-weight: 600;
-            transition: 0.3s;
+            transition: background-color 0.3s;
         }
 
-        .nav-container a:hover {
+        .nav-button:hover {
             background-color: #789563;
         }
 
@@ -119,7 +123,7 @@
                 font-size: 4vw;
             }
 
-            .nav-container a {
+            .nav-button {
                 font-size: 3vw;
                 padding: 2vh 4vw;
             }
@@ -143,13 +147,14 @@
                 </tr>
             </thead>
             <tbody>
-                {% for result in results %}
+                {# Loop exactly 10 times; if there are fewer than 10 results, show empty cells #}
+                {% for i in range(10) %}
                 <tr>
-                    <td>{{ result.run_id }}</td>
-                    <td>{{ result.avg_wait_time | round(2) }}</td>
-                    <td>{{ result.max_wait_time | round(2) }}</td>
-                    <td>{{ result.max_queue_length }}</td>
-                    <td>{{ result.score | round(2) }}</td>
+                    <td>{{ results[i].run_id if results|length > i else "" }}</td>
+                    <td>{{ results[i].avg_wait_time | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_wait_time | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_queue_length if results|length > i else "" }}</td>
+                    <td>{{ results[i].score | round(2) if results|length > i else "" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -157,7 +162,8 @@
     </div>
 
     <div class="nav-container">
-        <a href="/">🏠 Return Home</a>
+        <a class="nav-button" href="index.html">❌ End Session</a>
+        <a class="nav-button" href="parameters.html">✅ Continue Session</a>
     </div>
 </body>
 </html>

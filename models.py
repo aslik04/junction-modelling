@@ -67,6 +67,6 @@ class LeaderboardResult(db.Model):
             "session_id": self.session_id,
             "avg_wait_time": self.avg_wait_time,
             "max_wait_time": self.max_wait_time,
-            "max_queue_length": self.max_queue_length,
+            "max_queue_length": self.max_queue_length
             # "score": self.score
         }

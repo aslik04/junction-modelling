@@ -589,7 +589,7 @@ def simulate():
             'message': 'sim results saved',
             'avg_wait_time': avg_wait_time,
             'max_wait_time': max_wait_time,
-            'max_queue_length': max_queue_length,
+            'max_queue_length': max_queue_length
         }), 201
     except Exception as e:
         db.session.rollback()

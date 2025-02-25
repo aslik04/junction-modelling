@@ -307,31 +307,48 @@
       });
 
       // When the Start button is clicked, copy the parameter values into the hidden form and submit it.
-      document.getElementById("startButton").addEventListener("click", function() {
+      document.getElementById("startButton").addEventListener("click", async function () {
         // North
-        document.getElementById("hidden_nb_forward").value = document.getElementById("nb_forward").value;
-        document.getElementById("hidden_nb_left").value = document.getElementById("nb_left").value;
-        document.getElementById("hidden_nb_right").value = document.getElementById("nb_right").value;
-        // East
-        document.getElementById("hidden_eb_forward").value = document.getElementById("eb_forward").value;
-        document.getElementById("hidden_eb_left").value = document.getElementById("eb_left").value;
-        document.getElementById("hidden_eb_right").value = document.getElementById("eb_right").value;
-        // South
-        document.getElementById("hidden_sb_forward").value = document.getElementById("sb_forward").value;
-        document.getElementById("hidden_sb_left").value = document.getElementById("sb_left").value;
-        document.getElementById("hidden_sb_right").value = document.getElementById("sb_right").value;
-        // West
-        document.getElementById("hidden_wb_forward").value = document.getElementById("wb_forward").value;
-        document.getElementById("hidden_wb_left").value = document.getElementById("wb_left").value;
-        document.getElementById("hidden_wb_right").value = document.getElementById("wb_right").value;
-        // Junction Settings
-        document.getElementById("hidden_lanes").value = document.getElementById("lanes").value;
-        document.getElementById("hidden_left-turn").value = document.getElementById("left-turn").checked ? "on" : "";
-        document.getElementById("hidden_pedestrian_frequency").value = document.getElementById("pedestrian-frequency").value;
-        document.getElementById("hidden_pedestrian_duration").value = document.getElementById("pedestrian-duration").value;
+        try {
+        // ✅ Step 1: Start FastAPI before submitting form
+          let startResponse = await fetch('/start_simulation', { method: 'POST' });
+          let startData = await startResponse.json();
 
-        // Submit the hidden form.
-        document.getElementById("hiddenForm").submit();
+          if (startResponse.ok) {
+              console.log("✅ FastAPI started:", startData.message);
+
+              // ✅ Step 2: Copy form values to hidden fields
+              document.getElementById("hidden_nb_forward").value = document.getElementById("nb_forward").value;
+              document.getElementById("hidden_nb_left").value = document.getElementById("nb_left").value;
+              document.getElementById("hidden_nb_right").value = document.getElementById("nb_right").value;
+
+              document.getElementById("hidden_eb_forward").value = document.getElementById("eb_forward").value;
+              document.getElementById("hidden_eb_left").value = document.getElementById("eb_left").value;
+              document.getElementById("hidden_eb_right").value = document.getElementById("eb_right").value;
+
+              document.getElementById("hidden_sb_forward").value = document.getElementById("sb_forward").value;
+              document.getElementById("hidden_sb_left").value = document.getElementById("sb_left").value;
+              document.getElementById("hidden_sb_right").value = document.getElementById("sb_right").value;
+
+              document.getElementById("hidden_wb_forward").value = document.getElementById("wb_forward").value;
+              document.getElementById("hidden_wb_left").value = document.getElementById("wb_left").value;
+              document.getElementById("hidden_wb_right").value = document.getElementById("wb_right").value;
+
+              document.getElementById("hidden_lanes").value = document.getElementById("lanes").value;
+              document.getElementById("hidden_left-turn").value = document.getElementById("left-turn").checked ? "on" : "";
+              document.getElementById("hidden_pedestrian_frequency").value = document.getElementById("pedestrian-frequency").value;
+              document.getElementById("hidden_pedestrian_duration").value = document.getElementById("pedestrian-duration").value;
+
+              // ✅ Step 3: Submit the hidden form after FastAPI has started
+              console.log("🚀 Submitting form with updated values...");
+              document.getElementById("hiddenForm").submit();
+          } else {
+              console.error("❌ Error starting FastAPI:", startData.error);
+          }
+      } catch (error) {
+          console.error("❌ Error sending start request:", error);
+      }
+        console.error("❌ Error sending start request:", error);
       });
     });
   </script>

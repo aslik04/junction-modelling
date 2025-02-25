@@ -256,11 +256,25 @@
     });
 
 
-    // Optional: handle Back & End button clicks
-    document.getElementById("backBtn").addEventListener("click", () => {
-      console.log("Back button clicked");
-      // Implement navigation or logic as needed
+    document.getElementById("backBtn").addEventListener("click", async () => {
+        console.log("Back button clicked. Stopping FastAPI...");
+
+        try {
+            let stopResponse = await fetch('/stop_simulation', { method: 'POST' });
+            let stopData = await stopResponse.json();
+            
+            if (stopResponse.ok) {
+                console.log("✅ FastAPI stopped:", stopData.message);
+                // Redirect back to the parameters page
+                window.location.href = "/parameters";
+            } else {
+                console.error("❌ Error stopping FastAPI:", stopData.error);
+            }
+        } catch (error) {
+            console.error("❌ Error sending stop request:", error);
+        }
     });
+
 
 
     document.getElementById("endBtn").addEventListener("click", async () => {

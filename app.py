@@ -128,12 +128,12 @@ def get_session_leaderboard(session):
     # return top 10 results
     return sorted_results[:10]
 
-def get_all_time_leaderboard():
-    """Gets the top 10 scores across all sessions."""
-    return LeaderboardResult.query.order_by(LeaderboardResult.score.desc()).limit(10).all()
+# def get_all_time_leaderboard():
+#     """Gets the top 10 scores across all sessions."""
+#     return LeaderboardResult.query.order_by(LeaderboardResult.score.desc()).limit(10).all()
 
 def save_session_leaderboard_result(session_id, run_id, avg_wait_time,
-                                    max_wait_time, max_queue_length, score):
+                                    max_wait_time, max_queue_length):
     """Saves a session leaderboard result without deleting older results."""
     result = LeaderboardResult(
         session_id=session_id,
@@ -292,17 +292,17 @@ def results():
         avg_wait_time = round(random.uniform(5, 20), 2)
         max_wait_time = round(random.uniform(avg_wait_time, 40), 2)
         max_queue_length = random.randint(10, 50)
-        score = round(avg_wait_time + (max_wait_time / 2) + (max_queue_length / 5), 2)
+        #score = round(avg_wait_time + (max_wait_time / 2) + (max_queue_length / 5), 2)
 
         # Save results to the leaderboard
-        save_session_leaderboard_result(session_id, run_id, avg_wait_time, max_wait_time, max_queue_length, score)
+        save_session_leaderboard_result(session_id, run_id, avg_wait_time, max_wait_time, max_queue_length)
 
         return render_template(
             'results.html',
             avg_wait_time=avg_wait_time,
             max_wait_time=max_wait_time,
             max_queue_length=max_queue_length,
-            score=score
+            #score=score
         )
 
     except Exception as e:
@@ -581,16 +581,15 @@ def simulate():
         avg_wait_time = random.uniform(5, 20)
         max_wait_time = random.uniform(avg_wait_time, 40)
         max_queue_length = random.randint(10, 50)
-        score = avg_wait_time + (max_wait_time / 2) + (max_queue_length / 5)
+        # score = avg_wait_time + (max_wait_time / 2) + (max_queue_length / 5)
         save_session_leaderboard_result(session_id, run_id,
                                         avg_wait_time, max_wait_time,
-                                        max_queue_length, score)
+                                        max_queue_length)
         return jsonify({
             'message': 'sim results saved',
             'avg_wait_time': avg_wait_time,
             'max_wait_time': max_wait_time,
             'max_queue_length': max_queue_length,
-            'score': score
         }), 201
     except Exception as e:
         db.session.rollback()
@@ -600,10 +599,10 @@ def simulate():
 def junctionPage():
     return render_template('junctionPage.html')
 
-@app.route('/leaderboards')
-def leaderboards():
-    top_results = get_all_time_leaderboard()
-    return render_template('leaderboards.html', results=top_results)
+# @app.route('/leaderboards')
+# def leaderboards():
+#     top_results = get_all_time_leaderboard()
+#     return render_template('leaderboards.html', results=top_results)
 
 @app.route('/leaderboard/session/<int:session_id>', methods=['GET'])
 def session_leaderboard(session_id):
@@ -612,12 +611,12 @@ def session_leaderboard(session_id):
         return jsonify({"message": "no results for this session"}), 200
     return jsonify([r.serialize() for r in results])
 
-@app.route('/leaderboard/all_time', methods=['GET'])
-def all_time_leaderboard():
-    results = get_all_time_leaderboard()
-    if not results:
-        return jsonify({"message": "no results found"}), 200
-    return jsonify([r.serialize() for r in results])
+# @app.route('/leaderboard/all_time', methods=['GET'])
+# def all_time_leaderboard():
+#     results = get_all_time_leaderboard()
+#     if not results:
+#         return jsonify({"message": "no results found"}), 200
+#     return jsonify([r.serialize() for r in results])
 
 
 # Route for displaying the session leaderboard page 
@@ -628,10 +627,10 @@ def session_leaderboard_page():
     return render_template('session_leaderboard.html', results=results)
 
 # Route for displaying the all-time leaderboard page (HTML)
-@app.route('/all-time-leaderboard')
-def all_time_leaderboard_page():
-    results = get_all_time_leaderboard()
-    return render_template('all_time_leaderboard.html', results=results)
+# @app.route('/all-time-leaderboard')
+# def all_time_leaderboard_page():
+#     results = get_all_time_leaderboard()
+#     return render_template('all_time_leaderboard.html', results=results)
 
 if __name__ == '__main__':
     app.run(debug=True)

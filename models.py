@@ -58,7 +58,7 @@ class LeaderboardResult(db.Model):
     avg_wait_time = db.Column(db.Float, nullable=False)
     max_wait_time = db.Column(db.Float, nullable=False)
     max_queue_length = db.Column(db.Integer, nullable=False)
-    score = db.Column(db.Float, nullable=False)
+    # score = db.Column(db.Float, nullable=False)
 
     def serialize(self):
         return {
@@ -68,5 +68,5 @@ class LeaderboardResult(db.Model):
             "avg_wait_time": self.avg_wait_time,
             "max_wait_time": self.max_wait_time,
             "max_queue_length": self.max_queue_length,
-            "score": self.score
+            # "score": self.score
         }

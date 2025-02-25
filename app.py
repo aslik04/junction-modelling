@@ -77,10 +77,56 @@ def end_session(session_id):
         session.active = False
         db.session.commit()
 
-def get_session_leaderboard(session_id):
-    """Gets the top 10 scores for a specific session."""
-    return LeaderboardResult.query.filter_by(session_id=session_id)\
-        .order_by(LeaderboardResult.score.desc()).limit(10).all()
+# def get_session_leaderboard(session_id):
+#     """Gets the top 10 scores for a specific session."""
+#     return LeaderboardResult.query.filter_by(session_id=session_id)\
+#         .order_by(LeaderboardResult.score.desc()).limit(10).all()
+
+def get_session_leaderboard(session):
+    """
+    Given a session ID, returns the top 10 LeaderboardResult entries for that session ordered by the calculated total score (ascending).
+    """
+    # get results that match session ID
+    results = LeaderboardResult.query.filter_by(session_id=session).all()
+    if not results:
+        return []
+
+    # extract metrics for the given session
+    avg_wait_times = [r.avg_wait_time for r in results]
+    max_wait_times = [r.max_wait_time for r in results]
+    max_queue_lengths = [r.max_queue_length for r in results]
+
+    # calculate best (min) and worst (max) values for each metric
+    best_avg = min(avg_wait_times)
+    worst_avg = max(avg_wait_times)
+    best_max_wait = min(max_wait_times)
+    worst_max_wait = max(max_wait_times)
+    best_max_queue = min(max_queue_lengths)
+    worst_max_queue = max(max_queue_lengths)
+
+    def compute_metric_score(x, best, worst):
+        """
+        Computes the score for a single metric by:
+        - S = 100 * (x - best) / (worst - best)
+        - Returns 0 if worst == best.
+        """
+        return 0 if worst == best else 100 * (x - best) / (worst - best)
+
+    # compute total score for each result
+    for result in results:
+        score_avg = compute_metric_score(result.avg_wait_time, best_avg, worst_avg)
+        score_max_wait = compute_metric_score(result.max_wait_time, best_max_wait, worst_max_wait)
+        score_max_queue = compute_metric_score(result.max_queue_length, best_max_queue, worst_max_queue)
+        total_score = score_avg + score_max_wait + score_max_queue
+
+        # attach the calculated score to the result
+        result.calculated_score = total_score
+
+    # sort results by calculated_score in ascending order
+    sorted_results = sorted(results, key=lambda r: r.calculated_score)
+
+    # return top 10 results
+    return sorted_results[:10]
 
 def get_all_time_leaderboard():
     """Gets the top 10 scores across all sessions."""
@@ -95,7 +141,7 @@ def save_session_leaderboard_result(session_id, run_id, avg_wait_time,
         avg_wait_time=avg_wait_time,
         max_wait_time=max_wait_time,
         max_queue_length=max_queue_length,
-        score=score
+        # score=score
     )
     db.session.add(result)
     db.session.commit()

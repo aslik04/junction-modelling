@@ -1,32 +1,293 @@
-<!-- results.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results Page</title>
-    <style>
-        body { font-family: 'SF Pro', sans-serif; background-color:#f8f5e9; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); }
-        h1, h2 { text-align: center; }
-        .score { text-align: center; font-size: 24px; margin-bottom: 20px; }
-        .results-section { background-color: #f2dede; padding: 15px; border-radius: 10px; }
-        .direction { margin-bottom: 15px; }
-        .btn { background-color: #a2bf89; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Results</title>
+  <style>
+    /* Load SF Pro font (adjust path as needed) */
+    @font-face {
+      font-family: 'SF Pro';
+      src: url("{{ url_for('static', filename='fonts/SF-Pro.ttf') }}") format('truetype');
+      font-style: normal;
+      font-weight: 400;
+    }
+
+    /* Reset & Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden; /* Prevent scrolling */
+    }
+
+    body {
+      background-color: #a2bf89; /* Green background */
+      font-family: 'SF Pro', sans-serif;
+      font-weight: 400;
+      color: #6b6b6b;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly; /* Equal vertical spacing between sections */
+      align-items: center;
+      padding: 2vh 0;
+    }
+
+    /* Header Section */
+    #resultsHeader {
+      font-size: 5vh;
+      color: #f8f5e9;
+      font-weight: 600;
+    }
+
+    /* Results Container */
+    #resultsContainer {
+      width: 80vw;
+      background-color: #f8f5e9;
+      border-radius: 2vh;
+      padding: 2vh;
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .score {
+      font-size: 3vh;
+      margin-bottom: 2vh;
+      color: #6b6b6b;
+    }
+
+    /* Breakdown Table */
+    .resultsTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+    .resultsTable th, .resultsTable td {
+      padding: 1vh;
+      text-align: center;
+      font-size: 2vh;
+    }
+    .resultsTable th {
+      background-color: #8da676;
+      color: #ffffff;
+    }
+    .resultsTable tr:nth-child(even) {
+      background-color: #eeeeee;
+    }
+    .resultsTable tr:hover {
+      background-color: #dce7c5;
+      transition: 0.3s;
+    }
+
+    /* Parameters Container */
+    #paramsContainer {
+      width: 80vw;
+      display: flex;
+      justify-content: space-between;
+      gap: 2vw;
+    }
+
+    /* Base styling for each param container */
+    .param-box {
+      background-color: #f8f5e9;
+      border-radius: 2vh;
+      padding: 2vh;
+      width: 48%;
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Distinct classes for the two boxes */
+    .config-box {
+      /* Add custom styles if needed */
+    }
+    .junction-box {
+      /* Add custom styles if needed */
+    }
+
+    .param-box h2 {
+      color: #8da676;
+      font-size: 2.5vh;
+      margin-bottom: 1vh;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .param-box h2 span.symbol {
+      margin-right: 0.5em;
+      font-size: 2.5vh;
+      font-weight: bold;
+    }
+    .dropdown-content {
+      display: none;
+      margin-top: 1vh;
+      text-align: left;
+      font-size: 2vh;
+    }
+    .dropdown-content ul {
+      list-style: none;
+      padding-left: 1vw;
+    }
+    .dropdown-content li {
+      margin: 0.5vh 0;
+    }
+
+    /* Navigation Container */
+    .nav-container {
+      width: 40vw;
+      display: flex;
+      justify-content: space-between;
+    }
+    .res-button {
+      background-color: #8da676;
+      color: #f8f5e9;
+      padding: 1vh 2vw;
+      border: none;
+      border-radius: 2vh;
+      font-size: 2vh;
+      font-weight: 600;
+      transition: 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+    }
+    .res-button:hover {
+      background-color: #789563;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      #resultsHeader {
+        font-size: 6vw;
+      }
+      #resultsContainer {
+        width: 90vw;
+        padding: 3vh;
+      }
+      .score {
+        font-size: 4vw;
+      }
+      .resultsTable th, .resultsTable td {
+        font-size: 3.5vw;
+      }
+      #paramsContainer {
+        flex-direction: column;
+        width: 90vw;
+      }
+      .param-box {
+        width: 100%;
+        margin-bottom: 2vh;
+      }
+      .res-button {
+        font-size: 4vw;
+        padding: 2vh 4vw;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Results</h1>
-        <div class="score">Overall Score: <strong>123.45</strong></div>
-        <div class="results-section">
-            <h2>Breakdown</h2>
-            <div class="direction"><strong>Northbound:</strong> AVG Wait Time: 15.73s, MAX Wait Time: 30.32s, MAX Queue Length: 11 cars</div>
-            <div class="direction"><strong>Southbound:</strong> AVG Wait Time: ##s, MAX Wait Time: ##s, MAX Queue Length: # cars</div>
-            <div class="direction"><strong>Eastbound:</strong> AVG Wait Time: ##s, MAX Wait Time: ##s, MAX Queue Length: # cars</div>
-            <div class="direction"><strong>Westbound:</strong> AVG Wait Time: ##s, MAX Wait Time: ##s, MAX Queue Length: # cars</div> 
-        </div>
-        <button class="btn" onclick = "window.location.href='/session_leaderboard';">See Leaderboards</button>
+  <!-- Header Section -->
+  <div id="resultsHeader">🎉 Results 🎉</div>
+
+  <!-- Results Container -->
+  <div id="resultsContainer">
+    <div class="score">Overall Score: <strong>123.45</strong></div>
+    <table class="resultsTable">
+      <thead>
+        <tr>
+          <th>Direction</th>
+          <th>AVG Wait Time (s)</th>
+          <th>MAX Wait Time (s)</th>
+          <th>MAX Queue Length</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Northbound</td>
+          <td>15.73</td>
+          <td>30.32</td>
+          <td>11</td>
+        </tr>
+        <tr>
+          <td>Southbound</td>
+          <td>##</td>
+          <td>##</td>
+          <td>#</td>
+        </tr>
+        <tr>
+          <td>Eastbound</td>
+          <td>##</td>
+          <td>##</td>
+          <td>#</td>
+        </tr>
+        <tr>
+          <td>Westbound</td>
+          <td>##</td>
+          <td>##</td>
+          <td>#</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Parameters Section -->
+  <div id="paramsContainer">
+    <!-- Left: Configurable Parameters -->
+    <div class="param-box config-box">
+      <h2 class="dropdown-heading" data-target="configContent">
+        <span class="symbol">—</span> Configurable Parameters
+      </h2>
+      <div class="dropdown-content" id="configContent">
+        <ul>
+          <li><strong>North:</strong> Forward: 10, Left: 5, Right: 3</li>
+          <li><strong>East:</strong> Forward: 12, Left: 4, Right: 2</li>
+          <li><strong>South:</strong> Forward: 9, Left: 6, Right: 4</li>
+          <li><strong>West:</strong> Forward: 11, Left: 3, Right: 2</li>
+        </ul>
+      </div>
     </div>
+
+    <!-- Right: Junction Settings -->
+    <div class="param-box junction-box">
+      <h2 class="dropdown-heading" data-target="junctionContent">
+        <span class="symbol">—</span> Junction Settings
+      </h2>
+      <div class="dropdown-content" id="junctionContent">
+        <ul>
+          <li><strong>Number of Lanes:</strong> 2</li>
+          <li><strong>Left-turn Lane:</strong> Enabled</li>
+          <li><strong>Pedestrian Frequency per Hour:</strong> 3</li>
+          <li><strong>Pedestrian Duration:</strong> 2</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Section -->
+  <div class="nav-container">
+    <a class="res-button" href="javascript:history.back()">🔙 Back</a>
+    <a class="res-button" href="/session_leaderboard">📊 See Leaderboards</a>
+  </div>
+
+  <script>
+    // Only toggle the specific content linked by data-target
+    document.querySelectorAll('.dropdown-heading').forEach(heading => {
+      heading.addEventListener('click', () => {
+        const targetId = heading.getAttribute('data-target');
+        const content = document.getElementById(targetId);
+
+        // Toggle the specific content
+        if (content.style.display === 'block') {
+          content.style.display = 'none';
+          heading.querySelector('.symbol').textContent = '—';
+        } else {
+          content.style.display = 'block';
+          heading.querySelector('.symbol').textContent = '|';
+        }
+      });
+    });
+  </script>
 </body>
 </html>

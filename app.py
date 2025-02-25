@@ -668,7 +668,7 @@ def session_leaderboard(session_id):
 
 
 # Route for displaying the session leaderboard page 
-@app.route('/session-leaderboard')
+@app.route('/session_leaderboard')
 def session_leaderboard_page():
     session_id = request.args.get('session_id')  # Getting session ID from query parameter
     results = get_session_leaderboard(session_id)

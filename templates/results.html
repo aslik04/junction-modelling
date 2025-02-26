@@ -193,43 +193,43 @@
 
   <!-- Results Container -->
   <div id="resultsContainer">
-    <div class="score">Overall Score: <strong>123.45</strong></div>
-    <table class="resultsTable">
-      <thead>
-        <tr>
-          <th>Direction</th>
-          <th>AVG Wait Time (s)</th>
-          <th>MAX Wait Time (s)</th>
-          <th>MAX Queue Length</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Northbound</td>
-          <td>15.73</td>
-          <td>30.32</td>
-          <td>11</td>
-        </tr>
-        <tr>
-          <td>Southbound</td>
-          <td>##</td>
-          <td>##</td>
-          <td>#</td>
-        </tr>
-        <tr>
-          <td>Eastbound</td>
-          <td>##</td>
-          <td>##</td>
-          <td>#</td>
-        </tr>
-        <tr>
-          <td>Westbound</td>
-          <td>##</td>
-          <td>##</td>
-          <td>#</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="score">Overall Score: <strong>{{ avg_wait_time }}</strong></div>
+<table class="resultsTable">
+  <thead>
+    <tr>
+      <th>Direction</th>
+      <th>AVG Wait Time (s)</th>
+      <th>MAX Wait Time (s)</th>
+      <th>MAX Queue Length</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Northbound</td>
+      <td>{{ avg_wait_time }}</td>
+      <td>{{ max_wait_time }}</td>
+      <td>{{ max_queue_length }}</td>
+    </tr>
+    <tr>
+      <td>Southbound</td>
+      <td>{{ avg_wait_time }}</td>
+      <td>{{ max_wait_time }}</td>
+      <td>{{ max_queue_length }}</td>
+    </tr>
+    <tr>
+      <td>Eastbound</td>
+      <td>{{ avg_wait_time }}</td>
+      <td>{{ max_wait_time }}</td>
+      <td>{{ max_queue_length }}</td>
+    </tr>
+    <tr>
+      <td>Westbound</td>
+      <td>{{ avg_wait_time }}</td>
+      <td>{{ max_wait_time }}</td>
+      <td>{{ max_queue_length }}</td>
+    </tr>
+  </tbody>
+</table>
   </div>
 
   <!-- Parameters Section -->

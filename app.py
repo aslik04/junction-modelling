@@ -62,14 +62,6 @@ def stop_fastapi():
         print("⚠️ No FastAPI server is currently running.")
 
 
-@app.before_request
-def ensure_fastapi_running():
-    """
-    This runs before handling the first request,
-    ensuring FastAPI is running so that ws://localhost:8000/ws is available.
-    """
-    start_fastapi()
-
 def stop_fastapi():
     """
     Stops the FastAPI server if it's running.
@@ -125,11 +117,6 @@ def end_session(session_id):
         session.active = False
         db.session.commit()
 
-# def get_session_leaderboard(session_id):
-#     """Gets the top 10 scores for a specific session."""
-#     return LeaderboardResult.query.filter_by(session_id=session_id)\
-#         .order_by(LeaderboardResult.score.desc()).limit(10).all()
-
 def get_session_leaderboard(session):
     """
     Given a session ID, returns the top 10 LeaderboardResult entries for that session ordered by the calculated total score (ascending).
@@ -176,10 +163,6 @@ def get_session_leaderboard(session):
     # return top 10 results
     return sorted_results[:10]
 
-# def get_all_time_leaderboard():
-#     """Gets the top 10 scores across all sessions."""
-#     return LeaderboardResult.query.order_by(LeaderboardResult.score.desc()).limit(10).all()
-
 def save_session_leaderboard_result(session_id, run_id, avg_wait_time,
                                     max_wait_time, max_queue_length):
     """Saves a session leaderboard result without deleting older results."""
@@ -189,7 +172,6 @@ def save_session_leaderboard_result(session_id, run_id, avg_wait_time,
         avg_wait_time=avg_wait_time,
         max_wait_time=max_wait_time,
         max_queue_length=max_queue_length,
-        # score=score
     )
     db.session.add(result)
     db.session.commit()
@@ -672,25 +654,6 @@ def simulate():
 def junctionPage():
     return render_template('junctionPage.html')
 
-# @app.route('/leaderboards')
-# def leaderboards():
-#     top_results = get_all_time_leaderboard()
-#     return render_template('leaderboards.html', results=top_results)
-
-# @app.route('/leaderboard/session/<int:session_id>', methods=['GET'])
-# def session_leaderboard(session_id):
-#     results = get_session_leaderboard(session_id)
-#     if not results:
-#         return jsonify({"message": "no results for this session"}), 200
-#     return jsonify([r.serialize() for r in results])
-
-# @app.route('/leaderboard/all_time', methods=['GET'])
-# def all_time_leaderboard():
-#     results = get_all_time_leaderboard()
-#     if not results:
-#         return jsonify({"message": "no results found"}), 200
-#     return jsonify([r.serialize() for r in results])
-
 
 # Route for displaying the session leaderboard page 
 @app.route('/session_leaderboard')
@@ -698,12 +661,6 @@ def session_leaderboard_page():
     session_id = request.args.get('session_id', type=int)  # Getting session ID from query parameter
     results = get_session_leaderboard(session_id)
     return render_template('session_leaderboard.html', results=results)
-
-# Route for displaying the all-time leaderboard page (HTML)
-# @app.route('/all-time-leaderboard')
-# def all_time_leaderboard_page():
-#     results = get_all_time_leaderboard()
-#     return render_template('all_time_leaderboard.html', results=results)
 
 if __name__ == '__main__':
     app.run(debug=True)

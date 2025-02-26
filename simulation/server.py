@@ -349,8 +349,8 @@ async def run_fast_simulation(duration=10):
 
     # temporarily increase simulation speed
     old_multiplier = simulationSpeedMultiplier
-    simulationSpeedMultiplier = 1000.0  # set the high multiplier
-    traffic_light_logic.simulationSpeedMultiplier = 1000.0
+    simulationSpeedMultiplier = 50.0  # set the high multiplier
+    traffic_light_logic.simulationSpeedMultiplier = 50.0
 
     print(f"Running fast simulation for {duration} seconds with multiplier {simulationSpeedMultiplier}")
     await asyncio.sleep(duration)  # let simulation run quickly
@@ -373,6 +373,7 @@ async def run_fast_simulation(duration=10):
 async def simulate_fast_endpoint(duration: float = 10.0):
     # Run fast simulation for specified duration, return metrics
     metrics = await run_fast_simulation(duration)
+    #await stop_simulation()
     return metrics
 
 # Resets the simulation

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Session Leaderboard</title>
+    <title>Session Leaderboard (12 Outputs)</title>
     <style>
         /* Load SF Pro font (same as leaderboards.html) */
         @font-face {
@@ -47,10 +47,11 @@
             background-color: #f8f5e9;
             border-radius: 1.2vw;
             padding: 2vh 3vw;
-            width: 80%;
-            max-width: 1200px; /* slightly wider for more columns */
+            width: 90%;
+            max-width: 1400px; /* Widened for more columns */
             text-align: center;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-x: auto; /* Allow horizontal scroll if needed */
         }
         /* Leaderboard Table */
         table {
@@ -82,8 +83,8 @@
         }
         /* Navigation Container */
         .nav-container {
-            width: 80%;
-            max-width: 1200px;
+            width: 90%;
+            max-width: 1400px;
             margin-top: 3vh;
             display: flex;
             justify-content: space-between;
@@ -129,95 +130,96 @@
                 <tr>
                     <th>Recent Runs</th>
                     <th>Run ID</th>
-                    <th>AVG Wait Time (s)</th>
-                    <th>MAX Wait Time (s)</th>
-                    <th>MAX Queue Length</th>
+                    <!-- Northbound -->
+                    <th>NB Avg Wait (s)</th>
+                    <th>NB Max Wait (s)</th>
+                    <th>NB Max Queue</th>
+                    <!-- Southbound -->
+                    <th>SB Avg Wait (s)</th>
+                    <th>SB Max Wait (s)</th>
+                    <th>SB Max Queue</th>
+                    <!-- Eastbound -->
+                    <th>EB Avg Wait (s)</th>
+                    <th>EB Max Wait (s)</th>
+                    <th>EB Max Queue</th>
+                    <!-- Westbound -->
+                    <th>WB Avg Wait (s)</th>
+                    <th>WB Max Wait (s)</th>
+                    <th>WB Max Queue</th>
+                    <!-- Overall Score -->
                     <th>Score</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- "Best" row (clickable) -->
+                <!-- Example "Best" row (clickable) -->
                 <tr onclick="handleRowClick(this)">
                     <td>Best</td>
                     <td>001</td>
+                    <!-- NB -->
                     <td>12.34</td>
                     <td>23.45</td>
                     <td>10</td>
-                    <td>98.76</td>
+                    <!-- SB -->
+                    <td>11.11</td>
+                    <td>24.00</td>
+                    <td>12</td>
+                    <!-- EB -->
+                    <td>13.20</td>
+                    <td>26.00</td>
+                    <td>9</td>
+                    <!-- WB -->
+                    <td>14.50</td>
+                    <td>27.25</td>
+                    <td>11</td>
+                    <!-- Score -->
+                    <td>3177.15</td>
                 </tr>
-                <!-- 9 additional clickable rows -->
+                <!-- More clickable rows -->
                 <tr onclick="handleRowClick(this)">
                     <td>1</td>
                     <td>002</td>
+                    <!-- NB -->
                     <td>13.00</td>
-                    <td>24.00</td>
-                    <td>9</td>
-                    <td>95.00</td>
+                    <td>24.50</td>
+                    <td>10</td>
+                    <!-- SB -->
+                    <td>12.50</td>
+                    <td>25.00</td>
+                    <td>12</td>
+                    <!-- EB -->
+                    <td>14.00</td>
+                    <td>26.75</td>
+                    <td>8</td>
+                    <!-- WB -->
+                    <td>15.25</td>
+                    <td>28.00</td>
+                    <td>10</td>
+                    <!-- Score -->
+                    <td>3150.00</td>
                 </tr>
                 <tr onclick="handleRowClick(this)">
                     <td>2</td>
                     <td>003</td>
-                    <td>14.50</td>
-                    <td>25.50</td>
-                    <td>11</td>
-                    <td>93.25</td>
-                </tr>
-                <tr onclick="handleRowClick(this)">
-                    <td>3</td>
-                    <td>004</td>
-                    <td>15.00</td>
-                    <td>26.00</td>
-                    <td>10</td>
-                    <td>92.00</td>
-                </tr>
-                <tr onclick="handleRowClick(this)">
-                    <td>4</td>
-                    <td>005</td>
-                    <td>13.75</td>
-                    <td>24.50</td>
-                    <td>9</td>
-                    <td>94.50</td>
-                </tr>
-                <tr onclick="handleRowClick(this)">
-                    <td>5</td>
-                    <td>006</td>
-                    <td>14.00</td>
-                    <td>25.00</td>
-                    <td>10</td>
-                    <td>93.00</td>
-                </tr>
-                <tr onclick="handleRowClick(this)">
-                    <td>6</td>
-                    <td>007</td>
-                    <td>13.50</td>
-                    <td>24.75</td>
-                    <td>11</td>
-                    <td>92.50</td>
-                </tr>
-                <tr onclick="handleRowClick(this)">
-                    <td>7</td>
-                    <td>008</td>
-                    <td>15.25</td>
-                    <td>26.25</td>
-                    <td>10</td>
-                    <td>91.75</td>
-                </tr>
-                <tr onclick="handleRowClick(this)">
-                    <td>8</td>
-                    <td>009</td>
+                    <!-- NB -->
                     <td>14.25</td>
-                    <td>25.25</td>
-                    <td>9</td>
-                    <td>93.75</td>
-                </tr>
-                <tr onclick="handleRowClick(this)">
-                    <td>9</td>
-                    <td>010</td>
-                    <td>13.80</td>
-                    <td>24.80</td>
+                    <td>25.00</td>
+                    <td>11</td>
+                    <!-- SB -->
+                    <td>13.50</td>
+                    <td>26.25</td>
+                    <td>12</td>
+                    <!-- EB -->
+                    <td>15.00</td>
+                    <td>27.00</td>
                     <td>10</td>
-                    <td>94.00</td>
+                    <!-- WB -->
+                    <td>16.00</td>
+                    <td>28.50</td>
+                    <td>9</td>
+                    <!-- Score -->
+                    <td>3120.00</td>
                 </tr>
+                <!-- ... Add as many rows as needed ... -->
             </tbody>
         </table>
     </div>
@@ -231,19 +233,34 @@
     </div>
 
     <script>
-        // Placeholder function for handling row clicks.
-        // It should eventually return the parameters as a JSON file.
+        // Updated row click function to handle 12 new columns + Score
         function handleRowClick(row) {
-            // Example: Construct a JSON object from the row's cells.
             const cells = row.getElementsByTagName("td");
+
+            // Construct a JSON object from the row's cells
             const data = {
                 recentRun: cells[0].innerText,
                 runId: cells[1].innerText,
-                avgWaitTime: cells[2].innerText,
-                maxWaitTime: cells[3].innerText,
-                maxQueueLength: cells[4].innerText,
-                score: cells[5].innerText
+
+                nbAvgWait: cells[2].innerText,
+                nbMaxWait: cells[3].innerText,
+                nbMaxQueue: cells[4].innerText,
+
+                sbAvgWait: cells[5].innerText,
+                sbMaxWait: cells[6].innerText,
+                sbMaxQueue: cells[7].innerText,
+
+                ebAvgWait: cells[8].innerText,
+                ebMaxWait: cells[9].innerText,
+                ebMaxQueue: cells[10].innerText,
+
+                wbAvgWait: cells[11].innerText,
+                wbMaxWait: cells[12].innerText,
+                wbMaxQueue: cells[13].innerText,
+
+                score: cells[14].innerText
             };
+
             // For now, just log the JSON data to the console.
             console.log(JSON.stringify(data));
             // TODO: Add backend call or file download logic as needed.

@@ -54,10 +54,10 @@
             border-radius: 1.2vw;
             padding: 2vh 3vw;
             width: 90%;
-            max-width: 1500px; /* Increased for more columns */
+            max-width: 1000px;
+            /* Height scales with viewport; adjust as needed */
             max-height: calc(100vh - 20vh);
-            overflow-y: auto;    /* vertical scrolling if needed */
-            overflow-x: auto;    /* horizontal scrolling for wide table */
+            overflow-y: auto;
             text-align: center;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
         }
@@ -118,9 +118,11 @@
             .header h1 {
                 font-size: 6vw;
             }
+
             th, td {
                 font-size: 4vw;
             }
+
             .nav-button {
                 font-size: 3vw;
                 padding: 2vh 4vw;
@@ -132,66 +134,33 @@
     <div class="header">
         <h1>🏆 Top Configurations 🏆</h1>
     </div>
-
+<!-- 
     <div class="leaderboard-container">
         <table>
             <thead>
                 <tr>
                     <th>Run ID</th>
-                    <!-- Northbound -->
-                    <th>NB Avg Wait (s)</th>
-                    <th>NB Max Wait (s)</th>
-                    <th>NB Max Queue</th>
-                    <!-- Southbound -->
-                    <th>SB Avg Wait (s)</th>
-                    <th>SB Max Wait (s)</th>
-                    <th>SB Max Queue</th>
-                    <!-- Eastbound -->
-                    <th>EB Avg Wait (s)</th>
-                    <th>EB Max Wait (s)</th>
-                    <th>EB Max Queue</th>
-                    <!-- Westbound -->
-                    <th>WB Avg Wait (s)</th>
-                    <th>WB Max Wait (s)</th>
-                    <th>WB Max Queue</th>
-                    <!-- Overall Score -->
+                    <th>Avg Wait Time (s)</th>
+                    <th>Max Wait Time (s)</th>
+                    <th>Max Queue Length</th>
                     <th>Score</th>
                 </tr>
             </thead>
             <tbody>
-                {# Loop exactly 10 times; if fewer than 10 results, show empty cells #}
+                {# Loop exactly 10 times; if there are fewer than 10 results, show empty cells #}
                 {% for i in range(10) %}
                 <tr>
-                    <td>{{ results[i].run_id if results|length > i else "" }}</td>
-
-                    <!-- Northbound -->
-                    <td>{{ results[i].northbound_avg_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].northbound_max_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].northbound_max_queue_length if results|length > i else "" }}</td>
-
-                    <!-- Southbound -->
-                    <td>{{ results[i].southbound_avg_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].southbound_max_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].southbound_max_queue_length if results|length > i else "" }}</td>
-
-                    <!-- Eastbound -->
-                    <td>{{ results[i].eastbound_avg_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].eastbound_max_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].eastbound_max_queue_length if results|length > i else "" }}</td>
-
-                    <!-- Westbound -->
-                    <td>{{ results[i].westbound_avg_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].westbound_max_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].westbound_max_queue_length if results|length > i else "" }}</td>
-
-                    <!-- Score -->
+                    <!-- <td>{{ results[i].run_id if results|length > i else "" }}</td>
+                    <td>{{ results[i].avg_wait_time | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_wait_time | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_queue_length if results|length > i else "" }}</td>
                     <td>{{ results[i].score | round(2) if results|length > i else "" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-
+     -->
     <div class="nav-container">
         <a class="nav-button" href="/index">❌ End Session</a>
         <a class="nav-button" href="/parameters">✅ Continue Session</a>

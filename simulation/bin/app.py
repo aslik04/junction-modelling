@@ -62,6 +62,14 @@ def stop_fastapi():
         print("⚠️ No FastAPI server is currently running.")
 
 
+@app.before_request
+def ensure_fastapi_running():
+    """
+    This runs before handling the first request,
+    ensuring FastAPI is running so that ws://localhost:8000/ws is available.
+    """
+    start_fastapi()
+
 def stop_fastapi():
     """
     Stops the FastAPI server if it's running.
@@ -163,18 +171,34 @@ def get_session_leaderboard(session):
     # return top 10 results
     return sorted_results[:10]
 
-def save_session_leaderboard_result(session_id, run_id, avg_wait_time,
-                                    max_wait_time, max_queue_length):
-    """Saves a session leaderboard result without deleting older results."""
+
+def save_session_leaderboard_result(session_id, run_id, metrics):
+    print("🏆 Saving queue data result:", metrics)  # Debugging print statement
+
     result = LeaderboardResult(
         session_id=session_id,
         run_id=run_id,
-        avg_wait_time=avg_wait_time,
-        max_wait_time=max_wait_time,
-        max_queue_length=max_queue_length,
+        avg_wait_time_north=metrics["avg_wait_time"]["north"],
+        max_wait_time_north=metrics["max_wait_time"]["north"],
+        max_queue_length_north=metrics["max_queue_length"]["north"],
+
+        avg_wait_time_south=metrics["avg_wait_time"]["south"],
+        max_wait_time_south=metrics["max_wait_time"]["south"],
+        max_queue_length_south=metrics["max_queue_length"]["south"],
+
+        avg_wait_time_east=metrics["avg_wait_time"]["east"],
+        max_wait_time_east=metrics["max_wait_time"]["east"],
+        max_queue_length_east=metrics["max_queue_length"]["east"],
+
+        avg_wait_time_west=metrics["avg_wait_time"]["west"],
+        max_wait_time_west=metrics["max_wait_time"]["west"],
+        max_queue_length_west=metrics["max_queue_length"]["west"]
     )
+
     db.session.add(result)
     db.session.commit()
+
+
 
 def get_latest_spawn_rates():
     """
@@ -207,6 +231,8 @@ def get_latest_spawn_rates():
             "right": latest_config.west_right_vph
         }
     }
+
+
 
 def get_latest_junction_settings():
     """
@@ -317,49 +343,37 @@ def get_session_run_id():
 @app.route('/results')
 def results():
     try:
-        session_id = request.args.get('session_id', type=int)
-        run_id = request.args.get('run_id', type=int)
+        session = Session.query.filter_by(active=True).order_by(Session.id.desc()).first()
+        if not session:
+            return "No active session found", 404
 
-        if not session_id or not run_id:
-            return jsonify({"error": "Missing session_id or run_id"}), 400
+        latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
+        run_id = latest_config.run_id if latest_config else 1
 
-        # check DB for existing result
-        result = get_session_leaderboard_result(session_id, run_id)
-        if result:
-            avg_wait_time = result.avg_wait_time
-            max_wait_time = result.max_wait_time
-            max_queue_length = result.max_queue_length
-        else:
-            # no result found in DB:
-            with app.test_request_context(
-                '/simulate', 
-                method='POST', 
-                json={'session_id': session_id, 'run_id': run_id}
-            ):
-                response = simulate()
-                # simulate() returns a tuple (response, status_code)
-                if isinstance(response, tuple):
-                    response_data = response[0].json
-                else:
-                    response_data = response.json
+        # **Force running the simulation**
+        response = requests.get("http://127.0.0.1:8000/simulate_fast")
+        if response.status_code == 200:
+            metrics = response.json()
+            save_session_leaderboard_result(session.id, run_id, metrics)
+        print(response.json())
 
-            avg_wait_time = response_data.get('avg_wait_time')
-            max_wait_time = response_data.get('max_wait_time')
-            max_queue_length = response_data.get('max_queue_length')
+        # **Retrieve latest results**
+        latest_result = LeaderboardResult.query.order_by(LeaderboardResult.id.desc()).first()
 
-        return render_template(
-            'results.html',
-            avg_wait_time=avg_wait_time,
-            max_wait_time=max_wait_time,
-            max_queue_length=max_queue_length
-        )
-
+        spawn_rates = get_latest_spawn_rates()
+        junction_settings = get_latest_junction_settings()
+        return render_template('results.html',
+                               result=latest_result,
+                               spawn_rates=spawn_rates,
+                               junction_settings=junction_settings)
     except Exception as e:
-        print(f"❌ Error: {e}")
-        return jsonify({'error': str(e)}), 400
+        print(f"Error retrieving results: {e}")
+        return jsonify({"error": str(e)}), 500
 
-def get_session_leaderboard_result(session_id, run_id):
-    return LeaderboardResult.query.filter_by(session_id=session_id, run_id=run_id).first()
+
+
+
+
 
 @app.route('/parameters', methods=['GET', 'POST'])
 def parameters():
@@ -622,57 +636,22 @@ def upload():
 
     return render_template('upload.html')
 
-
-def simulate():
-    try:
-        data = request.json
-        run_id = data.get('run_id')
-        session_id = data.get('session_id')
-        
-        # call the endpoint in server.py
-        sim_response = requests.get("http://localhost:8000/simulate_fast", params={"duration": 10}) # can change duration if necessary
-        sim_response.raise_for_status()  # raise an error for bad status codes
-        
-        # parse JSON metrics
-        metrics = sim_response.json()
-        avg_wait_time = metrics.get("avg_wait_time")
-        max_wait_time = metrics.get("max_wait_time")
-        max_queue_length = metrics.get("max_queue_length")
-        
-        # save results to DB
-        save_session_leaderboard_result(session_id, run_id,
-                                          avg_wait_time, max_wait_time,
-                                          max_queue_length)
-                                          
-        return jsonify({
-            "message": "sim results saved",
-            "avg_wait_time": avg_wait_time,
-            "max_wait_time": max_wait_time,
-            "max_queue_length": max_queue_length
-        }), 201
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 400
-
 @app.route('/junctionPage')
 def junctionPage():
     return render_template('junctionPage.html')
 
-
 @app.route('/leaderboards')
 def leaderboards():
-    # Get from database
-    return render_template('leaderboards.html') 
+    return render_template('leaderboards.html')
+
 
 # Route for displaying the session leaderboard page 
 @app.route('/session_leaderboard')
 def session_leaderboard_page():
-    session_id = request.args.get('session_id', type=int)  # Getting session ID from query parameter
+    session_id = request.args.get('session_id')  # Getting session ID from query parameter
     results = get_session_leaderboard(session_id)
     return render_template('session_leaderboard.html', results=results)
 
+
 if __name__ == '__main__':
     app.run(debug=True)
-
-

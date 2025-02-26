@@ -336,27 +336,43 @@ def results():
         if not session_id or not run_id:
             return jsonify({"error": "Missing session_id or run_id"}), 400
 
-        # Generate dummy simulation results
-        avg_wait_time = round(random.uniform(5, 20), 2)
-        max_wait_time = round(random.uniform(avg_wait_time, 40), 2)
-        max_queue_length = random.randint(10, 50)
-        #score = round(avg_wait_time + (max_wait_time / 2) + (max_queue_length / 5), 2)
+        # check DB for existing result
+        result = get_session_leaderboard_result(session_id, run_id)
+        if result:
+            avg_wait_time = result.avg_wait_time
+            max_wait_time = result.max_wait_time
+            max_queue_length = result.max_queue_length
+        else:
+            # no result found in DB:
+            with app.test_request_context(
+                '/simulate', 
+                method='POST', 
+                json={'session_id': session_id, 'run_id': run_id}
+            ):
+                response = simulate()
+                # simulate() returns a tuple (response, status_code)
+                if isinstance(response, tuple):
+                    response_data = response[0].json
+                else:
+                    response_data = response.json
 
-        # Save results to the leaderboard
-        save_session_leaderboard_result(session_id, run_id, avg_wait_time, max_wait_time, max_queue_length)
+            avg_wait_time = response_data.get('avg_wait_time')
+            max_wait_time = response_data.get('max_wait_time')
+            max_queue_length = response_data.get('max_queue_length')
 
         return render_template(
             'results.html',
             avg_wait_time=avg_wait_time,
             max_wait_time=max_wait_time,
-            max_queue_length=max_queue_length,
-            #score=score
+            max_queue_length=max_queue_length
         )
 
     except Exception as e:
         print(f"❌ Error: {e}")
         return jsonify({'error': str(e)}), 400
 
+def get_session_leaderboard_result(session_id, run_id):
+    return LeaderboardResult.query.filter_by(session_id=session_id, run_id=run_id).first()
 
 @app.route('/parameters', methods=['GET', 'POST'])
 def parameters():
@@ -661,12 +677,12 @@ def junctionPage():
 #     top_results = get_all_time_leaderboard()
 #     return render_template('leaderboards.html', results=top_results)
 
-@app.route('/leaderboard/session/<int:session_id>', methods=['GET'])
-def session_leaderboard(session_id):
-    results = get_session_leaderboard(session_id)
-    if not results:
-        return jsonify({"message": "no results for this session"}), 200
-    return jsonify([r.serialize() for r in results])
+# @app.route('/leaderboard/session/<int:session_id>', methods=['GET'])
+# def session_leaderboard(session_id):
+#     results = get_session_leaderboard(session_id)
+#     if not results:
+#         return jsonify({"message": "no results for this session"}), 200
+#     return jsonify([r.serialize() for r in results])
 
 # @app.route('/leaderboard/all_time', methods=['GET'])
 # def all_time_leaderboard():
@@ -679,7 +695,7 @@ def session_leaderboard(session_id):
 # Route for displaying the session leaderboard page 
 @app.route('/session_leaderboard')
 def session_leaderboard_page():
-    session_id = request.args.get('session_id')  # Getting session ID from query parameter
+    session_id = request.args.get('session_id', type=int)  # Getting session ID from query parameter
     results = get_session_leaderboard(session_id)
     return render_template('session_leaderboard.html', results=results)
 

@@ -349,8 +349,8 @@ async def run_fast_simulation(duration=10):
 
     # temporarily increase simulation speed
     old_multiplier = simulationSpeedMultiplier
-    simulationSpeedMultiplier = 100.0  # set the high multiplier
-    traffic_light_logic.simulationSpeedMultiplier = 100.0
+    simulationSpeedMultiplier = 1000.0  # set the high multiplier
+    traffic_light_logic.simulationSpeedMultiplier = 1000.0
 
     print(f"Running fast simulation for {duration} seconds with multiplier {simulationSpeedMultiplier}")
     await asyncio.sleep(duration)  # let simulation run quickly
@@ -381,11 +381,6 @@ def reset_simulation():
     simulationTime = 0
     lastUpdateTime = None
     cars = []
-    # spawnRates = {} # We probably want to keep the spawn rates
-    # Reinitialize the traffic lights
-    traffic_light_logic = TrafficLightLogic()
-    traffic_light_logic.set_broadcast_callback(broadcast_to_all)
-    asyncio.create_task(traffic_light_logic.run_traffic_loop())
 
 @app.on_event("startup")
 async def on_startup():

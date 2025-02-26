@@ -620,28 +620,37 @@ def upload():
     return render_template('upload.html')
 
 
-@app.route('/simulate', methods=['POST'])
 def simulate():
     try:
         data = request.json
         run_id = data.get('run_id')
         session_id = data.get('session_id')
-        avg_wait_time = random.uniform(5, 20)
-        max_wait_time = random.uniform(avg_wait_time, 40)
-        max_queue_length = random.randint(10, 50)
-        # score = avg_wait_time + (max_wait_time / 2) + (max_queue_length / 5)
+        
+        # call the endpoint in server.py
+        sim_response = requests.get("http://localhost:8000/simulate_fast", params={"duration": 10}) # can change duration if necessary
+        sim_response.raise_for_status()  # raise an error for bad status codes
+        
+        # parse JSON metrics
+        metrics = sim_response.json()
+        avg_wait_time = metrics.get("avg_wait_time")
+        max_wait_time = metrics.get("max_wait_time")
+        max_queue_length = metrics.get("max_queue_length")
+        
+        # save results to DB
         save_session_leaderboard_result(session_id, run_id,
-                                        avg_wait_time, max_wait_time,
-                                        max_queue_length)
+                                          avg_wait_time, max_wait_time,
+                                          max_queue_length)
+                                          
         return jsonify({
-            'message': 'sim results saved',
-            'avg_wait_time': avg_wait_time,
-            'max_wait_time': max_wait_time,
-            'max_queue_length': max_queue_length
+            "message": "sim results saved",
+            "avg_wait_time": avg_wait_time,
+            "max_wait_time": max_wait_time,
+            "max_queue_length": max_queue_length
         }), 201
+        
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 400
+        return jsonify({"error": str(e)}), 400
 
 @app.route('/junctionPage')
 def junctionPage():

@@ -163,15 +163,34 @@ def get_session_leaderboard(session):
     # return top 10 results
     return sorted_results[:10]
 
-def save_session_leaderboard_result(session_id, run_id, avg_wait_time,
-                                    max_wait_time, max_queue_length):
-    """Saves a session leaderboard result without deleting older results."""
+def save_session_leaderboard_result(run_id, session_id,
+                                  avg_wait_time_n, max_wait_time_n, max_queue_length_n,
+                                  avg_wait_time_s, max_wait_time_s, max_queue_length_s, 
+                                  avg_wait_time_e, max_wait_time_e, max_queue_length_e,
+                                  avg_wait_time_w, max_wait_time_w, max_queue_length_w):
+    """
+    Saves a session leaderboard result with directional metrics without deleting older results.
+    Takes metrics for each direction (north, south, east, west) separately.
+    """
     result = LeaderboardResult(
         session_id=session_id,
         run_id=run_id,
-        avg_wait_time=avg_wait_time,
-        max_wait_time=max_wait_time,
-        max_queue_length=max_queue_length,
+        # Northbound metrics
+        avg_wait_time_north=avg_wait_time_n,
+        max_wait_time_north=max_wait_time_n, 
+        max_queue_length_north=max_queue_length_n,
+        # Southbound metrics
+        avg_wait_time_south=avg_wait_time_s,
+        max_wait_time_south=max_wait_time_s,
+        max_queue_length_south=max_queue_length_s,
+        # Eastbound metrics  
+        avg_wait_time_east=avg_wait_time_e,
+        max_wait_time_east=max_wait_time_e,
+        max_queue_length_east=max_queue_length_e,
+        # Westbound metrics
+        avg_wait_time_west=avg_wait_time_w,
+        max_wait_time_west=max_wait_time_w,
+        max_queue_length_west=max_queue_length_w
     )
     db.session.add(result)
     db.session.commit()
@@ -323,40 +342,90 @@ def results():
         if not session_id or not run_id:
             return jsonify({"error": "Missing session_id or run_id"}), 400
 
-        # check DB for existing result
+        # Check DB for an existing result
         result = get_session_leaderboard_result(session_id, run_id)
         if result:
-            avg_wait_time = result.avg_wait_time
-            max_wait_time = result.max_wait_time
-            max_queue_length = result.max_queue_length
+            # Use directional column names from the DB
+            avg_wait_time_n = result.avg_wait_time_north
+            avg_wait_time_s = result.avg_wait_time_south
+            avg_wait_time_e = result.avg_wait_time_east
+            avg_wait_time_w = result.avg_wait_time_west
+
+            max_wait_time_n = result.max_wait_time_north
+            max_wait_time_s = result.max_wait_time_south
+            max_wait_time_e = result.max_wait_time_east
+            max_wait_time_w = result.max_wait_time_west
+
+            max_queue_length_n = result.max_queue_length_north
+            max_queue_length_s = result.max_queue_length_south
+            max_queue_length_e = result.max_queue_length_east
+            max_queue_length_w = result.max_queue_length_west
+
+            score = compute_score_4directions(
+                avg_wait_time_n, max_wait_time_n, max_queue_length_n,
+                avg_wait_time_s, max_wait_time_s, max_queue_length_s,
+                avg_wait_time_e, max_wait_time_e, max_queue_length_e,
+                avg_wait_time_w, max_wait_time_w, max_queue_length_w
+            )
         else:
-            # no result found in DB:
+            # No result found in DB; call simulate() to get metrics (including score)
             with app.test_request_context(
                 '/simulate', 
                 method='POST', 
                 json={'session_id': session_id, 'run_id': run_id}
             ):
                 response = simulate()
-                # simulate() returns a tuple (response, status_code)
                 if isinstance(response, tuple):
                     response_data = response[0].json
                 else:
                     response_data = response.json
 
-            avg_wait_time = response_data.get('avg_wait_time')
-            max_wait_time = response_data.get('max_wait_time')
-            max_queue_length = response_data.get('max_queue_length')
+            avg_wait_time_n = response_data.get('avg_wait_time_n')
+            avg_wait_time_s = response_data.get('avg_wait_time_s')
+            avg_wait_time_e = response_data.get('avg_wait_time_e')
+            avg_wait_time_w = response_data.get('avg_wait_time_w')
+
+            max_wait_time_n = response_data.get('max_wait_time_n')
+            max_wait_time_s = response_data.get('max_wait_time_s')
+            max_wait_time_e = response_data.get('max_wait_time_e')
+            max_wait_time_w = response_data.get('max_wait_time_w')
+
+            max_queue_length_n = response_data.get('max_queue_length_n')
+            max_queue_length_s = response_data.get('max_queue_length_s')
+            max_queue_length_e = response_data.get('max_queue_length_e')
+            max_queue_length_w = response_data.get('max_queue_length_w')
+
+            score = response_data.get('score')
+
+        # Fetch the latest spawn rates and junction settings for the parameters section
+        spawn_rates = get_latest_spawn_rates()
+        junction_settings = get_latest_junction_settings()
 
         return render_template(
             'results.html',
-            avg_wait_time=avg_wait_time,
-            max_wait_time=max_wait_time,
-            max_queue_length=max_queue_length
+            avg_wait_time_n=avg_wait_time_n,
+            avg_wait_time_s=avg_wait_time_s,
+            avg_wait_time_e=avg_wait_time_e,
+            avg_wait_time_w=avg_wait_time_w,
+            max_wait_time_n=max_wait_time_n,
+            max_wait_time_s=max_wait_time_s,
+            max_wait_time_e=max_wait_time_e,
+            max_wait_time_w=max_wait_time_w,
+            max_queue_length_n=max_queue_length_n,
+            max_queue_length_s=max_queue_length_s,
+            max_queue_length_e=max_queue_length_e,
+            max_queue_length_w=max_queue_length_w,
+            score=score,
+            spawn_rates=spawn_rates,
+            junction_settings=junction_settings
         )
 
     except Exception as e:
+        print("blah")
+        
         print(f"❌ Error: {e}")
         return jsonify({'error': str(e)}), 400
+
 
 def get_session_leaderboard_result(session_id, run_id):
     return LeaderboardResult.query.filter_by(session_id=session_id, run_id=run_id).first()
@@ -630,25 +699,50 @@ def simulate():
         session_id = data.get('session_id')
         
         # call the endpoint in server.py
-        sim_response = requests.get("http://localhost:8000/simulate_fast", params={"duration": 10}) # can change duration if necessary
+        sim_response = requests.get("http://localhost:8000/simulate_fast") # can change duration if necessary
         sim_response.raise_for_status()  # raise an error for bad status codes
         
         # parse JSON metrics
         metrics = sim_response.json()
-        avg_wait_time = metrics.get("avg_wait_time")
-        max_wait_time = metrics.get("max_wait_time")
-        max_queue_length = metrics.get("max_queue_length")
+        avg_wait_time_n = metrics.get("avg_wait_time_n")
+        avg_wait_time_s = metrics.get("avg_wait_time_s")
+        avg_wait_time_e = metrics.get("avg_wait_time_e")
+        avg_wait_time_w = metrics.get("avg_wait_time_w")
+        
+        max_wait_time_n = metrics.get("max_wait_time_n")
+        max_wait_time_s = metrics.get("max_wait_time_s")
+        max_wait_time_e = metrics.get("max_wait_time_e")
+        max_wait_time_w = metrics.get("max_wait_time_w")
+
+        max_queue_length_n = metrics.get("max_queue_length_n")
+        max_queue_length_s = metrics.get("max_queue_length_s")
+        max_queue_length_e = metrics.get("max_queue_length_e")
+        max_queue_length_w = metrics.get("max_queue_length_w")
         
         # save results to DB
-        save_session_leaderboard_result(session_id, run_id,
-                                          avg_wait_time, max_wait_time,
-                                          max_queue_length)
+        save_session_leaderboard_result(run_id, session_id,
+                                          avg_wait_time_n, max_wait_time_n,
+                                          max_queue_length_n,
+                                          avg_wait_time_s, max_wait_time_s,
+                                          max_queue_length_s,
+                                          avg_wait_time_e, max_wait_time_e,
+                                          max_queue_length_e,
+                                          avg_wait_time_w, max_wait_time_w,
+                                          max_queue_length_w)
+        
+        score = compute_score_4directions(
+            avg_wait_time_n, max_wait_time_n, max_queue_length_n,
+            avg_wait_time_s, max_wait_time_s, max_queue_length_s,
+            avg_wait_time_e, max_wait_time_e, max_queue_length_e,
+            avg_wait_time_w, max_wait_time_w, max_queue_length_w
+        )
                                           
         return jsonify({
             "message": "sim results saved",
-            "avg_wait_time": avg_wait_time,
-            "max_wait_time": max_wait_time,
-            "max_queue_length": max_queue_length
+            "max_wait_time_n": max_wait_time_n, "max_wait_time_s": max_wait_time_s, "max_wait_time_e": max_wait_time_e, "max_wait_time_w": max_wait_time_w,
+            "max_queue_length_n": max_queue_length_n, "max_queue_length_s": max_queue_length_s, "max_queue_length_e": max_queue_length_e, "max_queue_length_w": max_queue_length_w,
+            "avg_wait_time_n": avg_wait_time_n, "avg_wait_time_s": avg_wait_time_s, "avg_wait_time_e": avg_wait_time_e, "avg_wait_time_w": avg_wait_time_w, 
+            "score": score
         }), 201
         
     except Exception as e:
@@ -660,19 +754,274 @@ def junctionPage():
     return render_template('junctionPage.html')
 
 
+
+
+
 @app.route('/leaderboards')
 def leaderboards():
-    # Get from database
-    return render_template('leaderboards.html') 
+    # Retrieve the top 10 all‑time best configurations (ranked by computed score)
+    results = get_all_time_best_configurations()
+    return render_template('leaderboards.html', results=results)
 
-# Route for displaying the session leaderboard page 
+
+def get_all_time_best_configurations():
+    """
+    Retrieves all LeaderboardResult entries from the database, computes a score for each run
+    using compute_score_4directions(), sorts them in ascending order (lowest score first),
+    and returns the top 10 configurations.
+    
+    Returns:
+        A list of LeaderboardResult objects with an additional 'score' attribute.
+    """
+    # Retrieve all leaderboard results (all time)
+    all_results = LeaderboardResult.query.all()
+    results_with_scores = []
+    
+    for r in all_results:
+        # Compute the score using the 12 metrics from each direction.
+        score = compute_score_4directions(
+            # Northbound metrics
+            r.avg_wait_time_north, r.max_wait_time_north, r.max_queue_length_north,
+            # Southbound metrics
+            r.avg_wait_time_south, r.max_wait_time_south, r.max_queue_length_south,
+            # Eastbound metrics
+            r.avg_wait_time_east, r.max_wait_time_east, r.max_queue_length_east,
+            # Westbound metrics
+            r.avg_wait_time_west, r.max_wait_time_west, r.max_queue_length_west
+        )
+        # Attach the computed score to the result (if desired)
+        r.score = score
+        results_with_scores.append(r)
+    
+    # Sort results by ascending score (best score first)
+    results_with_scores.sort(key=lambda x: x.score)
+    
+    # Return the top 10 configurations
+    return results_with_scores[:10]
+
+
+
 @app.route('/session_leaderboard')
 def session_leaderboard_page():
-    session_id = request.args.get('session_id', type=int)  # Getting session ID from query parameter
-    results = get_session_leaderboard(session_id)
-    return render_template('session_leaderboard.html', results=results)
+    session_id = request.args.get('session_id', type=int)
+    if not session_id:
+        active_session = Session.query.filter_by(active=True).order_by(Session.id.desc()).first()
+        session_id = active_session.id if active_session else None
+    runs = get_recent_runs_with_scores(session_id) if session_id else []
+    return render_template('session_leaderboard.html', runs=runs)
+
+
+
+def get_global_extremes():
+    """
+    Computes the best (minimum) and worst (maximum) values for each metric across all leaderboard results.
+    Returns a dictionary with entries for each direction.
+    """
+    results = LeaderboardResult.query.all()
+    if not results:
+        # Return None values if no results exist
+        return {
+            "north": {"best_avg": None, "worst_avg": None, "best_max": None, "worst_max": None, "best_queue": None, "worst_queue": None},
+            "south": {"best_avg": None, "worst_avg": None, "best_max": None, "worst_max": None, "best_queue": None, "worst_queue": None},
+            "east": {"best_avg": None, "worst_avg": None, "best_max": None, "worst_max": None, "best_queue": None, "worst_queue": None},
+            "west": {"best_avg": None, "worst_avg": None, "best_max": None, "worst_max": None, "best_queue": None, "worst_queue": None},
+        }
+
+    north_avg_values = [r.avg_wait_time_north for r in results]
+    north_max_values = [r.max_wait_time_north for r in results]
+    north_queue_values = [r.max_queue_length_north for r in results]
+
+    south_avg_values = [r.avg_wait_time_south for r in results]
+    south_max_values = [r.max_wait_time_south for r in results]
+    south_queue_values = [r.max_queue_length_south for r in results]
+
+    east_avg_values = [r.avg_wait_time_east for r in results]
+    east_max_values = [r.max_wait_time_east for r in results]
+    east_queue_values = [r.max_queue_length_east for r in results]
+
+    west_avg_values = [r.avg_wait_time_west for r in results]
+    west_max_values = [r.max_wait_time_west for r in results]
+    west_queue_values = [r.max_queue_length_west for r in results]
+
+    return {
+        "north": {
+            "best_avg": min(north_avg_values),
+            "worst_avg": max(north_avg_values),
+            "best_max": min(north_max_values),
+            "worst_max": max(north_max_values),
+            "best_queue": min(north_queue_values),
+            "worst_queue": max(north_queue_values),
+        },
+        "south": {
+            "best_avg": min(south_avg_values),
+            "worst_avg": max(south_avg_values),
+            "best_max": min(south_max_values),
+            "worst_max": max(south_max_values),
+            "best_queue": min(south_queue_values),
+            "worst_queue": max(south_queue_values),
+        },
+        "east": {
+            "best_avg": min(east_avg_values),
+            "worst_avg": max(east_avg_values),
+            "best_max": min(east_max_values),
+            "worst_max": max(east_max_values),
+            "best_queue": min(east_queue_values),
+            "worst_queue": max(east_queue_values),
+        },
+        "west": {
+            "best_avg": min(west_avg_values),
+            "worst_avg": max(west_avg_values),
+            "best_max": min(west_max_values),
+            "worst_max": max(west_max_values),
+            "best_queue": min(west_queue_values),
+            "worst_queue": max(west_queue_values),
+        }
+    }
+
+def compute_score_4directions(
+    # Actual values (12 total: 3 metrics × 4 directions)
+    nb_avg, nb_max, nb_queue,
+    sb_avg, sb_max, sb_queue,
+    eb_avg, eb_max, eb_queue,
+    wb_avg, wb_max, wb_queue,
+):
+    """
+    Computes a final score by:
+      1) Normalizing each metric (avg wait, max wait, max queue) to [0..100].
+    # Get extremes from the global values dictionary
+    """
+    extremes = get_global_extremes() 
+    
+    # Extract values for each direction
+    nb_best_avg = extremes["north"]["best_avg"]
+    nb_worst_avg = extremes["north"]["worst_avg"]
+    nb_best_max = extremes["north"]["best_max"]
+    nb_worst_max = extremes["north"]["worst_max"]
+    nb_best_queue = extremes["north"]["best_queue"]
+    nb_worst_queue = extremes["north"]["worst_queue"]
+
+    sb_best_avg = extremes["south"]["best_avg"]
+    sb_worst_avg = extremes["south"]["worst_avg"]
+    sb_best_max = extremes["south"]["best_max"]
+    sb_worst_max = extremes["south"]["worst_max"]
+    sb_best_queue = extremes["south"]["best_queue"]
+    sb_worst_queue = extremes["south"]["worst_queue"]
+
+    eb_best_avg = extremes["east"]["best_avg"]
+    eb_worst_avg = extremes["east"]["worst_avg"]
+    eb_best_max = extremes["east"]["best_max"]
+    eb_worst_max = extremes["east"]["worst_max"]
+    eb_best_queue = extremes["east"]["best_queue"]
+    eb_worst_queue = extremes["east"]["worst_queue"]
+
+    wb_best_avg = extremes["west"]["best_avg"]
+    wb_worst_avg = extremes["west"]["worst_avg"]
+    wb_best_max = extremes["west"]["best_max"]
+    wb_worst_max = extremes["west"]["worst_max"]
+    wb_best_queue = extremes["west"]["best_queue"]
+    wb_worst_queue = extremes["west"]["worst_queue"]
+
+    def normalize(x, best, worst):
+        """Helper: Returns 0 if best == worst; else the linear scaling [0..100]."""
+        if best == worst:
+            return 0
+        return 100.0 * (x - best) / (worst - best)
+
+    # --- Northbound ---
+    s_nb_avg = normalize(nb_avg, nb_best_avg, nb_worst_avg)
+    s_nb_max = normalize(nb_max, nb_best_max, nb_worst_max)
+    s_nb_queue = normalize(nb_queue, nb_best_queue, nb_worst_queue)
+    nb_direction_score = (s_nb_avg + s_nb_max + s_nb_queue) / 3.0
+
+    # --- Southbound ---
+    s_sb_avg = normalize(sb_avg, sb_best_avg, sb_worst_avg)
+    s_sb_max = normalize(sb_max, sb_best_max, sb_worst_max)
+    s_sb_queue = normalize(sb_queue, sb_best_queue, sb_worst_queue)
+    sb_direction_score = (s_sb_avg + s_sb_max + s_sb_queue) / 3.0
+
+    # --- Eastbound ---
+    s_eb_avg = normalize(eb_avg, eb_best_avg, eb_worst_avg)
+    s_eb_max = normalize(eb_max, eb_best_max, eb_worst_max)
+    s_eb_queue = normalize(eb_queue, eb_best_queue, eb_worst_queue)
+    eb_direction_score = (s_eb_avg + s_eb_max + s_eb_queue) / 3.0
+
+    # --- Westbound ---
+    s_wb_avg = normalize(wb_avg, wb_best_avg, wb_worst_avg)
+    s_wb_max = normalize(wb_max, wb_best_max, wb_worst_max)
+    s_wb_queue = normalize(wb_queue, wb_best_queue, wb_worst_queue)
+    wb_direction_score = (s_wb_avg + s_wb_max + s_wb_queue) / 3.0
+
+    # Sum up direction scores for final
+    final_score = nb_direction_score + sb_direction_score + eb_direction_score + wb_direction_score
+    return final_score
+
+def get_recent_runs_with_scores(session_id):
+    """
+    1) Retrieves up to 10 most recent runs for the given session_id (descending run_id).
+    2) For each run, computes the final score using `compute_score_4directions()`.
+    3) Identifies the best run (lowest score).
+    4) Returns a list of dicts: best run first, then the rest in descending run_id.
+       Each dict: { run_id, nb_avg_wait, ..., score }
+    """
+
+    # 1) Query up to 10 most recent runs (descending run_id)
+    recent_runs = (
+        LeaderboardResult.query
+        .filter_by(session_id=session_id)
+        .order_by(LeaderboardResult.run_id.desc())
+        .limit(10)
+        .all()
+    )
+    
+    # Convert them into a list of dicts with computed score
+    runs_with_scores = []
+    for r in recent_runs:
+        final_score = compute_score_4directions(
+            # 12 actual metrics
+            r.avg_wait_time_north, r.max_wait_time_north, r.max_queue_length_north,
+            r.avg_wait_time_south, r.max_wait_time_south, r.max_queue_length_south,
+            r.avg_wait_time_east,  r.max_wait_time_east,  r.max_queue_length_east,
+            r.avg_wait_time_west,  r.max_wait_time_west,  r.max_queue_length_west
+        )
+        runs_with_scores.append({
+            "run_id": r.run_id,
+            # Northbound
+            "nb_avg_wait": r.avg_wait_time_north,
+            "nb_max_wait": r.max_wait_time_north,
+            "nb_max_queue": r.max_queue_length_north,
+            # Southbound
+            "sb_avg_wait": r.avg_wait_time_south,
+            "sb_max_wait": r.max_wait_time_south,
+            "sb_max_queue": r.max_queue_length_south,
+            # Eastbound
+            "eb_avg_wait": r.avg_wait_time_east,
+            "eb_max_wait": r.max_wait_time_east,
+            "eb_max_queue": r.max_queue_length_east,
+            # Westbound
+            "wb_avg_wait": r.avg_wait_time_west,
+            "wb_max_wait": r.max_wait_time_west,
+            "wb_max_queue": r.max_queue_length_west,
+            # Computed Score
+            "score": final_score
+        })
+
+    if not runs_with_scores:
+        return []
+
+    # 2) Identify the best run (lowest score)
+    best_run = min(runs_with_scores, key=lambda x: x["score"])
+
+    # 3) Remove the best run from the list
+    runs_with_scores.remove(best_run)
+
+    # 4) Sort the remaining runs by descending run_id (the order they were run),
+    #    then put the best run at the front of the list.
+    runs_with_scores.sort(key=lambda x: x["run_id"], reverse=True)
+
+    # Prepend best_run
+    final_list = [best_run] + runs_with_scores
+
+    return final_list
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-

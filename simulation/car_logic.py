@@ -11,6 +11,7 @@ class Car:
         jd: dict with geometry from getJunctionData
         """
 
+        self.initial_direction = direction
         self.direction = direction
         self.speed = speed
         self.turn_type = turn_type
@@ -156,7 +157,9 @@ class Car:
         elif self.direction == "west":
             self.x = line
 
-    def is_beyond_line(self, line):
+    def is_beyond_line(self, line=None):
+        if line is None:
+            line = self.get_stop_line()
         if self.direction == "north":
             return self.y < line
         elif self.direction == "east":

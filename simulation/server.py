@@ -51,11 +51,13 @@ simulationTime = 0
 lastUpdateTime = None
 simulation_running = True
 
+backend_results = False 
+
 # Simulation metrics in fast simulation/scoring
-max_wait_time = 0      # max wait time (s)
-total_wait_time = 0    # total wait time for all cars
-wait_count = 0         # number of cars measured
-max_queue_length = 0   # maximum number of cars in queue
+max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0      # max wait time (s)
+total_wait_time_n = total_wait_time_s = total_wait_time_e = total_wait_time_w = 0    # total wait time for all cars
+wait_count_n = wait_count_s = wait_count_e = wait_count_w = 0         # number of cars measured
+max_queue_length_n = max_queue_length_s = max_queue_length_e = max_queue_length_w = 0   # maximum number of cars in queue
 
 @app.post("/stop_simulation")
 async def stop_simulation():
@@ -257,11 +259,14 @@ async def spawn_car_loop():
                             forwardIndex[direction] += 1
                         else:
                             lane = 0
-                    new_car = Car(direction, lane, speed=2.0, turn_type=turnType, jd=junction_data)
+                    if backend_results:
+                        speed = 10.0
+                    else:
+                        speed = 2.0
+                    new_car = Car(direction, lane, speed, turn_type=turnType, jd=junction_data)
                     new_car.spawn_time = simulationTime  # simulation time when car spawns
                     new_car.wait_recorded = False        # ensure wait time recorded only once
                     cars.append(new_car)
-                    print(f"Spawned {direction} {turnType} car in lane {lane}")
         if not simulation_running: 
             break
         await asyncio.sleep(1)
@@ -269,13 +274,47 @@ async def spawn_car_loop():
 
 
 def isOffCanvas(car):
-    if (car.x < -200 or car.x > (junction_data["canvasWidth"] + 200) or
-        car.y < -200 or car.y > (junction_data["canvasHeight"] + 200)):
-        return True
+    # Check based on the direction of travel
+    if car.initial_direction == "north":
+        # Northbound cars leave at the top.
+        if car.turn_type == "forward" and car.y < - car.height:
+            return True
+        elif car.turn_type == "left" and car.x < -car.height:
+            return True
+        elif car.turn_type == "right" and car.x > junction_data["canvasWidth"] + car.height:
+            return True
+    elif car.initial_direction == "south":
+        # Southbound cars leave at the bottom.
+        if car.turn_type == "forward" and car.y > junction_data["canvasHeight"] + car.height:
+            return True
+        elif car.turn_type == "left" and car.x > junction_data["canvasWidth"] + car.height:
+            return True
+        elif car.turn_type == "right" and car.x < -car.height:
+            return True
+    elif car.initial_direction == "east":
+        # Eastbound cars leave on the right.
+        if car.turn_type == "forward" and car.x > junction_data["canvasWidth"] + car.height:
+            return True
+        elif car.turn_type == "left" and car.y < -car.height:
+            return True
+        elif car.turn_type == "right" and car.y > junction_data["canvasHeight"] + car.height:
+            return True
+    elif car.initial_direction == "west":
+        # Westbound cars leave on the left.
+        if car.turn_type == "forward" and car.x < -car.height:
+            return True
+        elif car.turn_type == "left" and car.y > junction_data["canvasHeight"] + car.height:
+            return True
+        elif car.turn_type == "right" and car.y < -car.height:
+            return True
     return False
 
 async def update_car_loop():
     global cars, junction_data, simulation_running
+
+    while junction_data is None: # Wait until junction_data is available.
+        await asyncio.sleep(0.1)
+
     while simulation_running:
         if not simulation_running:
             print("Stopping car update loop")
@@ -283,15 +322,24 @@ async def update_car_loop():
         main_lights = traffic_light_logic.trafficLightStates
         right_lights = traffic_light_logic.rightTurnLightStates
         for c in cars:
-            base_speed = 2.0
+            if backend_results:
+                base_speed = 10.0
+            else:
+                base_speed = 2.0
             c.speed = base_speed * simulationSpeedMultiplier
             c.update(main_lights, right_lights, cars)
         cars = [c for c in cars if not isOffCanvas(c)]
 
 
-        global max_wait_time, total_wait_time, wait_count, max_queue_length
+        global max_wait_time_n, max_wait_time_s, max_wait_time_e, max_wait_time_w
+        global total_wait_time_n, total_wait_time_s, total_wait_time_e, total_wait_time_w
+        global wait_count_n, wait_count_s, wait_count_e, wait_count_w
+        global max_queue_length_n, max_queue_length_s, max_queue_length_e, max_queue_length_w
         north_waiting_count = south_waiting_count = east_waiting_count = west_waiting_count = 0
+
         for c in cars:
+            """ if c.direction == "east":
+                #print("big error") """
             # ensure all cars have these attributes
             if not hasattr(c, 'spawn_time'):
                 c.spawn_time = simulationTime
@@ -300,28 +348,63 @@ async def update_car_loop():
 
             # if car has not been recorded as entered the junction
             if not c.wait_recorded:
-                # check if car has entered junction
-                if (junction_data["leftVertical"] <= c.x <= junction_data["rightVertical"] and
-                    junction_data["topHorizontal"] <= c.y <= junction_data["bottomHorizontal"]):
-                    wait_time = simulationTime - c.spawn_time
-                    if wait_time > max_wait_time:
-                        max_wait_time = wait_time
-                    total_wait_time += wait_time
-                    wait_count += 1
-                    c.wait_recorded = True
-
-            # count queueing cars in each arm
-            if not c.wait_recorded:
-                if c.direction == "north":
+                if c.initial_direction == "north":
                     north_waiting_count += 1
-                elif c.direction == "south":
+                    # check if car has entered junction
+                    if (c.is_beyond_line()):
+                        wait_time = simulationTime - c.spawn_time
+                        if wait_time > max_wait_time_n:
+                            max_wait_time_n = wait_time
+                        total_wait_time_n += wait_time
+                        wait_count_n += 1
+                        c.wait_recorded = True
+                elif c.initial_direction == "south":
                     south_waiting_count += 1
-                elif c.direction == "east":
+                    # check if car has entered junction
+                    if (c.is_beyond_line()):
+                        wait_time = simulationTime - c.spawn_time
+                        if wait_time > max_wait_time_s:
+                            max_wait_time_s = wait_time
+                        total_wait_time_s += wait_time
+                        wait_count_s += 1
+                        c.wait_recorded = True
+                elif c.initial_direction == "east":
                     east_waiting_count += 1
-                elif c.direction == "west":
+                    # check if car has entered junction
+                    if (c.is_beyond_line()):
+                        wait_time = simulationTime - c.spawn_time
+                        if wait_time > max_wait_time_e:
+                            max_wait_time_e = wait_time
+                        total_wait_time_e += wait_time
+                        wait_count_e += 1
+                        c.wait_recorded = True
+                        print("recording east uncorrectly")
+                        print(c.direction)
+                elif c.initial_direction == "west":
                     west_waiting_count += 1
+                    # check if car has entered junction
+                    if (c.is_beyond_line()):
+                        wait_time = simulationTime - c.spawn_time
+                        if wait_time > max_wait_time_w:
+                            max_wait_time_w = wait_time
+                        total_wait_time_w += wait_time
+                        wait_count_w += 1
+                        c.wait_recorded = True
 
-        max_queue_length = max(max_queue_length,north_waiting_count,south_waiting_count,east_waiting_count,west_waiting_count)
+        print("north_waiting_count: ", north_waiting_count)
+        print("south_waiting_count: ", south_waiting_count)
+        print("east_waiting_count: ", east_waiting_count)
+        print("west_waiting_count: ", west_waiting_count)
+
+        max_queue_length_n = max(max_queue_length_n,north_waiting_count)
+        max_queue_length_s = max(max_queue_length_s,south_waiting_count)
+        max_queue_length_e = max(max_queue_length_e,east_waiting_count)
+        max_queue_length_w = max(max_queue_length_w,west_waiting_count)#
+
+        print("max_queue_length_n: ", max_queue_length_n)
+        print("max_queue_length_s: ", max_queue_length_s)
+        print("max_queue_length_e: ", max_queue_length_e)
+        print("max_queue_length_w: ", max_queue_length_w)
 
 
         data = {"cars": [c.to_dict() for c in cars]}
@@ -335,22 +418,32 @@ async def update_car_loop():
 # Used for fast simulation (calculating scores)
 ###############################################################################
 
-async def run_fast_simulation(duration=10):
+async def run_fast_simulation():
     # Run the simulation at a high speed for a given real-time duration (in seconds), and record scoring metrics
-    global simulationSpeedMultiplier, max_wait_time, total_wait_time, wait_count, max_queue_length
+    global simulationSpeedMultiplier
+    global max_wait_time_n, max_wait_time_s, max_wait_time_e, max_wait_time_w
+    global total_wait_time_n, total_wait_time_s, total_wait_time_e, total_wait_time_w
+    global wait_count_n, wait_count_s, wait_count_e, wait_count_w
+    global max_queue_length_n, max_queue_length_s, max_queue_length_e, max_queue_length_w
+
+    backend_results = True
+
+    duration = 10.0
 
     reset_simulation()
 
+    print(cars)
+
     # reset metrics
-    max_wait_time = 0
-    total_wait_time = 0
-    wait_count = 0
-    max_queue_length = 0
+    max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0
+    total_wait_time_n = total_wait_time_s = total_wait_time_e = total_wait_time_w = 0
+    wait_count_n = wait_count_s = wait_count_e = wait_count_w = 0
+    max_queue_length_n = max_queue_length_s = max_queue_length_e = max_queue_length_w = 0
 
     # temporarily increase simulation speed
     old_multiplier = simulationSpeedMultiplier
-    simulationSpeedMultiplier = 50.0  # set the high multiplier
-    traffic_light_logic.simulationSpeedMultiplier = 50.0
+    # Simulates 24 Hours in 1 second
+    simulationSpeedMultiplier = traffic_light_logic.simulationSpeedMultiplier = 10.0  # set the high multiplier
 
     print(f"Running fast simulation for {duration} seconds with multiplier {simulationSpeedMultiplier}")
     await asyncio.sleep(duration)  # let simulation run quickly
@@ -359,20 +452,23 @@ async def run_fast_simulation(duration=10):
     simulationSpeedMultiplier = old_multiplier
     traffic_light_logic.simulationSpeedMultiplier = old_multiplier
 
-    avg_wait_time = total_wait_time / wait_count if wait_count > 0 else 0
+    avg_wait_time_n = total_wait_time_n / wait_count_n if wait_count_n > 0 else 0
+    avg_wait_time_s = total_wait_time_s / wait_count_s if wait_count_s > 0 else 0
+    avg_wait_time_e = total_wait_time_e / wait_count_e if wait_count_e > 0 else 0
+    avg_wait_time_w = total_wait_time_w / wait_count_w if wait_count_w > 0 else 0
     metrics = {
-        "max_wait_time": max_wait_time,
-        "max_queue_length": max_queue_length,
-        "avg_wait_time": avg_wait_time
+        "max_wait_time_n": max_wait_time_n, "max_wait_time_s": max_wait_time_s, "max_wait_time_e": max_wait_time_e, "max_wait_time_w": max_wait_time_w,
+        "max_queue_length_n": max_queue_length_n, "max_queue_length_s": max_queue_length_s, "max_queue_length_e": max_queue_length_e, "max_queue_length_w": max_queue_length_w,
+        "avg_wait_time_n": avg_wait_time_n, "avg_wait_time_s": avg_wait_time_s, "avg_wait_time_e": avg_wait_time_e, "avg_wait_time_w": avg_wait_time_w
     }
     print("Fast simulation metrics:", metrics)
     return metrics
 
 # Expose endpoint to run fast simulation
 @app.get("/simulate_fast")
-async def simulate_fast_endpoint(duration: float = 10.0):
+async def simulate_fast_endpoint():
     # Run fast simulation for specified duration, return metrics
-    metrics = await run_fast_simulation(duration)
+    metrics = await run_fast_simulation()
     #await stop_simulation()
     return metrics
 
@@ -382,6 +478,11 @@ def reset_simulation():
     simulationTime = 0
     lastUpdateTime = None
     cars = []
+    asyncio.create_task(traffic_light_logic.run_traffic_loop())
+    asyncio.create_task(spawn_car_loop())
+    asyncio.create_task(update_car_loop())
+    asyncio.create_task(update_simulation_time())
+
 
 @app.on_event("startup")
 async def on_startup():

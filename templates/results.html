@@ -193,43 +193,43 @@
 
   <!-- Results Container -->
   <div id="resultsContainer">
-    <div class="score">Overall Score: <strong>{{ avg_wait_time }}</strong></div>
-<table class="resultsTable">
-  <thead>
-    <tr>
-      <th>Direction</th>
-      <th>AVG Wait Time (s)</th>
-      <th>MAX Wait Time (s)</th>
-      <th>MAX Queue Length</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Northbound</td>
-      <td>{{ avg_wait_time }}</td>
-      <td>{{ max_wait_time }}</td>
-      <td>{{ max_queue_length }}</td>
-    </tr>
-    <tr>
-      <td>Southbound</td>
-      <td>{{ avg_wait_time }}</td>
-      <td>{{ max_wait_time }}</td>
-      <td>{{ max_queue_length }}</td>
-    </tr>
-    <tr>
-      <td>Eastbound</td>
-      <td>{{ avg_wait_time }}</td>
-      <td>{{ max_wait_time }}</td>
-      <td>{{ max_queue_length }}</td>
-    </tr>
-    <tr>
-      <td>Westbound</td>
-      <td>{{ avg_wait_time }}</td>
-      <td>{{ max_wait_time }}</td>
-      <td>{{ max_queue_length }}</td>
-    </tr>
-  </tbody>
-</table>
+    <div class="score">Overall Score: <strong>{{ score }}</strong></div>
+    <table class="resultsTable">
+      <thead>
+        <tr>
+          <th>Direction</th>
+          <th>AVG Wait Time (s)</th>
+          <th>MAX Wait Time (s)</th>
+          <th>MAX Queue Length</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Northbound</td>
+          <td>{{ avg_wait_time_n }}</td>
+          <td>{{ max_wait_time_n }}</td>
+          <td>{{ max_queue_length_n }}</td>
+        </tr>
+        <tr>
+          <td>Southbound</td>
+          <td>{{ avg_wait_time_s }}</td>
+          <td>{{ max_wait_time_s }}</td>
+          <td>{{ max_queue_length_s }}</td>
+        </tr>
+        <tr>
+          <td>Eastbound</td>
+          <td>{{ avg_wait_time_e }}</td>
+          <td>{{ max_wait_time_e }}</td>
+          <td>{{ max_queue_length_e }}</td>
+        </tr>
+        <tr>
+          <td>Westbound</td>
+          <td>{{ avg_wait_time_w }}</td>
+          <td>{{ max_wait_time_w }}</td>
+          <td>{{ max_queue_length_w }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- Parameters Section -->
@@ -241,10 +241,30 @@
       </h2>
       <div class="dropdown-content" id="configContent">
         <ul>
-          <li><strong>North:</strong> Forward: 10, Left: 5, Right: 3</li>
-          <li><strong>East:</strong> Forward: 12, Left: 4, Right: 2</li>
-          <li><strong>South:</strong> Forward: 9, Left: 6, Right: 4</li>
-          <li><strong>West:</strong> Forward: 11, Left: 3, Right: 2</li>
+          <li>
+            <strong>North:</strong>
+            Forward: {{ spawn_rates.north.forward }},
+            Left: {{ spawn_rates.north.left }},
+            Right: {{ spawn_rates.north.right }}
+          </li>
+          <li>
+            <strong>South:</strong>
+            Forward: {{ spawn_rates.south.forward }},
+            Left: {{ spawn_rates.south.left }},
+            Right: {{ spawn_rates.south.right }}
+          </li>
+          <li>
+            <strong>East:</strong>
+            Forward: {{ spawn_rates.east.forward }},
+            Left: {{ spawn_rates.east.left }},
+            Right: {{ spawn_rates.east.right }}
+          </li>
+          <li>
+            <strong>West:</strong>
+            Forward: {{ spawn_rates.west.forward }},
+            Left: {{ spawn_rates.west.left }},
+            Right: {{ spawn_rates.west.right }}
+          </li>
         </ul>
       </div>
     </div>
@@ -256,10 +276,21 @@
       </h2>
       <div class="dropdown-content" id="junctionContent">
         <ul>
-          <li><strong>Number of Lanes:</strong> 2</li>
-          <li><strong>Left-turn Lane:</strong> Enabled</li>
-          <li><strong>Pedestrian Frequency per Hour:</strong> 3</li>
-          <li><strong>Pedestrian Duration:</strong> 2</li>
+          <li><strong>Number of Lanes:</strong> {{ junction_settings.lanes }}</li>
+          <li>
+            <strong>Left-turn Lane:</strong>
+            {{ "Enabled" if junction_settings.left_turn_lane else "Disabled" }}
+          </li>
+          <li>
+            <strong>Bus Lane:</strong>
+            {{ "Enabled" if junction_settings.bus_lane else "Disabled" }}
+          </li>
+          <li>
+            <strong>Pedestrian Frequency per Hour:</strong> {{ junction_settings.pedestrian_frequency }}
+          </li>
+          <li>
+            <strong>Pedestrian Duration:</strong> {{ junction_settings.pedestrian_duration }}
+          </li>
         </ul>
       </div>
     </div>
@@ -272,13 +303,11 @@
   </div>
 
   <script>
-    // Only toggle the specific content linked by data-target
+    // Toggle dropdown content for configurable parameters and junction settings
     document.querySelectorAll('.dropdown-heading').forEach(heading => {
       heading.addEventListener('click', () => {
         const targetId = heading.getAttribute('data-target');
         const content = document.getElementById(targetId);
-
-        // Toggle the specific content
         if (content.style.display === 'block') {
           content.style.display = 'none';
           heading.querySelector('.symbol').textContent = '—';

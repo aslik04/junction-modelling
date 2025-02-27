@@ -53,20 +53,44 @@ class LeaderboardResult(db.Model):
     __tablename__ = 'leaderboard_results'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     run_id = db.Column(db.Integer, db.ForeignKey('configurations.run_id'), nullable=False)
-    session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False)  # Always store session ID
+    session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False)
 
-    avg_wait_time = db.Column(db.Float, nullable=False)
-    max_wait_time = db.Column(db.Float, nullable=False)
-    max_queue_length = db.Column(db.Integer, nullable=False)
-    # score = db.Column(db.Float, nullable=False)
+    # North direction metrics
+    avg_wait_time_north = db.Column(db.Float, nullable=False)
+    max_wait_time_north = db.Column(db.Float, nullable=False)
+    max_queue_length_north = db.Column(db.Integer, nullable=False)
+
+    # South direction metrics
+    avg_wait_time_south = db.Column(db.Float, nullable=False)
+    max_wait_time_south = db.Column(db.Float, nullable=False)
+    max_queue_length_south = db.Column(db.Integer, nullable=False)
+
+    # East direction metrics
+    avg_wait_time_east = db.Column(db.Float, nullable=False)
+    max_wait_time_east = db.Column(db.Float, nullable=False)
+    max_queue_length_east = db.Column(db.Integer, nullable=False)
+
+    # West direction metrics
+    avg_wait_time_west = db.Column(db.Float, nullable=False)
+    max_wait_time_west = db.Column(db.Float, nullable=False)
+    max_queue_length_west = db.Column(db.Integer, nullable=False)
 
     def serialize(self):
         return {
             "id": self.id,
             "run_id": self.run_id,
             "session_id": self.session_id,
-            "avg_wait_time": self.avg_wait_time,
-            "max_wait_time": self.max_wait_time,
-            "max_queue_length": self.max_queue_length
-            # "score": self.score
+            "avg_wait_time_north": self.avg_wait_time_north,
+            "max_wait_time_north": self.max_wait_time_north,
+            "max_queue_length_north": self.max_queue_length_north,
+            "avg_wait_time_south": self.avg_wait_time_south,
+            "max_wait_time_south": self.max_wait_time_south,
+            "max_queue_length_south": self.max_queue_length_south,
+            "avg_wait_time_east": self.avg_wait_time_east,
+            "max_wait_time_east": self.max_wait_time_east,
+            "max_queue_length_east": self.max_queue_length_east,
+            "avg_wait_time_west": self.avg_wait_time_west,
+            "max_wait_time_west": self.max_wait_time_west,
+            "max_queue_length_west": self.max_queue_length_west
         }
+

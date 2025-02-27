@@ -11,20 +11,17 @@
             font-style: normal;
             font-weight: 400;
         }
-
         /* Reset & Base Styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
         }
-
         body {
             background-color: #a2bf89; /* Green background */
             font-family: 'SF Pro', sans-serif;
@@ -34,20 +31,17 @@
             align-items: center;
             padding: 2vh 0;
         }
-
         /* Header */
         .header {
             width: 90%;
             text-align: center;
             margin-bottom: 2vh;
         }
-
         .header h1 {
             font-size: 3vw;
             color: #f8f5e9;
             font-weight: 600;
         }
-
         /* Leaderboard Container */
         .leaderboard-container {
             background-color: #f8f5e9;
@@ -61,7 +55,6 @@
             text-align: center;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
         }
-
         /* Leaderboard Table */
         table {
             width: 100%;
@@ -69,35 +62,29 @@
             border-radius: 1.2vw;
             overflow: hidden;
         }
-
         th, td {
             padding: 1.2vh;
             text-align: center;
             font-size: 1.2vw;
         }
-
         th {
             background-color: #8da676;
             color: white;
             font-weight: bold;
         }
-
         tr:nth-child(even) {
             background-color: #f1f1f1;
         }
-
         tr:hover {
             background-color: #dce7c5;
             transition: 0.3s;
         }
-
         /* Navigation Buttons */
         .nav-container {
             margin-top: 3vh;
             display: flex;
             gap: 2vw;
         }
-
         .nav-button {
             text-decoration: none;
             color: #f8f5e9;
@@ -108,11 +95,9 @@
             font-weight: 600;
             transition: background-color 0.3s;
         }
-
         .nav-button:hover {
             background-color: #789563;
         }
-
         /* Responsive Design */
         @media (max-width: 600px) {
             .header h1 {
@@ -165,24 +150,24 @@
                     <td>{{ results[i].run_id if results|length > i else "" }}</td>
 
                     <!-- Northbound -->
-                    <td>{{ results[i].northbound_avg_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].northbound_max_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].northbound_max_queue_length if results|length > i else "" }}</td>
+                    <td>{{ results[i].avg_wait_time_north | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_wait_time_north | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_queue_length_north if results|length > i else "" }}</td>
 
                     <!-- Southbound -->
-                    <td>{{ results[i].southbound_avg_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].southbound_max_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].southbound_max_queue_length if results|length > i else "" }}</td>
+                    <td>{{ results[i].avg_wait_time_south | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_wait_time_south | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_queue_length_south if results|length > i else "" }}</td>
 
                     <!-- Eastbound -->
-                    <td>{{ results[i].eastbound_avg_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].eastbound_max_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].eastbound_max_queue_length if results|length > i else "" }}</td>
+                    <td>{{ results[i].avg_wait_time_east | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_wait_time_east | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_queue_length_east if results|length > i else "" }}</td>
 
                     <!-- Westbound -->
-                    <td>{{ results[i].westbound_avg_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].westbound_max_wait_time | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].westbound_max_queue_length if results|length > i else "" }}</td>
+                    <td>{{ results[i].avg_wait_time_west | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_wait_time_west | round(2) if results|length > i else "" }}</td>
+                    <td>{{ results[i].max_queue_length_west if results|length > i else "" }}</td>
 
                     <!-- Score -->
                     <td>{{ results[i].score | round(2) if results|length > i else "" }}</td>

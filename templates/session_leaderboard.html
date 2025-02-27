@@ -97,7 +97,7 @@
             border-radius: 2vw;
             font-size: 1.2vw;
             font-weight: 600;
-            transition: 0.3s;
+            transition: background-color 0.3s;
         }
         .nav-container a:hover {
             background-color: #789563;
@@ -151,84 +151,49 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Example "Best" row (clickable) -->
-                <tr onclick="handleRowClick(this)">
-                    <td>Best</td>
-                    <td>001</td>
-                    <!-- NB -->
-                    <td>12.34</td>
-                    <td>23.45</td>
-                    <td>10</td>
-                    <!-- SB -->
-                    <td>11.11</td>
-                    <td>24.00</td>
-                    <td>12</td>
-                    <!-- EB -->
-                    <td>13.20</td>
-                    <td>26.00</td>
-                    <td>9</td>
-                    <!-- WB -->
-                    <td>14.50</td>
-                    <td>27.25</td>
-                    <td>11</td>
-                    <!-- Score -->
-                    <td>3177.15</td>
-                </tr>
-                <!-- More clickable rows -->
-                <tr onclick="handleRowClick(this)">
-                    <td>1</td>
-                    <td>002</td>
-                    <!-- NB -->
-                    <td>13.00</td>
-                    <td>24.50</td>
-                    <td>10</td>
-                    <!-- SB -->
-                    <td>12.50</td>
-                    <td>25.00</td>
-                    <td>12</td>
-                    <!-- EB -->
-                    <td>14.00</td>
-                    <td>26.75</td>
-                    <td>8</td>
-                    <!-- WB -->
-                    <td>15.25</td>
-                    <td>28.00</td>
-                    <td>10</td>
-                    <!-- Score -->
-                    <td>3150.00</td>
-                </tr>
-                <tr onclick="handleRowClick(this)">
-                    <td>2</td>
-                    <td>003</td>
-                    <!-- NB -->
-                    <td>14.25</td>
-                    <td>25.00</td>
-                    <td>11</td>
-                    <!-- SB -->
-                    <td>13.50</td>
-                    <td>26.25</td>
-                    <td>12</td>
-                    <!-- EB -->
-                    <td>15.00</td>
-                    <td>27.00</td>
-                    <td>10</td>
-                    <!-- WB -->
-                    <td>16.00</td>
-                    <td>28.50</td>
-                    <td>9</td>
-                    <!-- Score -->
-                    <td>3120.00</td>
-                </tr>
-                <!-- ... Add as many rows as needed ... -->
+                {% if runs and runs|length > 0 %}
+                    {% for run in runs %}
+                    <tr onclick="handleRowClick(this)">
+                        <td>
+                            {% if loop.first %}
+                                Best
+                            {% else %}
+                                {{ loop.index0 }}
+                            {% endif %}
+                        </td>
+                        <td>{{ run.run_id }}</td>
+                        <!-- Northbound -->
+                        <td>{{ run.nb_avg_wait }}</td>
+                        <td>{{ run.nb_max_wait }}</td>
+                        <td>{{ run.nb_max_queue }}</td>
+                        <!-- Southbound -->
+                        <td>{{ run.sb_avg_wait }}</td>
+                        <td>{{ run.sb_max_wait }}</td>
+                        <td>{{ run.sb_max_queue }}</td>
+                        <!-- Eastbound -->
+                        <td>{{ run.eb_avg_wait }}</td>
+                        <td>{{ run.eb_max_wait }}</td>
+                        <td>{{ run.eb_max_queue }}</td>
+                        <!-- Westbound -->
+                        <td>{{ run.wb_avg_wait }}</td>
+                        <td>{{ run.wb_max_wait }}</td>
+                        <td>{{ run.wb_max_queue }}</td>
+                        <!-- Score -->
+                        <td>{{ run.score }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="15">No session runs found.</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
 
     <!-- Bottom Nav Buttons with emojis on both sides -->
     <div class="nav-container">
-        <!-- Bottom left: Back to Inputs with home emojis on both sides -->
         <a href="/parameters">🏠 Back to Inputs</a>
-        <!-- Bottom right: See All-Time Leaderboards with trophy emojis on both sides -->
         <a href="/leaderboards">🏆 See All-Time Leaderboards</a>
     </div>
 
@@ -236,34 +201,24 @@
         // Updated row click function to handle 12 new columns + Score
         function handleRowClick(row) {
             const cells = row.getElementsByTagName("td");
-
-            // Construct a JSON object from the row's cells
             const data = {
                 recentRun: cells[0].innerText,
                 runId: cells[1].innerText,
-
                 nbAvgWait: cells[2].innerText,
                 nbMaxWait: cells[3].innerText,
                 nbMaxQueue: cells[4].innerText,
-
                 sbAvgWait: cells[5].innerText,
                 sbMaxWait: cells[6].innerText,
                 sbMaxQueue: cells[7].innerText,
-
                 ebAvgWait: cells[8].innerText,
                 ebMaxWait: cells[9].innerText,
                 ebMaxQueue: cells[10].innerText,
-
                 wbAvgWait: cells[11].innerText,
                 wbMaxWait: cells[12].innerText,
                 wbMaxQueue: cells[13].innerText,
-
                 score: cells[14].innerText
             };
-
-            // For now, just log the JSON data to the console.
             console.log(JSON.stringify(data));
-            // TODO: Add backend call or file download logic as needed.
         }
     </script>
 </body>

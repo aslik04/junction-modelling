@@ -638,6 +638,7 @@ def parameters():
 
             traffic_light_settings = {
                     "traffic-light-enable": "on" if traffic_enabled else "",  # or just traffic_enabled
+                    "sequences": tl_config.sequences_per_hour,
                     "vertical_main_green": tl_config.vertical_main_green,
                     "horizontal_main_green": tl_config.horizontal_main_green,
                     "vertical_right_green": tl_config.vertical_right_green,

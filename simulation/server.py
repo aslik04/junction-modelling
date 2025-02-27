@@ -202,6 +202,23 @@ def update_junction_settings(data: Dict[str, Any]):
 def get_junction_settings():
     return junctionSettings if junctionSettings else {"message": "No junction settings available yet"}
 
+###############################################################################
+# Traffic Light Settings
+###############################################################################
+trafficLightSettings: Dict[str, Any] = {}
+
+@app.post("/update_traffic_light_settings")
+def update_traffic_light_settings(data: Dict[str, Any]):
+    global trafficLightSettings
+    trafficLightSettings = data  # Store the latest traffic light settings
+    traffic_light_logic.update_traffic_settings(trafficLightSettings)
+    print("Traffic light settings updated:", trafficLightSettings)
+    return {"message": "Traffic light settings updated successfully"}
+
+@app.get("/traffic_light_settings")
+def get_traffic_light_settings():
+    return trafficLightSettings if trafficLightSettings else {"message": "No traffic light settings available yet"}
+
 
 ###############################################################################
 # Our global list of Car objects
@@ -378,8 +395,6 @@ async def update_car_loop():
                         total_wait_time_e += wait_time
                         wait_count_e += 1
                         c.wait_recorded = True
-                        print("recording east uncorrectly")
-                        print(c.direction)
                 elif c.initial_direction == "west":
                     west_waiting_count += 1
                     # check if car has entered junction
@@ -391,21 +406,10 @@ async def update_car_loop():
                         wait_count_w += 1
                         c.wait_recorded = True
 
-        print("north_waiting_count: ", north_waiting_count)
-        print("south_waiting_count: ", south_waiting_count)
-        print("east_waiting_count: ", east_waiting_count)
-        print("west_waiting_count: ", west_waiting_count)
-
         max_queue_length_n = max(max_queue_length_n,north_waiting_count)
         max_queue_length_s = max(max_queue_length_s,south_waiting_count)
         max_queue_length_e = max(max_queue_length_e,east_waiting_count)
-        max_queue_length_w = max(max_queue_length_w,west_waiting_count)#
-
-        print("max_queue_length_n: ", max_queue_length_n)
-        print("max_queue_length_s: ", max_queue_length_s)
-        print("max_queue_length_e: ", max_queue_length_e)
-        print("max_queue_length_w: ", max_queue_length_w)
-
+        max_queue_length_w = max(max_queue_length_w,west_waiting_count)
 
         data = {"cars": [c.to_dict() for c in cars]}
         await broadcast_to_all(json.dumps(data))
@@ -431,8 +435,6 @@ async def run_fast_simulation():
     duration = 10.0
 
     reset_simulation()
-
-    print(cars)
 
     # reset metrics
     max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0
@@ -461,7 +463,6 @@ async def run_fast_simulation():
         "max_queue_length_n": max_queue_length_n, "max_queue_length_s": max_queue_length_s, "max_queue_length_e": max_queue_length_e, "max_queue_length_w": max_queue_length_w,
         "avg_wait_time_n": avg_wait_time_n, "avg_wait_time_s": avg_wait_time_s, "avg_wait_time_e": avg_wait_time_e, "avg_wait_time_w": avg_wait_time_w
     }
-    print("Fast simulation metrics:", metrics)
     return metrics
 
 # Expose endpoint to run fast simulation

@@ -7,7 +7,7 @@ import io
 import random
 import requests
 from flask import Flask, request, jsonify, render_template, url_for, redirect, send_from_directory
-from models import db, Configuration, LeaderboardResult, Session
+from models import db, Configuration, LeaderboardResult, Session, TrafficSettings
 from sqlalchemy import inspect
 
 app = Flask(__name__)
@@ -521,6 +521,33 @@ def parameters():
             db.session.commit()
             print(f"✅ Data stored with run_id {config.run_id}")
 
+            traffic_enabled = data.get('traffic-light-enable', '') == 'on'
+            if traffic_enabled:
+                tl_config = TrafficSettings(
+                    run_id=config.run_id,
+                    session_id=session.id,
+                    enabled=True,
+                    sequences_per_hour=int(data.get('tl_sequences', 0)),
+                    vertical_main_green=int(data.get('tl_vmain', 0)),
+                    horizontal_main_green=int(data.get('tl_hmain', 0)),
+                    vertical_right_green=int(data.get('tl_vright', 0)),
+                    horizontal_right_green=int(data.get('tl_hright', 0))
+                )
+            else:
+                tl_config = TrafficSettings(
+                    run_id=config.run_id,
+                    session_id=session.id,
+                    enabled=False,
+                    sequences_per_hour=0,
+                    vertical_main_green=0,
+                    horizontal_main_green=0,
+                    vertical_right_green=0,
+                    horizontal_right_green=0
+                )
+            db.session.add(tl_config)
+            db.session.commit()
+            print(f"✅ Traffic settings stored for run_id {config.run_id}")
+
             # Construct the spawn rates dictionary
             spawn_rates = {
                 "north": {
@@ -575,6 +602,25 @@ def parameters():
                     print(f"❌ Error sending junction settings: {response.text}")
             except requests.exceptions.RequestException as e:
                 print(f"⚠️ Could not reach server.py: {e}")
+
+
+            traffic_light_settings = {
+                    "traffic-light-enable": "on" if traffic_enabled else "",  # or just traffic_enabled
+                    "vertical_main_green": tl_config.vertical_main_green,
+                    "horizontal_main_green": tl_config.horizontal_main_green,
+                    "vertical_right_green": tl_config.vertical_right_green,
+                    "horizontal_right_green": tl_config.horizontal_right_green
+            }
+
+            try:
+                response = requests.post("http://127.0.0.1:8000/update_traffic_light_settings", json=traffic_light_settings)
+                if response.status_code == 200:
+                    print("✅ Traffic light settings sent successfully to server.py.")
+                else:
+                    print(f"❌ Error sending traffic light settings: {response.text}")
+            except requests.exceptions.RequestException as e:
+                print(f"⚠️ Could not reach server.py for traffic lights: {e}")
+            # ──────────────────────────────────────────────────────────
 
             return redirect(url_for('junctionPage')) 
 

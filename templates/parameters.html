@@ -62,14 +62,14 @@
       gap: 2vh; /* vertical gap between top row & bottom box */
     }
 
-    /* Top row: two side-by-side boxes */
+    /* Top row: three side-by-side boxes (was two, now three) */
     .top-row {
       display: flex;
       gap: 2vw;
       flex: 1; /* let top row grow to fill vertical space */
     }
 
-    /* Boxes (left & right, plus bottom) */
+    /* Boxes (all top boxes + bottom) */
     .box,
     .bottom-box {
       background-color: #f8f5e9;
@@ -141,6 +141,33 @@
       border-radius: 4px;
     }
 
+    /* Traffic Light Settings list */
+    .traffic-light-settings {
+      list-style: none;
+      padding: 0;
+      margin: 1vh 0;
+    }
+
+    .traffic-light-settings li {
+      display: flex;
+      align-items: center;
+      margin: 1vh 0;
+    }
+
+    .traffic-light-settings li label {
+      flex: 0 0 12vw;
+      margin-right: 1vw;
+      font-size: 1vw;
+    }
+
+    .traffic-light-settings li input[type="number"] {
+      flex: 1;
+      padding: 0.5vh 1vw;
+      font-size: 1vw;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
     /* Slider container (Number of lanes) */
     .slider-container {
       margin: 2vh 0;
@@ -179,6 +206,12 @@
     .checkbox-container label {
       margin-left: 1vw;
       font-size: 1vw;
+    }
+
+    /* Disabled input styling */
+    input:disabled {
+      background-color: #ddd;
+      color: #888;
     }
 
     /* Bottom box (spans full width) */
@@ -248,6 +281,12 @@
       .dropdown-content li input[type="text"] {
         font-size: 3vw;
       }
+      .traffic-light-settings li label {
+        flex: 0 0 30vw;
+      }
+      .traffic-light-settings li input[type="number"] {
+        font-size: 3vw;
+      }
       .slider-container label,
       .slider-values span,
       .checkbox-container label {
@@ -306,11 +345,23 @@
         fileInput.click();
       });
 
+      // Toggle enable/disable for Traffic Light Settings inputs
+      const tlCheckbox = document.getElementById('traffic-light-enable');
+      const tlInputs = document.querySelectorAll('.traffic-light-settings input[type="number"]');
+      tlCheckbox.addEventListener('change', () => {
+        tlInputs.forEach(input => {
+          input.disabled = !tlCheckbox.checked;
+        });
+      });
+      // Set initial state for traffic light inputs
+      tlInputs.forEach(input => {
+        input.disabled = !tlCheckbox.checked;
+      });
+
       // When the Start button is clicked, copy the parameter values into the hidden form and submit it.
       document.getElementById("startButton").addEventListener("click", async function () {
-        // North
         try {
-        // ✅ Step 1: Start FastAPI before submitting form
+          // ✅ Step 1: Start FastAPI before submitting form
           let startResponse = await fetch('/start_simulation', { method: 'POST' });
           let startData = await startResponse.json();
 
@@ -338,6 +389,14 @@
               document.getElementById("hidden_left-turn").value = document.getElementById("left-turn").checked ? "on" : "";
               document.getElementById("hidden_pedestrian_frequency").value = document.getElementById("pedestrian-frequency").value;
               document.getElementById("hidden_pedestrian_duration").value = document.getElementById("pedestrian-duration").value;
+              
+              // Traffic Light Settings values
+              document.getElementById("hidden_tl_enabled").value = tlCheckbox.checked ? "on" : "";
+              document.getElementById("hidden_sequences").value = document.getElementById("tl_sequences").value;
+              document.getElementById("hidden_vmain").value = document.getElementById("tl_vmain").value;
+              document.getElementById("hidden_hmain").value = document.getElementById("tl_hmain").value;
+              document.getElementById("hidden_vright").value = document.getElementById("tl_vright").value;
+              document.getElementById("hidden_hright").value = document.getElementById("tl_hright").value;
 
               // ✅ Step 3: Submit the hidden form after FastAPI has started
               console.log("🚀 Submitting form with updated values...");
@@ -345,14 +404,12 @@
           } else {
               console.error("❌ Error starting FastAPI:", startData.error);
           }
-      } catch (error) {
+        } catch (error) {
           console.error("❌ Error sending start request:", error);
-      }
-        console.error("❌ Error sending start request:", error);
+        }
       });
     });
   </script>
-  <!-- In parameters.html, inside a <script> tag or in an external JS file -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const lanesSlider = document.getElementById("lanes");
@@ -371,8 +428,8 @@
         pedestrianDurationInput.value = storedDuration;
       } else {
         // Otherwise, set a default value (e.g., "2") and store it
-        pedestrianDurationInput.value = "2";
-        localStorage.setItem("pedestrianDuration", "2");
+        pedestrianDurationInput.value = "1";
+        localStorage.setItem("pedestrianDuration", "1");
       }
       // Update localStorage whenever the input changes
       pedestrianDurationInput.addEventListener("input", function() {
@@ -418,7 +475,7 @@
     
     // Function to compute cycle times (using 2-second transitions as in your Python code)
     function getCycleTimes(seqLengths) {
-      const gap = 2;
+      const gap = 1;
       const verticalCycleTime = (5 * gap) + seqLengths.main_vertical + seqLengths.vertical_right;
       const horizontalCycleTime = (5 * gap) + seqLengths.main_horizontal + seqLengths.horizontal_right;
       return { verticalCycleTime, horizontalCycleTime };
@@ -428,7 +485,7 @@
     function getMaxGapsPerMinute(seqLengths, gap) {
       const cycleTimes = getCycleTimes(seqLengths);
       // Full cycle includes a vertical cycle + gap + horizontal cycle + gap.
-      const fullCycleTime = cycleTimes.verticalCycleTime + cycleTimes.horizontalCycleTime + 2 * gap;
+      const fullCycleTime = cycleTimes.verticalCycleTime + cycleTimes.horizontalCycleTime;
       // Each full cycle yields 2 gaps.
       return 2 * (60 / fullCycleTime);
     }
@@ -528,19 +585,88 @@
     
     return { main_vertical, main_horizontal, vertical_right, horizontal_right };
   }
+
+  function updateAndValidateTrafficSettings() {
+    // Retrieve the number of sequences and set gap duration
+    let sequences = parseInt(document.getElementById("tl_sequences").value) || 1;
+    let gap = 1;
+    
+    // Retrieve the current green time values
+    let vmainInput = document.getElementById("tl_vmain");
+    let vrightInput = document.getElementById("tl_vright");
+    let hmainInput = document.getElementById("tl_hmain");
+    let hrightInput = document.getElementById("tl_hright");
+    
+    let vmain = parseInt(vmainInput.value) || 0;
+    let vright = parseInt(vrightInput.value) || 0;
+    let hmain = parseInt(hmainInput.value) || 0;
+    let hright = parseInt(hrightInput.value) || 0;
+    
+    // Calculate total vertical and horizontal values
+    // Adding (5 * gap) as the fixed transition time component
+    let vTotal = vmain + vright + (5 * gap);
+    let hTotal = hmain + hright + (5 * gap);
+    
+    // Compute the maximum allowed totals for each direction
+    // For vertical, the max allowed is 60 minus the horizontal total,
+    // and vice versa.
+    let maxV = 60 - hTotal;
+    let maxH = 60 - vTotal;
+    
+    // Validate vertical green times: if the total vertical time exceeds maxV,
+    // adjust the vertical right green time.
+    if (vTotal > maxV) {
+      // Here we subtract the fixed transition and vmain from maxV
+      vright = Math.max(0, maxV - (vmain + (5 * gap)));
+      vrightInput.value = vright;
+      console.log("Adjusted vertical_right_green to", vright, "to meet max allowed vertical sum of", maxV);
+    }
+    
+    // Validate horizontal green times similarly:
+    if (hTotal > maxH) {
+      hright = Math.max(0, maxH - (hmain + (5 * gap)));
+      hrightInput.value = hright;
+      console.log("Adjusted horizontal_right_green to", hright, "to meet max allowed horizontal sum of", maxH);
+    }
+    
+    // Return the normalized values (dividing by the number of sequences)
+    return {
+      vertical_main_green: vmain / sequences,
+      vertical_right_green: vright / sequences,
+      horizontal_main_green: hmain / sequences,
+      horizontal_right_green: hright / sequences,
+    };
+  }
+
+
+  // Attach event listeners to update limits and validate as the user types:
+  document.addEventListener('DOMContentLoaded', function () {
+    // When tl_sequences changes, update the limits and validate the green fields
+    document.getElementById("tl_sequences").addEventListener('input', () => {
+      updateTrafficSettingsLimits();
+      updateAndValidateTrafficSettings();
+    });
+    // Also attach validation to the green fields so they are checked when changed
+    const greenFields = ["tl_vmain", "tl_vright", "tl_hmain", "tl_hright"];
+    greenFields.forEach(id => {
+      document.getElementById(id).addEventListener('input', updateAndValidateTrafficSettings);
+    });
+  });
+
+
   
   // Compute cycle times (using 2-second transitions as in Python)
-  function getCycleTimes(seqLengths) {
-    const verticalCycleTime = 2 + seqLengths.main_vertical + 2 + seqLengths.vertical_right;
-    const horizontalCycleTime = 2 + seqLengths.main_horizontal + 2 + seqLengths.horizontal_right;
+  function getCycleTimes(seqLengths, gap) {
+    const verticalCycleTime = seqLengths.main_vertical + seqLengths.vertical_right + 5*gap;
+    const horizontalCycleTime = seqLengths.main_horizontal + seqLengths.horizontal_right + 5*gap;
     return { verticalCycleTime, horizontalCycleTime };
   }
   
   // Calculate max gap opportunities per minute (to be used as max pedestrian frequency)
   function getMaxGapsPerMinute(seqLengths, gap) {
-    const cycleTimes = getCycleTimes(seqLengths);
-    const maxVerticalGaps = 60 / (cycleTimes.verticalCycleTime + gap);
-    const maxHorizontalGaps = 60 / (cycleTimes.horizontalCycleTime + gap);
+    const cycleTimes = getCycleTimes(seqLengths, gap);
+    const maxVerticalGaps = 60 / cycleTimes.verticalCycleTime;
+    const maxHorizontalGaps = 60 / cycleTimes.horizontalCycleTime;
     return maxVerticalGaps + maxHorizontalGaps;
   }
   
@@ -569,9 +695,15 @@
         right: document.getElementById('wb_right').value
       }
     };
-  
-    const seqLengths = getSequenceLengths(vehicleData);
-    const gap = 2; // Adjust gap duration as needed
+
+    let enabled = document.getElementById("traffic-light-enable").checked;
+
+    if (enabled) {
+      const seqLengths = updateTrafficSettingsLimits();
+    } else {
+      const seqLengths = getSequenceLengths(vehicleData);
+    }
+    const gap = 1; // Adjust gap duration as needed
     const maxGaps = getMaxGapsPerMinute(seqLengths, gap);
     
     // Update the pedestrian frequency input's max attribute
@@ -696,7 +828,7 @@
               </ul>
             </div>
           </div>
-          <!-- Right box -->
+          <!-- Middle box -->
           <div class="box">
             <h2>Junction Settings</h2>
             <!-- Number of lanes slider -->
@@ -727,8 +859,41 @@
               <label for="pedestrian-duration" style="font-size: 1.2vw; font-weight: 400; margin-right: 1vw; cursor: default;">
                 Pedestrian Duration per Event
               </label>
-              <input type="number" id="pedestrian-duration" name="pedestrian-duration" min="0" max="10" style="padding: 0.5vh 1vw; font-size: 1vw; border: 1px solid #ccc; border-radius: 4px;">
+              <input type="number" id="pedestrian-duration" name="pedestrian-duration" min="0" max="5" style="padding: 0.5vh 1vw; font-size: 1vw; border: 1px solid #ccc; border-radius: 4px;">
             </div>
+          </div>
+          <!-- New Right box: Traffic Light Settings -->
+          <div class="box">
+            <h2>Traffic Light Settings</h2>
+            <!-- Enable Traffic Light Settings checkbox -->
+            <div class="checkbox-container">
+              <input type="checkbox" id="traffic-light-enable" name="traffic-light-enable">
+              <label for="traffic-light-enable">Enable Traffic Light Settings</label>
+            </div>
+            <!-- Traffic Light Parameters -->
+            <ul class="traffic-light-settings">
+              <li>
+                <label for="tl_sequences">Sequences per Hour</label>
+                <input type="number" id="tl_sequences" name="tl_sequences" min="0" value="0" style="width: 3em;">
+              </li>
+              <li>
+                <label for="tl_vmain">Vertical Main Green</label>
+                <input type="number" id="tl_vmain" name="tl_vmain" min="0" value="0" style="width: 3em;">
+              </li>
+              <li>
+                <label for="tl_hmain">Horizontal Main Green</label>
+                <input type="number" id="tl_hmain" name="tl_hmain" min="0" value="0" style="width: 3em;">
+              </li>
+              <li>
+                <label for="tl_vright">Vertical Right Green</label>
+                <input type="number" id="tl_vright" name="tl_vright" min="0" value="0" style="width: 3em;">
+              </li>
+              <li>
+                <label for="tl_hright">Horizontal Right Green</label>
+                <input type="number" id="tl_hright" name="tl_hright" min="0" value="0" style="width: 3em;">
+              </li>
+              
+            </ul>
           </div>
         </div>
       </form>
@@ -769,6 +934,14 @@
         <input type="hidden" id="hidden_left-turn" name="left-turn" value="">
         <input type="hidden" id="hidden_pedestrian_frequency" name="pedestrian-frequency" value="">
         <input type="hidden" id="hidden_pedestrian_duration" name="pedestrian-duration" value="">
+        
+        <!-- Hidden inputs for Traffic Light Settings -->
+        <input type="hidden" id="hidden_tl_enabled" name="traffic-light-enable" value="">
+        <input type="hidden" id="hidden_sequences" name="tl_sequences" value="">
+        <input type="hidden" id="hidden_vmain" name="tl_vmain" value="">
+        <input type="hidden" id="hidden_hmain" name="tl_hmain" value="">
+        <input type="hidden" id="hidden_vright" name="tl_vright" value="">
+        <input type="hidden" id="hidden_hright" name="tl_hright" value="">
         
         <!-- The visible Start button -->
         <button class="upload-button" type="button" id="startButton">Start</button>

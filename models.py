@@ -94,3 +94,33 @@ class LeaderboardResult(db.Model):
             "max_queue_length_west": self.max_queue_length_west
         }
 
+
+class TrafficSettings(db.Model):
+    __tablename__ = 'traffic_settings'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # Optionally, you can tie this to a configuration run via a foreign key:
+    run_id = db.Column(db.Integer, db.ForeignKey('configurations.run_id'), nullable=False)
+    # Also include a session reference if needed:
+    session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False)
+
+    enabled = db.Column(db.Boolean, nullable=False, default=False)
+    sequences_per_hour = db.Column(db.Integer, nullable=False, default=0)
+    vertical_main_green = db.Column(db.Integer, nullable=False, default=0)
+    horizontal_main_green = db.Column(db.Integer, nullable=False, default=0)
+    vertical_right_green = db.Column(db.Integer, nullable=False, default=0)
+    horizontal_right_green = db.Column(db.Integer, nullable=False, default=0)
+
+    const_gaps_in_sequence = db.Column(db.Integer, default=5 * 1)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "run_id": self.run_id,
+            "session_id": self.session_id,
+            "enabled": self.enabled,
+            "sequences_per_hour": self.sequences_per_hour,
+            "vertical_main_green": self.vertical_main_green,
+            "horizontal_main_green": self.horizontal_main_green,
+            "vertical_right_green": self.vertical_right_green,
+            "horizontal_right_green": self.horizontal_right_green
+        }

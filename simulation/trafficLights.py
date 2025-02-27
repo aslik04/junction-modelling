@@ -12,6 +12,8 @@ class TrafficLightLogic:
 
         self.junction_settings = None
 
+        self.traffic_settings = None
+
         # -------------------------------
         #  Traffic Light States
         # -------------------------------
@@ -53,14 +55,6 @@ class TrafficLightLogic:
         self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = 0
         self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = 0
 
-        main_vertical, main_horizontal, vertical_right, horizontal_right = self.get_sequence_lengths()
-        
-        self.VERTICAL_SEQUENCE_LENGTH = main_vertical       # Green phase for north/south
-        self.HORIZONTAL_SEQUENCE_LENGTH = main_horizontal    # Green phase for east/west
-
-        self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = vertical_right
-        self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = horizontal_right
-
         # -------------------------------
         #  Pedestrian Activation
         #  - pedestrianPerMinute: desired pedestrian activations per minute.
@@ -75,18 +69,50 @@ class TrafficLightLogic:
         self.pedestrianPerMinute = pedestrian_frequency
         self.pedestrianDuration = pedestrian_duration
 
-        self.gap = 2                # Gap (in seconds) after each cycle
+        self.gap = 1                # Gap (in seconds) after each cycle
 
         self._broadcast_callback = None
 
     def set_broadcast_callback(self, cb):
         self._broadcast_callback = cb
 
+    def update_traffic_settings(self, traffic_settings: Dict[str, Any]):
+        """
+        Update the traffic light settings based on user input.
+        If enabled is True, override the auto‑computed sequence lengths.
+        """
+        self.traffic_settings = traffic_settings
+        if traffic_settings.get("traffic-light-enable", False):
+            self.VERTICAL_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_main_green", self.VERTICAL_SEQUENCE_LENGTH))
+            self.HORIZONTAL_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_main_green", self.HORIZONTAL_SEQUENCE_LENGTH))
+            self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_right_green", self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH))
+            self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_right_green", self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH))
+            print("Custom traffic settings applied:", traffic_settings)
+        else:
+            print("Traffic settings disabled; using auto-calculated values.")
+            main_vertical, main_horizontal, vertical_right, horizontal_right = self.get_sequence_lengths()
+        
+            self.VERTICAL_SEQUENCE_LENGTH = main_vertical       # Green phase for north/south
+            self.HORIZONTAL_SEQUENCE_LENGTH = main_horizontal    # Green phase for east/west
+
+            self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = vertical_right
+            self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = horizontal_right
+
     def get_sequence_lengths(self):
         """
         Compute cycle times based on vehicle input data.
         Returns four values: main_vertical, main_horizontal, vertical_right, horizontal_right.
         """
+
+        if self.traffic_settings is not None:
+            traffic_settings = self.traffic_settings
+            if traffic_settings.get("traffic-light-enable", False):
+                self.VERTICAL_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_main_green", self.VERTICAL_SEQUENCE_LENGTH))
+                self.HORIZONTAL_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_main_green", self.HORIZONTAL_SEQUENCE_LENGTH))
+                self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_right_green", self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH))
+                self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_right_green", self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH))
+                print("Custom traffic settings applied:", traffic_settings)
+
         # Default base sequence lengths (if no vehicle data is provided)
         main_vertical = main_horizontal = vertical_right = horizontal_right = 0
         increment = 4
@@ -247,8 +273,8 @@ class TrafficLightLogic:
           - A 2-sec green→amber→red transition,
           - A right-turn phase.
         """
-        verticalCycleTime = (5 * 2) + self.VERTICAL_SEQUENCE_LENGTH + self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH
-        horizontalCycleTime = (5 * 2) + self.HORIZONTAL_SEQUENCE_LENGTH + self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH
+        verticalCycleTime = (5 * self.gap) + self.VERTICAL_SEQUENCE_LENGTH + self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH
+        horizontalCycleTime = (5 * self.gap) + self.HORIZONTAL_SEQUENCE_LENGTH + self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH
         return verticalCycleTime, horizontalCycleTime
 
     def get_max_gaps_per_minute(self):

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -23,7 +23,9 @@
     body {
       width: 100%;
       height: 100%;
-      overflow: hidden; /* Prevent scrolling */
+      /* Allow vertical scroll so we can see Start button when dropdowns expand */
+      overflow-x: hidden;
+      overflow-y: auto;
     }
 
     body {
@@ -44,50 +46,53 @@
 
     /* Header: left-aligned heading with top margin */
     .header {
-      margin: 4vh 5vw 0 5vw; /* 4vh top, 5vw sides, 0 bottom */
+      margin: 4vh 5vh 0 5vh; /* 4vh top, 5vh sides, 0 bottom */
     }
 
     .header h1 {
       color: #f8f5e9;
-      font-size: 3vw;
+      font-size: 4vh;
       text-align: left; /* left-aligned */
     }
 
     /* Content area for top row + bottom box */
     .content {
-      flex: 1; /* Fill remaining space */
-      margin: 2vh 5vw 4vh 5vw; /* 2vh top, 5vw sides, 4vh bottom */
+      /* Make all outer margins and gaps consistent */
+      margin: 4vh 5vh; 
       display: flex;
       flex-direction: column;
       gap: 2vh; /* vertical gap between top row & bottom box */
+      flex: 1;
     }
 
-    /* Top row: three side-by-side boxes (was two, now three) */
+    /* Top row: three side-by-side boxes, same size */
     .top-row {
       display: flex;
-      gap: 2vw;
-      flex: 1; /* let top row grow to fill vertical space */
+      gap: 2vh; /* uniform gap */
+      align-items: stretch; /* ensure equal height boxes */
+      flex: 1; /* let top row grow in height */
     }
 
     /* Boxes (all top boxes + bottom) */
     .box,
     .bottom-box {
       background-color: #f8f5e9;
-      border-radius: 1.2vw; /* more rounding */
+      border-radius: 1.2vh; /* more rounding */
       padding: 2vh;
       display: flex;
       flex-direction: column;
     }
 
+    /* Let each top box flex equally */
     .box {
-      flex: 1; /* each top box grows equally */
+      flex: 1; 
       min-height: 0; /* let flex container control the height */
     }
 
     /* Titles inside the boxes */
     .box h2 {
       color: #8da676;
-      font-size: 1.6vw;
+      font-size: 2vh;
       margin-bottom: 2vh;
     }
 
@@ -95,7 +100,7 @@
     .dropdown-heading {
       cursor: pointer;
       font-weight: 400;
-      font-size: 1.2vw;
+      font-size: 1.5vh;
       margin: 2vh 0 1vh;
       display: flex;
       align-items: center;
@@ -104,14 +109,14 @@
     .dropdown-heading span.symbol {
       margin-right: 8px;
       color: #8da676;
-      font-size: 1.6vw;
+      font-size: 1.5vh;
       font-weight: bold;
     }
 
     /* Drop-down content hidden by default */
     .dropdown-content {
       display: none;
-      margin-left: 1vw;
+      margin-left: 1vh;
       margin-bottom: 2vh;
     }
 
@@ -128,15 +133,15 @@
     }
 
     .dropdown-content li label {
-      flex: 0 0 8vw;
-      margin-right: 1vw;
-      font-size: 1vw;
+      flex: 0 0 8vh;
+      margin-right: 1vh;
+      font-size: 1.25vh;
     }
 
     .dropdown-content li input[type="text"] {
       flex: 1;
-      padding: 0.5vh 1vw;
-      font-size: 1vw;
+      padding: 0.5vh 1vh;
+      font-size: 1.25vh;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
@@ -151,22 +156,34 @@
     .traffic-light-settings li {
       display: flex;
       align-items: center;
+      justify-content: flex-start;
       margin: 1vh 0;
+      width: 100%;
     }
 
+    /* Ensure all labels have the same width so text aligns */
     .traffic-light-settings li label {
-      flex: 0 0 12vw;
-      margin-right: 1vw;
-      font-size: 1vw;
+      flex: 0 0 17vh; /* Set a fixed width for labels */
+      text-align: left;
+      font-size: 1.5vh;
     }
 
-    .traffic-light-settings li input[type="number"] {
-      flex: 1;
-      padding: 0.5vh 1vw;
-      font-size: 1vw;
+    /* Ensure all input fields have the same width */
+    .traffic-light-settings li input {
+      flex: 0 0 5vh; /* Set a fixed width for all input fields */
+      padding: 0.5vh 1vh;
+      font-size: 1.25vh;
       border: 1px solid #ccc;
       border-radius: 4px;
+      text-align: center;
     }
+
+    /* Force a width on all number inputs in traffic-light-settings-sub */
+    .traffic-light-settings li input[type="number"] {
+      width: 7vh; /* or 80px, or whatever you prefer */
+      max-width: 8em; /* optional max width if you want to cap it */
+    }
+
 
     /* Slider container (Number of lanes) */
     .slider-container {
@@ -177,23 +194,23 @@
       display: block;
       margin-bottom: 1vh;
       font-weight: 400;
-      font-size: 1vw;
+      font-size: 1.5vh;
     }
 
     .slider-container input[type="range"] {
-      width: 60%;
+      width: 80%;
     }
 
     /* Numbers below the slider */
     .slider-values {
       display: flex;
       justify-content: space-between;
-      width: 60%;
+      width: 80%;
       margin-top: 1vh;
     }
 
     .slider-values span {
-      font-size: 1vw;
+      font-size: 1.25vh;
     }
 
     /* Checkbox container */
@@ -204,8 +221,8 @@
     }
 
     .checkbox-container label {
-      margin-left: 1vw;
-      font-size: 1vw;
+      margin-left: 1vh;
+      font-size: 1.5vh;
     }
 
     /* Disabled input styling */
@@ -216,7 +233,7 @@
 
     /* Bottom box (spans full width) */
     .bottom-box {
-      flex: 0.4; /* ~40% of the remaining content height */
+      flex: 0.4; /* ~40% of the leftover space in content */
       align-items: center;
       justify-content: center;
       text-align: center;
@@ -225,8 +242,8 @@
     /* Drag-and-drop area inside the bottom box */
     .drag-drop-box {
       border: 2px dashed #8da676;
-      border-radius: 1vw;
-      padding: 3vh 2vw;
+      border-radius: 1vh;
+      padding: 3vh 2vh;
       color: #6b6b6b;
       cursor: pointer;
       max-width: 600px;
@@ -234,7 +251,7 @@
     }
 
     .drag-drop-box p {
-      font-size: 1.2vw;
+      font-size: 1.5vh;
       margin: 1vh 0;
     }
 
@@ -246,15 +263,15 @@
     /* Upload button style */
     .upload-button {
       margin-top: 3vh;
-      width: 30vw;
-      padding: 1vh 2vw;
+      width: 30vh;
+      padding: 1vh 2vh;
       background-color: #f8f5e9;
       color: #a2bf89;
       border: none;
-      border-radius: 2vw;
+      border-radius: 2vh;
       cursor: pointer;
-      font-size: 1.5vw;
-      border-radius: 6vw;
+      font-size: 3vh;
+      border-radius: 6vh;
       margin: 3vh auto 0; /* Centering the button */
       display: block; /* Ensure proper centering */
       font-weight: bold;
@@ -267,33 +284,33 @@
     /* Responsive text sizing fallback for smaller screens */
     @media (max-width: 600px) {
       .header h1 {
-        font-size: 6vw;
+        font-size: 6vh;
       }
       .dropdown-heading span.symbol {
-        font-size: 4vw;
+        font-size: 4vh;
       }
       .dropdown-heading {
-        font-size: 3vw;
+        font-size: 3vh;
       }
       .dropdown-content li label {
-        flex: 0 0 30vw;
+        flex: 0 0 30vh;
       }
       .dropdown-content li input[type="text"] {
-        font-size: 3vw;
+        font-size: 3vh;
       }
       .traffic-light-settings li label {
-        flex: 0 0 30vw;
+        flex: 0 0 30vh;
       }
       .traffic-light-settings li input[type="number"] {
-        font-size: 3vw;
+        font-size: 3vh;
       }
       .slider-container label,
       .slider-values span,
       .checkbox-container label {
-        font-size: 3vw;
+        font-size: 3vh;
       }
       .drag-drop-box p {
-        font-size: 3vw;
+        font-size: 3vh;
       }
     }
   </style>
@@ -387,6 +404,7 @@
 
               document.getElementById("hidden_lanes").value = document.getElementById("lanes").value;
               document.getElementById("hidden_left-turn").value = document.getElementById("left-turn").checked ? "on" : "";
+              document.getElementById("hidden_bus-lane").value = document.getElementById("bus-lane").checked ? "on" : "";
               document.getElementById("hidden_pedestrian_frequency").value = document.getElementById("pedestrian-frequency").value;
               document.getElementById("hidden_pedestrian_duration").value = document.getElementById("pedestrian-duration").value;
               
@@ -518,18 +536,15 @@
     
       // Get sequence lengths based on current vehicle data
       const seqLengths = getSequenceLengths(vehicleData);
-      // Define gap duration (in seconds) as needed; for example:
-      // THIS WONT WORK UNTIL pedestrian time is implemented dont r
+      // Define gap duration (in seconds) as needed
       const gap = document.getElementById('pedestrian-duration').value;
     
       // Calculate max pedestrian frequency (gaps per minute)
       const maxGaps = getMaxGapsPerMinute(seqLengths, gap);
     
-      // Update the pedestrian frequency input's max attribute or display the value somewhere
+      // Update the pedestrian frequency input's max attribute
       const pedInput = document.getElementById('pedestrian-frequency');
       pedInput.max = maxGaps;
-      // Optionally, update a display element to show the calculated value:
-      // document.getElementById('maxGapsDisplay').textContent = maxGaps.toFixed(2);
     }
     
     // Attach the update function to all vehicle input fields so it runs on every change
@@ -551,40 +566,6 @@
     </script>
 <script>
   // Replicate your Python calculations in JavaScript
-  
-  // Calculate sequence lengths based on vehicle data
-  function getSequenceLengths(vehicleData) {
-    let main_vertical = 0, main_horizontal = 0, vertical_right = 0, horizontal_right = 0;
-    const increment = 4;
-  
-    const north = vehicleData.north || {};
-    const south = vehicleData.south || {};
-    const east  = vehicleData.east  || {};
-    const west  = vehicleData.west  || {};
-  
-    const vertical_total = (parseInt(north.forward) || 0) + (parseInt(north.left) || 0) +
-                           (parseInt(south.forward) || 0) + (parseInt(south.left) || 0);
-    const horizontal_total = (parseInt(east.forward) || 0) + (parseInt(east.left) || 0) +
-                             (parseInt(west.forward) || 0) + (parseInt(west.left) || 0);
-    const vertical_right_total = (parseInt(north.right) || 0) + (parseInt(south.right) || 0);
-    const horizontal_right_total = (parseInt(east.right) || 0) + (parseInt(west.right) || 0);
-  
-    const total = vertical_total + horizontal_total + vertical_right_total + horizontal_right_total;
-    
-    if (total > 0) {
-      const raw_main_vertical = 60 * (vertical_total / total);
-      const raw_main_horizontal = 60 * (horizontal_total / total);
-      const raw_vertical_right = 60 * (vertical_right_total / total);
-      const raw_horizontal_right = 60 * (horizontal_right_total / total);
-      
-      main_vertical = Math.ceil(raw_main_vertical / increment);
-      main_horizontal = Math.ceil(raw_main_horizontal / increment);
-      vertical_right = Math.ceil(raw_vertical_right / increment);
-      horizontal_right = Math.ceil(raw_horizontal_right / increment);
-    }
-    
-    return { main_vertical, main_horizontal, vertical_right, horizontal_right };
-  }
 
   function updateAndValidateTrafficSettings() {
     // Retrieve the number of sequences and set gap duration
@@ -608,28 +589,24 @@
     let hTotal = hmain + hright + (5 * gap);
     
     // Compute the maximum allowed totals for each direction
-    // For vertical, the max allowed is 60 minus the horizontal total,
-    // and vice versa.
     let maxV = 60 - hTotal;
     let maxH = 60 - vTotal;
     
-    // Validate vertical green times: if the total vertical time exceeds maxV,
-    // adjust the vertical right green time.
+    // Validate vertical green times
     if (vTotal > maxV) {
-      // Here we subtract the fixed transition and vmain from maxV
       vright = Math.max(0, maxV - (vmain + (5 * gap)));
       vrightInput.value = vright;
       console.log("Adjusted vertical_right_green to", vright, "to meet max allowed vertical sum of", maxV);
     }
     
-    // Validate horizontal green times similarly:
+    // Validate horizontal green times
     if (hTotal > maxH) {
       hright = Math.max(0, maxH - (hmain + (5 * gap)));
       hrightInput.value = hright;
       console.log("Adjusted horizontal_right_green to", hright, "to meet max allowed horizontal sum of", maxH);
     }
     
-    // Return the normalized values (dividing by the number of sequences)
+    // Return the normalized values (dividing by number of sequences)
     return {
       vertical_main_green: vmain / sequences,
       vertical_right_green: vright / sequences,
@@ -643,10 +620,9 @@
   document.addEventListener('DOMContentLoaded', function () {
     // When tl_sequences changes, update the limits and validate the green fields
     document.getElementById("tl_sequences").addEventListener('input', () => {
-      updateTrafficSettingsLimits();
       updateAndValidateTrafficSettings();
     });
-    // Also attach validation to the green fields so they are checked when changed
+    // Also attach validation to the green fields
     const greenFields = ["tl_vmain", "tl_vright", "tl_hmain", "tl_hright"];
     greenFields.forEach(id => {
       document.getElementById(id).addEventListener('input', updateAndValidateTrafficSettings);
@@ -662,7 +638,7 @@
     return { verticalCycleTime, horizontalCycleTime };
   }
   
-  // Calculate max gap opportunities per minute (to be used as max pedestrian frequency)
+  // Calculate max gap opportunities per minute
   function getMaxGapsPerMinute(seqLengths, gap) {
     const cycleTimes = getCycleTimes(seqLengths, gap);
     const maxVerticalGaps = 60 / cycleTimes.verticalCycleTime;
@@ -699,7 +675,7 @@
     let enabled = document.getElementById("traffic-light-enable").checked;
 
     if (enabled) {
-      const seqLengths = updateTrafficSettingsLimits();
+      const seqLengths = updateAndValidateTrafficSettings();
     } else {
       const seqLengths = getSequenceLengths(vehicleData);
     }
@@ -708,10 +684,7 @@
     
     // Update the pedestrian frequency input's max attribute
     const pedInput = document.getElementById('pedestrian-frequency');
-    pedInput.max = Math.floor(maxGaps); // You can round or format as needed
-  
-    // Optional: update a placeholder or display to show the calculated maximum value
-    // e.g., pedInput.placeholder = `Max: ${Math.floor(maxGaps)}`;
+    pedInput.max = Math.floor(maxGaps);
   }
   
   // Attach updatePedestrianMax to all vehicle input frequency
@@ -730,7 +703,27 @@
       }
     });
   });
-  </script>      
+</script> 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // These are your traffic light input IDs
+    const trafficLightFields = ["tl_vmain", "tl_vright", "tl_hmain", "tl_hright"];
+
+    trafficLightFields.forEach(id => {
+      const field = document.getElementById(id);
+      if (field) {
+        // For each input change, call the function that updates your max calc
+        field.addEventListener("input", () => {
+          // If your main function is updatePedestrianMax, call that:
+          updatePedestrianMax(); 
+          // Or if you rely on updateAndValidateTrafficSettings, call that too:
+          updateAndValidateTrafficSettings();
+        });
+      }
+    });
+  });
+</script>
+
 </head>
 <body>
   <div class="main-container">
@@ -746,7 +739,7 @@
         <div class="top-row">
           <!-- Left box -->
           <div class="box">
-            <h2>Configurable Parameters</h2>
+            <h2>Vehicle Settings</h2>
             <!-- North -->
             <div class="dropdown-heading">
               <span class="symbol">—</span> North
@@ -828,6 +821,7 @@
               </ul>
             </div>
           </div>
+
           <!-- Middle box -->
           <div class="box">
             <h2>Junction Settings</h2>
@@ -846,65 +840,91 @@
             <!-- Left-turn lane checkbox -->
             <div class="checkbox-container">
               <input type="checkbox" id="left-turn" name="left-turn" checked>
-              <label for="left-turn">Left-turn lane</label>
+              <label for="left-turn">Left-Turn Lane</label>
+            </div>
+            <!-- Bus-lane checkbox -->
+            <div class="checkbox-container">
+              <input type="checkbox" id="bus-lane" name="bus-lane">
+              <label for="bus-lane">Bus Lane</label>
             </div>
             <!-- Pedestrians -->
             <div style="display: flex; align-items: center; margin: 2vh 0 1vh;">
-              <label for="pedestrian-frequency" style="font-size: 1.2vw; font-weight: 400; margin-right: 1vw; cursor: default;">
-                Pedestrian Frequency per hour
+              <label for="pedestrian-frequency" style="font-size: 1.5vh; font-weight: 400; margin-right: 1.5vh; cursor: default;">
+                Pedestrian Frequency per Hour
               </label>
-              <input type="number" id="pedestrian-frequency" name="pedestrian-frequency" min="0" max="5" style="padding: 0.5vh 1vw; font-size: 1vw; border: 1px solid #ccc; border-radius: 4px;">
+              <input type="number" id="pedestrian-frequency" name="pedestrian-frequency" min="0" max="5" style="padding: 0.5vh 1vh; font-size: 1.5vh; border: 1px solid #ccc; border-radius: 4px;">
             </div>
             <div style="display: flex; align-items: center; margin: 2vh 0 1vh;">
-              <label for="pedestrian-duration" style="font-size: 1.2vw; font-weight: 400; margin-right: 1vw; cursor: default;">
+              <label for="pedestrian-duration" style="font-size: 1.5vh; font-weight: 400; margin-right: 1.5vh; cursor: default;">
                 Pedestrian Duration per Event
               </label>
-              <input type="number" id="pedestrian-duration" name="pedestrian-duration" min="0" max="5" style="padding: 0.5vh 1vw; font-size: 1vw; border: 1px solid #ccc; border-radius: 4px;">
+              <input type="number" id="pedestrian-duration" name="pedestrian-duration" min="0" max="5" style="padding: 0.5vh 1vh; font-size: 1.5vh; border: 1px solid #ccc; border-radius: 4px;">
             </div>
           </div>
-          <!-- New Right box: Traffic Light Settings -->
+
+          <!-- Right box: Traffic Light Settings -->
           <div class="box">
             <h2>Traffic Light Settings</h2>
+            
             <!-- Enable Traffic Light Settings checkbox -->
             <div class="checkbox-container">
               <input type="checkbox" id="traffic-light-enable" name="traffic-light-enable">
               <label for="traffic-light-enable">Enable Traffic Light Settings</label>
             </div>
-            <!-- Traffic Light Parameters -->
+          
+            <!-- Sequences per Hour -->
             <ul class="traffic-light-settings">
               <li>
-                <label for="tl_sequences">Sequences per Hour</label>
-                <input type="number" id="tl_sequences" name="tl_sequences" min="0" value="0" style="width: 3em;">
+                <label for="tl_sequences">Traffic Cycles per Hour</label>
+                <input type="number" id="tl_sequences" name="tl_sequences" min="2" max="12" value="0" step="2">
               </li>
-              <li>
-                <label for="tl_vmain">Vertical Main Green</label>
-                <input type="number" id="tl_vmain" name="tl_vmain" min="0" value="0" style="width: 3em;">
-              </li>
-              <li>
-                <label for="tl_hmain">Horizontal Main Green</label>
-                <input type="number" id="tl_hmain" name="tl_hmain" min="0" value="0" style="width: 3em;">
-              </li>
-              <li>
-                <label for="tl_vright">Vertical Right Green</label>
-                <input type="number" id="tl_vright" name="tl_vright" min="0" value="0" style="width: 3em;">
-              </li>
-              <li>
-                <label for="tl_hright">Horizontal Right Green</label>
-                <input type="number" id="tl_hright" name="tl_hright" min="0" value="0" style="width: 3em;">
-              </li>
-              
             </ul>
+          
+            <!-- Vertical Settings -->
+            <div class="dropdown-heading">
+              <span class="symbol">—</span> Vertical Sequence Lengths
+            </div>
+            <div class="dropdown-content">
+              <ul class="traffic-light-settings">
+                <li>
+                  <label for="tl_vmain">Main Green Length</label>
+                  <input type="number" id="tl_vmain" name="tl_vmain" min="0" value="0">
+                </li>
+                <li>
+                  <label for="tl_vright">Right Green Length</label>
+                  <input type="number" id="tl_vright" name="tl_vright" min="0" value="0">
+                </li>
+              </ul>
+            </div>
+          
+            <!-- Horizontal Settings -->
+            <div class="dropdown-heading">
+              <span class="symbol">—</span> Horizontal Sequence Lengths
+            </div>
+            <div class="dropdown-content">
+              <ul class="traffic-light-settings">
+                <li>
+                  <label for="tl_hmain">Main Green Length</label>
+                  <input type="number" id="tl_hmain" name="tl_hmain" min="0" value="0">
+                </li>
+                <li>
+                  <label for="tl_hright">Right Green Length</label>
+                  <input type="number" id="tl_hright" name="tl_hright" min="0" value="0">
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </form>
 
-      <!-- Bottom box: File Upload area (remains in its own form) -->
+      <!-- Bottom box: File Upload area -->
       <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data" style="flex: 0;">
         <div class="bottom-box">
           <div class="drag-drop-box">
-            <p style="font-size: 2vw;">+</p>
-            <p>Drag and drop your file here</p>
-            <p>Browse files from computer here</p>
+            <p style="font-size: 3vh;">+</p>
+            <p>Drag and Drop your Settings File</p>
+            <p>or</p>
+            <p>Click to Browse Files from your Computer</p>
           </div>
           <input type="file" name="file" id="file-input" />
           <br>
@@ -932,6 +952,7 @@
 
         <input type="hidden" id="hidden_lanes" name="lanes" value="">
         <input type="hidden" id="hidden_left-turn" name="left-turn" value="">
+        <input type="hidden" id="hidden_bus-lane" name="bus-lane" value="">
         <input type="hidden" id="hidden_pedestrian_frequency" name="pedestrian-frequency" value="">
         <input type="hidden" id="hidden_pedestrian_duration" name="pedestrian-duration" value="">
         
@@ -942,7 +963,7 @@
         <input type="hidden" id="hidden_hmain" name="tl_hmain" value="">
         <input type="hidden" id="hidden_vright" name="tl_vright" value="">
         <input type="hidden" id="hidden_hright" name="tl_hright" value="">
-        
+
         <!-- The visible Start button -->
         <button class="upload-button" type="button" id="startButton">Start</button>
       </form>

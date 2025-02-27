@@ -400,6 +400,7 @@ def results():
         # Fetch the latest spawn rates and junction settings for the parameters section
         spawn_rates = get_latest_spawn_rates()
         junction_settings = get_latest_junction_settings()
+        traffic_light_settings = get_latest_traffic_light_settings()
 
         return render_template(
             'results.html',
@@ -417,7 +418,8 @@ def results():
             max_queue_length_w=max_queue_length_w,
             score=score,
             spawn_rates=spawn_rates,
-            junction_settings=junction_settings
+            junction_settings=junction_settings,
+            traffic_light_settings=traffic_light_settings
         )
 
     except Exception as e:
@@ -425,6 +427,36 @@ def results():
         
         print(f"❌ Error: {e}")
         return jsonify({'error': str(e)}), 400
+    
+
+def get_latest_traffic_light_settings():
+    """
+    Retrieves the latest traffic light settings from the database.
+    Returns a dict with fields to match what you display in results.html.
+    """
+    from models import TrafficSettings  # or place this import at the top
+    latest_ts = TrafficSettings.query.order_by(TrafficSettings.id.desc()).first()
+
+    # If none found, return a default dictionary
+    if not latest_ts:
+        return {
+            "enabled": False,
+            "sequences_per_hour": 0,
+            "vertical_main_green": 0,
+            "horizontal_main_green": 0,
+            "vertical_right_green": 0,
+            "horizontal_right_green": 0,
+        }
+
+    return {
+        "enabled": latest_ts.enabled,
+        "sequences_per_hour": latest_ts.sequences_per_hour,
+        "vertical_main_green": latest_ts.vertical_main_green,
+        "horizontal_main_green": latest_ts.horizontal_main_green,
+        "vertical_right_green": latest_ts.vertical_right_green,
+        "horizontal_right_green": latest_ts.horizontal_right_green,
+    }
+
 
 
 def get_session_leaderboard_result(session_id, run_id):

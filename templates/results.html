@@ -87,6 +87,7 @@
       width: 80vw;
       display: flex;
       justify-content: space-between;
+      align-items: flex-start; /* ensures boxes use their own height */
       gap: 2vw;
     }
 
@@ -95,16 +96,24 @@
       background-color: #f8f5e9;
       border-radius: 2vh;
       padding: 2vh;
-      width: 48%;
+      width: 30%;
       box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
     }
 
     /* Distinct classes for the two boxes */
     .config-box {
-      /* Add custom styles if needed */
+      background-color: #f8f5e9;
+      border-radius: 2vh;
+      padding: 2vh;
+      width: 30%;
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
     }
     .junction-box {
-      /* Add custom styles if needed */
+      background-color: #f8f5e9;
+      border-radius: 2vh;
+      padding: 2vh;
+      width: 30%;
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
     }
 
     .param-box h2 {
@@ -232,69 +241,57 @@
     </table>
   </div>
 
-  <!-- Parameters Section -->
+  <!-- Parameters Container -->
   <div id="paramsContainer">
     <!-- Left: Configurable Parameters -->
     <div class="param-box config-box">
-      <h2 class="dropdown-heading" data-target="configContent">
+      <h2 id="configHeading" class="dropdown-heading" data-target="configContent">
         <span class="symbol">—</span> Configurable Parameters
       </h2>
       <div class="dropdown-content" id="configContent">
         <ul>
-          <li>
-            <strong>North:</strong>
-            Forward: {{ spawn_rates.north.forward }},
-            Left: {{ spawn_rates.north.left }},
-            Right: {{ spawn_rates.north.right }}
-          </li>
-          <li>
-            <strong>South:</strong>
-            Forward: {{ spawn_rates.south.forward }},
-            Left: {{ spawn_rates.south.left }},
-            Right: {{ spawn_rates.south.right }}
-          </li>
-          <li>
-            <strong>East:</strong>
-            Forward: {{ spawn_rates.east.forward }},
-            Left: {{ spawn_rates.east.left }},
-            Right: {{ spawn_rates.east.right }}
-          </li>
-          <li>
-            <strong>West:</strong>
-            Forward: {{ spawn_rates.west.forward }},
-            Left: {{ spawn_rates.west.left }},
-            Right: {{ spawn_rates.west.right }}
-          </li>
+          <li><strong>North:</strong> Forward: {{ spawn_rates.north.forward }}, Left: {{ spawn_rates.north.left }}, Right: {{ spawn_rates.north.right }}</li>
+          <li><strong>South:</strong> Forward: {{ spawn_rates.south.forward }}, Left: {{ spawn_rates.south.left }}, Right: {{ spawn_rates.south.right }}</li>
+          <li><strong>East:</strong> Forward: {{ spawn_rates.east.forward }}, Left: {{ spawn_rates.east.left }}, Right: {{ spawn_rates.east.right }}</li>
+          <li><strong>West:</strong> Forward: {{ spawn_rates.west.forward }}, Left: {{ spawn_rates.west.left }}, Right: {{ spawn_rates.west.right }}</li>
         </ul>
       </div>
     </div>
 
-    <!-- Right: Junction Settings -->
+    <!-- Middle: Junction Settings -->
     <div class="param-box junction-box">
-      <h2 class="dropdown-heading" data-target="junctionContent">
+      <h2 id="junctionHeading" class="dropdown-heading" data-target="junctionContent">
         <span class="symbol">—</span> Junction Settings
       </h2>
       <div class="dropdown-content" id="junctionContent">
         <ul>
           <li><strong>Number of Lanes:</strong> {{ junction_settings.lanes }}</li>
-          <li>
-            <strong>Left-turn Lane:</strong>
-            {{ "Enabled" if junction_settings.left_turn_lane else "Disabled" }}
-          </li>
-          <li>
-            <strong>Bus Lane:</strong>
-            {{ "Enabled" if junction_settings.bus_lane else "Disabled" }}
-          </li>
-          <li>
-            <strong>Pedestrian Frequency per Hour:</strong> {{ junction_settings.pedestrian_frequency }}
-          </li>
-          <li>
-            <strong>Pedestrian Duration:</strong> {{ junction_settings.pedestrian_duration }}
-          </li>
+          <li><strong>Left-turn Lane:</strong> {{ "Enabled" if junction_settings.left_turn_lane else "Disabled" }}</li>
+          <li><strong>Bus Lane:</strong> {{ "Enabled" if junction_settings.bus_lane else "Disabled" }}</li>
+          <li><strong>Pedestrian Frequency per Hour:</strong> {{ junction_settings.pedestrian_frequency }}</li>
+          <li><strong>Pedestrian Duration (seconds):</strong> {{ junction_settings.pedestrian_duration }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Right: Traffic Light Settings -->
+    <div class="param-box traffic-box">
+      <h2 id="trafficHeading" class="dropdown-heading" data-target="trafficContent">
+        <span class="symbol">—</span> Traffic Light Settings
+      </h2>
+      <div class="dropdown-content" id="trafficContent">
+        <ul>
+          <li><strong>Enabled:</strong> {{ "Yes" if traffic_light_settings.enabled else "No" }}</li>
+          <li><strong>Sequences per Hour:</strong> {{ traffic_light_settings.sequences_per_hour }}</li>
+          <li><strong>Vertical Main Green (sec):</strong> {{ traffic_light_settings.vertical_main_green }}</li>
+          <li><strong>Horizontal Main Green (sec):</strong> {{ traffic_light_settings.horizontal_main_green }}</li>
+          <li><strong>Vertical Right Green (sec):</strong> {{ traffic_light_settings.vertical_right_green }}</li>
+          <li><strong>Horizontal Right Green (sec):</strong> {{ traffic_light_settings.horizontal_right_green }}</li>
         </ul>
       </div>
     </div>
   </div>
+
 
   <!-- Navigation Section -->
   <div class="nav-container">
@@ -303,20 +300,50 @@
   </div>
 
   <script>
-    // Toggle dropdown content for configurable parameters and junction settings
-    document.querySelectorAll('.dropdown-heading').forEach(heading => {
-      heading.addEventListener('click', () => {
-        const targetId = heading.getAttribute('data-target');
-        const content = document.getElementById(targetId);
-        if (content.style.display === 'block') {
-          content.style.display = 'none';
-          heading.querySelector('.symbol').textContent = '—';
-        } else {
-          content.style.display = 'block';
-          heading.querySelector('.symbol').textContent = '|';
-        }
+    // Function to equalize the heights of all open dropdowns
+    function equalizeDropdownHeights() {
+      const dropdowns = document.querySelectorAll('.dropdown-content');
+      let openDropdowns = Array.from(dropdowns).filter(div => div.style.display === "block");
+      if (openDropdowns.length === 0) return;
+      
+      // Remove any previously set inline height so we can get the natural scrollHeight
+      openDropdowns.forEach(div => div.style.height = "");
+      
+      // Find the maximum scrollHeight among open dropdowns
+      let maxHeight = Math.max(...openDropdowns.map(div => div.scrollHeight));
+      
+      // Set each open dropdown's height to the maximum value
+      openDropdowns.forEach(div => {
+        div.style.height = maxHeight + "px";
       });
+    }
+    
+    // Toggle function for a given heading and its target content
+    function toggleDropdown(headingId, contentId) {
+      const heading = document.getElementById(headingId);
+      const content = document.getElementById(contentId);
+      if (content.style.display === "block") {
+        content.style.display = "none";
+        heading.querySelector('.symbol').textContent = "—";
+        // Remove inline height so that when reopened it can recalc naturally
+        content.style.height = "";
+      } else {
+        content.style.display = "block";
+        heading.querySelector('.symbol').textContent = "|";
+      }
+      equalizeDropdownHeights();
+    }
+    
+    // Attach separate listeners
+    document.getElementById("configHeading").addEventListener("click", function() {
+      toggleDropdown("configHeading", "configContent");
     });
-  </script>
+    document.getElementById("junctionHeading").addEventListener("click", function() {
+      toggleDropdown("junctionHeading", "junctionContent");
+    });
+    document.getElementById("trafficHeading").addEventListener("click", function() {
+      toggleDropdown("trafficHeading", "trafficContent");
+    });
+  </script>   
 </body>
 </html>

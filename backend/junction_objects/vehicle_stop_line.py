@@ -1,22 +1,13 @@
 """
-This module contains utility functions for managing car behavior at intersections.
-It provides functions to determine stop lines, check if a car can pass or has crossed a stop line,
-stop a car at the stop line, and manage vehicle queuing to maintain proper spacing.
+
 """
 
-from vehicle import Car 
-from ..enums import Direction
+from .vehicle import Car 
+from .enums import Direction
 
 def get_stop_line(car: Car) -> float:
     """
-    Determines the stop line position for a given car based on its direction 
-    along with a width of the stop line.
     
-    Args:
-        car (Car): The car for which to calculate the stop line position.
-    
-    Returns:
-        float: The stop line position along the corresponding axis.
     """
 
     junctionData = car.junctionData
@@ -42,15 +33,8 @@ def get_stop_line(car: Car) -> float:
 
 def can_pass_stop_line(car: Car) -> bool:
     """
-    Checks if a car can pass the stop line based on its direction and speed.
     
-    Args:
-        car (Car): The car to check.
-    
-    Returns:
-        bool: True if the car can pass the stop line, False otherwise.
     """
-
 
     line = get_stop_line(car)
 
@@ -71,12 +55,8 @@ def can_pass_stop_line(car: Car) -> bool:
 
 def stop_at_stop_line(car: Car) -> None:
     """
-    Adjusts a car's position to stop at the stop line on the simulation.
     
-    Args:
-        car (Car): The car to adjust.
     """
-    
 
     line = get_stop_line(car)
 
@@ -91,13 +71,7 @@ def stop_at_stop_line(car: Car) -> None:
 
 def has_crossed_line(car: Car) -> bool:
     """
-    Determines whether a car has crossed the stop line.
     
-    Args:
-        car (Car): The car to check.
-    
-    Returns:
-        bool: True if the car has crossed the stop line, False otherwise.
     """
 
     line = get_stop_line(car)
@@ -119,12 +93,7 @@ def has_crossed_line(car: Car) -> bool:
 
 def queue_vehicle(car: Car, all_cars: list) -> None:
     """
-    Manages vehicle queuing by ensuring a car maintains proper distance
-    (same distance for all vehicles)from the vehicle ahead.
     
-    Args:
-        car (Car): The car to be queued.
-        all_cars (list): A list of all cars in the simulation.
     """
 
     total_gap = car.height + 5

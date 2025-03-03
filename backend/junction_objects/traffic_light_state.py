@@ -4,8 +4,8 @@
 
 import asyncio
 import random
-from traffic_light_controller import TrafficLightController
-from ..enums import Direction, TrafficLightSignal
+from .traffic_light_controller import TrafficLightController
+from .enums import Direction, TrafficLightSignal
 
 async def run_vertical_sequence(controller: TrafficLightController) -> None:
     """
@@ -237,9 +237,7 @@ async def run_pedestrian_event(controller: TrafficLightController) -> None:
         }
 
         controller.rightTurnLightStates[d] = {TrafficLightSignal.OFF.value: True, TrafficLightSignal.ON.value: False}
-        
-        controller.leftTurnLightStates[d] = {TrafficLightSignal.OFF.value: True, TrafficLightSignal.ON.value: False}
-        
+                
         await asyncio.sleep(0.5 / controller.simulationSpeedMultiplier)
         
         controller.pedestrianLightStates[d] = {TrafficLightSignal.OFF.value: False, TrafficLightSignal.ON.value: True}

@@ -1,21 +1,15 @@
 """
-This module provides functions for controlling vehicle movement in the traffic simulation.
-It includes functions for moving vehicles forward, executing left and right turns,
-and handling vehicle updates based on traffic light signals and road conditions.
-It also add new vehicles to the vehicle queue used in the simulation logic
+
 """
 
 import math 
-from vehicle import Car
-from vehicle_stop_line import can_pass_stop_line, stop_at_stop_line, has_crossed_line, queue_vehicle
-from ..enums import Direction, TurnType
+from .vehicle import Car
+from .vehicle_stop_line import can_pass_stop_line, stop_at_stop_line, has_crossed_line, queue_vehicle
+from .enums import Direction, TurnType
 
 def move_forward(car: Car) -> None:
     """
-    Moves the car forward in its current direction by its speed.
     
-    Args:
-        car (Car): The car to be moved.
     """
 
     if car.direction == Direction.NORTH:
@@ -33,10 +27,7 @@ def move_forward(car: Car) -> None:
 
 def move_left_turn(car: Car) -> None:
     """
-    Handles a left turn for the car at an intersection, changing direction upon completion.
     
-    Args:
-        car (Car): The car executing the left turn.
     """
 
     junctionData = car.junctionData
@@ -55,7 +46,7 @@ def move_left_turn(car: Car) -> None:
             if (car.y - car.speed) <= (bottom - margin):
 
                 car.y = bottom - margin
-                car.direction = Direction.WEST  
+                car.direction = Direction.WEST  # Consider using Direction.WEST if using enums consistently
                 car.completedLeft = True
             else:
 
@@ -95,10 +86,7 @@ def move_left_turn(car: Car) -> None:
 
 def move_right_turn(car: Car) -> None:
     """
-    Handles a right turn for the car using an incremental turn approach for smoother movement in the simulation.
     
-    Args:
-        car (Car): The car executing the right turn.
     """
 
     junctionData = car.junctionData
@@ -167,15 +155,7 @@ def move_right_turn(car: Car) -> None:
 
 def update_vehicle(car: Car, traffic_lights: dict, right_turn_lights: dict, all_cars: list) -> None:
     """
-    Updates the vehicle's movement based on traffic light signals and road conditions
-    Ensures that vehicles stop at stop lines if necessary
-    Adds the vehicle to the vehicle queue for simulation logic
     
-    Args:
-        car (Car): The car to update.
-        traffic_lights (dict): Dictionary containing traffic light states.
-        right_turn_lights (dict): Dictionary containing right turn signal states.
-        all_cars (list): A list of all cars in the simulation.
     """
 
     if not car.passedStopLine:
@@ -210,7 +190,7 @@ def update_vehicle(car: Car, traffic_lights: dict, right_turn_lights: dict, all_
         move_left_turn(car)
 
     else:
-        move_right_turn(car, all_cars)
+        move_right_turn(car)
 
     if has_crossed_line(car):
         car.passedStopLine = True

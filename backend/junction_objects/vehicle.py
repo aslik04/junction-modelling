@@ -1,17 +1,14 @@
 """
-This module defines the Car class, which represents vehicles in the traffic simulation.
-Each Car object has attributes such as direction, lane, speed, and turn type.
-The class also determines the initial position and movement behavior of the car
-within a simulated junction environment.
+
 """
 
 import math
 import random
-from ..enums import Direction, TurnType
+from .enums import Direction, TurnType
 
 class Car:
     """
-    Represent the traffic inside of the simulation, it has attributes like direction, speed and lane
+    
     """
 
     def __init__(
@@ -23,18 +20,10 @@ class Car:
         junctionData: dict
     ):
         """
-        Initializes a Car object with its movement attributes and position based on the junction data.
         
-        Args:
-            direction (Direction): The initial direction of the car (NORTH, EAST, SOUTH, WEST).
-            lane (int): The lane in which the car is positioned (wot change from this).
-            speed (float): The speed of the car (constant for all cars).
-            turn_type (TurnType): The type of turn the car will take (LEFT, RIGHT, STRAIGHT).
-            junctionData (dict): A dictionary containing junction configuration such as lane width, canvas dimensions, and lane numbers.
-        
-        Raises:
-            ValueError: If the provided direction is invalid.
         """
+
+        self.junctionData = junctionData
 
         self.inital_direction = direction
         self.direction = direction
@@ -87,10 +76,7 @@ class Car:
 
     def to_dict(self):
         """
-        Converts the Car object to a dictionary containg the attributes.
         
-        Returns:
-            dict: A dictionary containing the car's attributes such as direction, lane, speed, position, and dimensions.
         """
 
         return {

@@ -202,7 +202,7 @@
 
   <!-- Results Container -->
   <div id="resultsContainer">
-    <div class="score">Overall Score: <strong>{{ score }}</strong></div>
+    <div class="score">Overall Score: <strong>{{ score|round|int }}</strong></div>
     <table class="resultsTable">
       <thead>
         <tr>
@@ -215,31 +215,32 @@
       <tbody>
         <tr>
           <td>Northbound</td>
-          <td>{{ avg_wait_time_n }}</td>
-          <td>{{ max_wait_time_n }}</td>
-          <td>{{ max_queue_length_n }}</td>
+          <td>{{ avg_wait_time_n|round|int }}</td>
+          <td>{{ max_wait_time_n|round|int }}</td>
+          <td>{{ max_queue_length_n|round|int }}</td>
         </tr>
         <tr>
           <td>Southbound</td>
-          <td>{{ avg_wait_time_s }}</td>
-          <td>{{ max_wait_time_s }}</td>
-          <td>{{ max_queue_length_s }}</td>
+          <td>{{ avg_wait_time_s|round|int }}</td>
+          <td>{{ max_wait_time_s|round|int }}</td>
+          <td>{{ max_queue_length_s|round|int }}</td>
         </tr>
         <tr>
           <td>Eastbound</td>
-          <td>{{ avg_wait_time_e }}</td>
-          <td>{{ max_wait_time_e }}</td>
-          <td>{{ max_queue_length_e }}</td>
+          <td>{{ avg_wait_time_e|round|int }}</td>
+          <td>{{ max_wait_time_e|round|int }}</td>
+          <td>{{ max_queue_length_e|round|int }}</td>
         </tr>
         <tr>
           <td>Westbound</td>
-          <td>{{ avg_wait_time_w }}</td>
-          <td>{{ max_wait_time_w }}</td>
-          <td>{{ max_queue_length_w }}</td>
+          <td>{{ avg_wait_time_w|round|int }}</td>
+          <td>{{ max_wait_time_w|round|int }}</td>
+          <td>{{ max_queue_length_w|round|int }}</td>
         </tr>
       </tbody>
     </table>
   </div>
+
 
   <!-- Parameters Container -->
   <div id="paramsContainer">

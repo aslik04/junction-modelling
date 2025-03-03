@@ -5,7 +5,7 @@
 import json
 import math
 from typing import Dict, Any
-from ..enums import Direction, TrafficLightSignal
+from .enums import Direction, TrafficLightSignal
 
 class TrafficLightController:
     """

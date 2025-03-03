@@ -4,7 +4,6 @@ import time
 import subprocess
 import csv
 import io
-import random
 import requests
 from flask import Flask, request, jsonify, render_template, url_for, redirect, send_from_directory
 from models import db, Configuration, LeaderboardResult, Session, TrafficSettings
@@ -12,6 +11,8 @@ from sqlalchemy import inspect
 
 app = Flask(__name__)
 
+
+# Database Configuration
 db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'traffic_junction.db')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -21,34 +22,28 @@ db.init_app(app)
 # Initialize database, needed os.path to not create db in instance folder
 with app.app_context():
     db.create_all()
-    inspector = inspect(db.engine)
-    print("Tables created:", inspector.get_table_names())
-    print("Database path:", os.path.abspath('traffic_junction.db'))
 
-# ------------------------------------------------------
-# Spawn FastAPI (server.py) automatically
-# ------------------------------------------------------
 server_process = None
+
 def start_fastapi():
-    """
-    Start the FastAPI server (`server.py`) if it's not already running.
-    Adjust 'cwd' if 'server.py' is in a different location.
-    """
+    """Start the FastAPI server (server.py) if not already running."""
     global server_process
     if server_process is None or server_process.poll() is not None:
         python_executable = sys.executable
+<<<<<<< HEAD
         # Ensure `server.py` runs in the correct folder
         server_dir = os.path.join(os.path.dirname(__file__), "backend")
+=======
+        server_dir = os.path.join(os.path.dirname(__file__), "simulation")
+>>>>>>> ae43bab97ccfce7f8c38162d34e24059066b7a1d
         server_script = os.path.join(server_dir, "server.py")
         server_process = subprocess.Popen([python_executable, server_script], cwd=server_dir)
-        time.sleep(3)  # Give FastAPI time to start on port 8000
-        print("✅ FastAPI server started.")
+        time.sleep(3)
+        print("FastAPI server started.")
 
 
 def stop_fastapi():
-    """
-    Stop the FastAPI server if it's running.
-    """
+    """Stop the FastAPI server if it's running."""
     global server_process
     if server_process and server_process.poll() is None:  # Check if the process is running
         server_process.terminate()  # Send termination signal
@@ -56,22 +51,8 @@ def stop_fastapi():
             server_process.wait(timeout=5)  # Give it some time to terminate
         except subprocess.TimeoutExpired:
             server_process.kill()  # Force kill if it doesn't stop in time
-        print("⛔ FastAPI server stopped.")
+        print("FastAPI server stopped.")
         server_process = None
-    else:
-        print("⚠️ No FastAPI server is currently running.")
-
-
-def stop_fastapi():
-    """
-    Stops the FastAPI server if it's running.
-    """
-    global server_process
-    if server_process and server_process.poll() is None:  # If server is running
-        server_process.terminate()  # Terminate the process
-        server_process.wait()  # Ensure it stops completely
-        server_process = None
-        print("⏹️ FastAPI server stopped.")
 
 # ✅ Endpoint to start FastAPI when Start button is pressed
 @app.route('/start_simulation', methods=['POST'])
@@ -93,18 +74,14 @@ def back_to_parameters():
 
 
 
-# ------------------------------------------------------
-# Serve files from 'frontend' folder (NOT in static/)
-# ------------------------------------------------------
+
 @app.route('/frontend/<path:filename>')
 def serve_frontend(filename):
-    """
-    Serve files from the 'frontend' folder, which is NOT in /static.
-    This lets you use <script src="/frontend/main.js"></script> in your HTML.
-    """
+    """Serve files from the 'frontend' directory"""
     frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend")
     return send_from_directory(frontend_dir, filename)
 
+# Session Management
 def create_session():
     session = Session()
     db.session.add(session)
@@ -117,21 +94,18 @@ def end_session(session_id):
         session.active = False
         db.session.commit()
 
+
+# Leaderboard Retrieval
 def get_session_leaderboard(session):
-    """
-    Given a session ID, returns the top 10 LeaderboardResult entries for that session ordered by the calculated total score (ascending).
-    """
-    # get results that match session ID
+    """Retrieve top 10 leaderboard results for a given session ordered by score."""
     results = LeaderboardResult.query.filter_by(session_id=session).all()
     if not results:
         return []
 
-    # extract metrics for the given session
     avg_wait_times = [r.avg_wait_time for r in results]
     max_wait_times = [r.max_wait_time for r in results]
     max_queue_lengths = [r.max_queue_length for r in results]
 
-    # calculate best (min) and worst (max) values for each metric
     best_avg = min(avg_wait_times)
     worst_avg = max(avg_wait_times)
     best_max_wait = min(max_wait_times)
@@ -147,20 +121,14 @@ def get_session_leaderboard(session):
         """
         return 0 if worst == best else 100 * (x - best) / (worst - best)
 
-    # compute total score for each result
     for result in results:
         score_avg = compute_metric_score(result.avg_wait_time, best_avg, worst_avg)
         score_max_wait = compute_metric_score(result.max_wait_time, best_max_wait, worst_max_wait)
         score_max_queue = compute_metric_score(result.max_queue_length, best_max_queue, worst_max_queue)
         total_score = score_avg + score_max_wait + score_max_queue
-
-        # attach the calculated score to the result
         result.calculated_score = total_score
 
-    # sort results by calculated_score in ascending order
     sorted_results = sorted(results, key=lambda r: r.calculated_score)
-
-    # return top 10 results
     return sorted_results[:10]
 
 def save_session_leaderboard_result(run_id, session_id,
@@ -195,15 +163,14 @@ def save_session_leaderboard_result(run_id, session_id,
     db.session.add(result)
     db.session.commit()
 
+# Fetch Latest Traffic Settings
 def get_latest_spawn_rates():
     """
     Retrieves the latest spawn rates from the database.
     """
     latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
-
     if not latest_config:
-        return {}  # Return empty if no data exists
-
+        return {} 
     return {
         "north": {
             "forward": latest_config.north_forward_vph,
@@ -227,13 +194,13 @@ def get_latest_spawn_rates():
         }
     }
 
+
 def get_latest_junction_settings():
     """
     Retrieves the latest spawn rates from the database.
     """
     try:
         latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
-
         if latest_config:
             return {
                 "lanes": latest_config.lanes,
@@ -648,12 +615,11 @@ def parameters():
             try:
                 response = requests.post("http://127.0.0.1:8000/update_traffic_light_settings", json=traffic_light_settings)
                 if response.status_code == 200:
-                    print("✅ Traffic light settings sent successfully to server.py.")
+                    print("Traffic light settings sent successfully to server.py.")
                 else:
-                    print(f"❌ Error sending traffic light settings: {response.text}")
+                    print(f"Error sending traffic light settings: {response.text}")
             except requests.exceptions.RequestException as e:
                 print(f"⚠️ Could not reach server.py for traffic lights: {e}")
-            # ──────────────────────────────────────────────────────────
 
             return redirect(url_for('junctionPage')) 
 

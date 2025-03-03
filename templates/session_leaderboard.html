@@ -163,23 +163,23 @@
                         </td>
                         <td>{{ run.run_id }}</td>
                         <!-- Northbound -->
-                        <td>{{ run.nb_avg_wait }}</td>
-                        <td>{{ run.nb_max_wait }}</td>
-                        <td>{{ run.nb_max_queue }}</td>
+                        <td>{{ run.nb_avg_wait|round|int }}</td>
+                        <td>{{ run.nb_max_wait|round|int }}</td>
+                        <td>{{ run.nb_max_queue|round|int }}</td>
                         <!-- Southbound -->
-                        <td>{{ run.sb_avg_wait }}</td>
-                        <td>{{ run.sb_max_wait }}</td>
-                        <td>{{ run.sb_max_queue }}</td>
+                        <td>{{ run.sb_avg_wait|round|int }}</td>
+                        <td>{{ run.sb_max_wait|round|int }}</td>
+                        <td>{{ run.sb_max_queue|round|int }}</td>
                         <!-- Eastbound -->
-                        <td>{{ run.eb_avg_wait }}</td>
-                        <td>{{ run.eb_max_wait }}</td>
-                        <td>{{ run.eb_max_queue }}</td>
+                        <td>{{ run.eb_avg_wait|round|int }}</td>
+                        <td>{{ run.eb_max_wait|round|int }}</td>
+                        <td>{{ run.eb_max_queue|round|int }}</td>
                         <!-- Westbound -->
-                        <td>{{ run.wb_avg_wait }}</td>
-                        <td>{{ run.wb_max_wait }}</td>
-                        <td>{{ run.wb_max_queue }}</td>
+                        <td>{{ run.wb_avg_wait|round|int }}</td>
+                        <td>{{ run.wb_max_wait|round|int }}</td>
+                        <td>{{ run.wb_max_queue|round|int }}</td>
                         <!-- Score -->
-                        <td>{{ run.score }}</td>
+                        <td>{{ run.score|round|int }}</td>
                     </tr>
                     {% endfor %}
                 {% else %}

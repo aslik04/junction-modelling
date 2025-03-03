@@ -98,9 +98,7 @@ class LeaderboardResult(db.Model):
 class TrafficSettings(db.Model):
     __tablename__ = 'traffic_settings'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # Optionally, you can tie this to a configuration run via a foreign key:
     run_id = db.Column(db.Integer, db.ForeignKey('configurations.run_id'), nullable=False)
-    # Also include a session reference if needed:
     session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False)
 
     enabled = db.Column(db.Boolean, nullable=False, default=False)

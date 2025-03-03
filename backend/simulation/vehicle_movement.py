@@ -4,7 +4,7 @@
 
 import math 
 from vehicle import Car
-from vehicle_stop_line import get_stop_line, can_pass_stop_line, stop_at_stop_line, has_crossed_line, queue_vehicle
+from vehicle_stop_line import can_pass_stop_line, stop_at_stop_line, has_crossed_line, queue_vehicle
 from ..enums import Direction, TurnType
 
 def move_forward(car: Car) -> None:
@@ -12,16 +12,16 @@ def move_forward(car: Car) -> None:
     
     """
 
-    if car.direction.value == Direction.NORTH:
+    if car.direction == Direction.NORTH:
 
         car.y -= car.speed
-    elif car.direction.value == Direction.SOUTH:
+    elif car.direction == Direction.SOUTH:
 
         car.y += car.speed
-    elif car.direction.value == Direction.EAST:
+    elif car.direction == Direction.EAST:
 
         car.x += car.speed
-    elif car.direction.value == Direction.WEST:
+    elif car.direction == Direction.WEST:
 
         car.x -= car.speed
 
@@ -41,7 +41,7 @@ def move_left_turn(car: Car) -> None:
 
     if not car.completedLeft:
 
-        if car.direction.value == Direction.NORTH:
+        if car.direction == Direction.NORTH:
 
             if (car.y - car.speed) <= (bottom - margin):
 
@@ -51,7 +51,7 @@ def move_left_turn(car: Car) -> None:
             else:
 
                 car.y -= car.speed
-        elif car.direction.value == Direction.EAST:
+        elif car.direction == Direction.EAST:
 
             if (car.x + car.speed) >= (left + margin):
 
@@ -61,7 +61,7 @@ def move_left_turn(car: Car) -> None:
             else:
 
                 car.x += car.speed
-        elif car.direction.value == Direction.SOUTH:
+        elif car.direction == Direction.SOUTH:
 
             if (car.y + car.speed) >= (top + margin):
 
@@ -71,7 +71,7 @@ def move_left_turn(car: Car) -> None:
             else:
 
                 car.y += car.speed
-        elif car.direction.value == Direction.WEST:
+        elif car.direction == Direction.WEST:
 
             if (car.x - car.speed) <= (right - margin):
 
@@ -103,22 +103,22 @@ def move_right_turn(car: Car) -> None:
 
     if car.rightTurnPhase == 0:
 
-        if car.direction.value == Direction.NORTH and car.y <= bottom - margin:
+        if car.direction == Direction.NORTH and car.y <= bottom - margin:
 
             car.y = bottom - margin
             car.rightTurnPhase = 1
             car.currentRightTurnAngle += math.pi / 4
-        elif car.direction.value == Direction.EAST and car.x >= left + margin:
+        elif car.direction == Direction.EAST and car.x >= left + margin:
 
             car.x = left + margin
             car.rightTurnPhase = 1
             car.currentRightTurnAngle += math.pi / 4
-        elif car.direction.value == Direction.SOUTH and car.y >= top + margin:
+        elif car.direction == Direction.SOUTH and car.y >= top + margin:
 
             car.y = top + margin
             car.rightTurnPhase = 1
             car.currentRightTurnAngle += math.pi / 4
-        elif car.direction.value == Direction.WEST and car.x <= right - margin:
+        elif car.direction == Direction.WEST and car.x <= right - margin:
 
             car.x = right - margin
             car.rightTurnPhase = 1
@@ -126,25 +126,25 @@ def move_right_turn(car: Car) -> None:
 
     elif car.rightTurnPhase == 1:
 
-        if car.direction.value == Direction.NORTH and car.x >= right - margin:
+        if car.direction == Direction.NORTH and car.x >= right - margin:
 
             car.direction = Direction.EAST
             car.rightTurnPhase = 2
             car.currentRightTurnAngle += math.pi / 4
 
-        elif car.direction.value == Direction.EAST and car.y >= bottom - margin:
+        elif car.direction == Direction.EAST and car.y >= bottom - margin:
 
             car.direction = Direction.SOUTH
             car.rightTurnPhase = 2
             car.currentRightTurnAngle += math.pi / 4
 
-        elif car.direction.value == Direction.SOUTH and car.x <= left + margin:
+        elif car.direction == Direction.SOUTH and car.x <= left + margin:
 
             car.direction = Direction.WEST
             car.rightTurnPhase = 2
             car.currentRightTurnAngle += math.pi / 4
 
-        elif car.direction.value == Direction.WEST and car.y <= top + margin:
+        elif car.direction == Direction.WEST and car.y <= top + margin:
 
             car.direction = Direction.NORTH
             car.rightTurnPhase = 2
@@ -160,30 +160,26 @@ def update_vehicle(car: Car, traffic_lights: dict, right_turn_lights: dict, all_
 
     if not car.passedStopLine:
 
-        if car.turn_type.value in ["forward", "left"]:
+        if car.turn_type in ["forward", "left"]:
 
-            allowed = traffic_lights.get(car.direction.value, {}).get("green", False)
+            allowed = traffic_lights.get(car.direction, {}).get("green", False)
 
             if not allowed:
 
-                stop_line = get_stop_line(car)
+                if not can_pass_stop_line(car):
 
-                if not can_pass_stop_line(car, stop_line):
-
-                    stop_at_stop_line(car, stop_line)
+                    stop_at_stop_line(car)
                     queue_vehicle(car, all_cars)
                     return
         else:
 
-            arrow_on = right_turn_lights.get(car.direction.value, {}).get("on", False)
+            arrow_on = right_turn_lights.get(car.direction, {}).get("on", False)
 
             if not arrow_on:
 
-                stop_line = get_stop_line(car)
+                if not can_pass_stop_line(car):
 
-                if not can_pass_stop_line(car, stop_line):
-
-                    stop_at_stop_line(car, stop_line)
+                    stop_at_stop_line(car)
                     queue_vehicle(car, all_cars)
                     return
 

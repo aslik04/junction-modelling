@@ -8,6 +8,13 @@ The `TurnType` enum defines the possible movement types for a vehicle:
 - FORWARD: go straight,
 - LEFT: make a left turn,
 - RIGHT: make a right turn.
+
+The `TrafficLightSignal` enum represents the possible states of a traffic light:
+- RED: stop signal
+- AMBER: prepare to stop or go
+- GREEN: proceed signal
+- OFF: light is not operational
+- ON: special case for pedestrian signals
 """
 
 from enum import Enum
@@ -22,3 +29,10 @@ class TurnType(str, Enum):
     FORWARD = "forward"
     LEFT = "left"
     RIGHT = "right"
+
+class TrafficLightSignal(Enum):
+    RED = "red"
+    AMBER = "amber"
+    GREEN = "green"
+    OFF = "off"
+    ON = "on"

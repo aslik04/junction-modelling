@@ -31,13 +31,12 @@ def get_stop_line(car: Car) -> float:
     
     return 0
 
-def can_pass_stop_line(car: Car, line: float) -> bool:
+def can_pass_stop_line(car: Car) -> bool:
     """
     
     """
 
-    if line is None:
-        line = get_stop_line(car)
+    line = get_stop_line(car)
 
     if car.direction == Direction.NORTH:
 
@@ -54,13 +53,12 @@ def can_pass_stop_line(car: Car, line: float) -> bool:
     
     return True
 
-def stop_at_stop_line(car: Car, line: float) -> None:
+def stop_at_stop_line(car: Car) -> None:
     """
     
     """
 
-    if line is None:
-        line = get_stop_line(car)
+    line = get_stop_line(car)
 
     if car.direction == Direction.NORTH:
         car.y = line
@@ -71,13 +69,12 @@ def stop_at_stop_line(car: Car, line: float) -> None:
     elif car.direction == Direction.WEST:
         car.x = line
 
-def has_crossed_line(car: Car, line: float = None) -> bool:
+def has_crossed_line(car: Car) -> bool:
     """
     
     """
 
-    if line is None:
-        line = get_stop_line(car)
+    line = get_stop_line(car)
 
     if car.direction == Direction.NORTH:
 

@@ -30,12 +30,8 @@ def start_fastapi():
     global server_process
     if server_process is None or server_process.poll() is not None:
         python_executable = sys.executable
-<<<<<<< HEAD
         # Ensure `server.py` runs in the correct folder
         server_dir = os.path.join(os.path.dirname(__file__), "backend")
-=======
-        server_dir = os.path.join(os.path.dirname(__file__), "simulation")
->>>>>>> ae43bab97ccfce7f8c38162d34e24059066b7a1d
         server_script = os.path.join(server_dir, "server.py")
         server_process = subprocess.Popen([python_executable, server_script], cwd=server_dir)
         time.sleep(3)

@@ -1,5 +1,8 @@
 """
-
+This module defines the Car class, which represents vehicles in the traffic simulation.
+Each Car object has attributes such as direction, lane, speed, and turn type.
+The class also determines the initial position and movement behavior of the car
+within a simulated junction environment.
 """
 
 import math

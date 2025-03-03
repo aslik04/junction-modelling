@@ -1,5 +1,8 @@
 """
-
+This module provides functions for controlling vehicle movement in the traffic simulation.
+It includes functions for moving vehicles forward, executing left and right turns,
+and handling vehicle updates based on traffic light signals and road conditions.
+It also add new vehicles to the vehicle queue used in the simulation logic
 """
 
 import math 
@@ -9,7 +12,10 @@ from ..enums import Direction, TurnType
 
 def move_forward(car: Car) -> None:
     """
+    Moves the car forward in its current direction by its speed.
     
+    Args:
+        car (Car): The car to be moved.
     """
 
     if car.direction == Direction.NORTH:

@@ -27,7 +27,10 @@ def move_forward(car: Car) -> None:
 
 def move_left_turn(car: Car) -> None:
     """
+    Handles a left turn for the car at an intersection, changing direction upon completion.
     
+    Args:
+        car (Car): The car executing the left turn.
     """
 
     junctionData = car.junctionData
@@ -46,7 +49,7 @@ def move_left_turn(car: Car) -> None:
             if (car.y - car.speed) <= (bottom - margin):
 
                 car.y = bottom - margin
-                car.direction = Direction.WEST  # Consider using Direction.WEST if using enums consistently
+                car.direction = Direction.WEST  
                 car.completedLeft = True
             else:
 
@@ -86,7 +89,10 @@ def move_left_turn(car: Car) -> None:
 
 def move_right_turn(car: Car) -> None:
     """
+    Handles a right turn for the car using an incremental turn approach for smoother movement in the simulation.
     
+    Args:
+        car (Car): The car executing the right turn.
     """
 
     junctionData = car.junctionData
@@ -155,7 +161,15 @@ def move_right_turn(car: Car) -> None:
 
 def update_vehicle(car: Car, traffic_lights: dict, right_turn_lights: dict, all_cars: list) -> None:
     """
+    Updates the vehicle's movement based on traffic light signals and road conditions
+    Ensures that vehicles stop at stop lines if necessary
+    Adds the vehicle to the vehicle queue for simulation logic
     
+    Args:
+        car (Car): The car to update.
+        traffic_lights (dict): Dictionary containing traffic light states.
+        right_turn_lights (dict): Dictionary containing right turn signal states.
+        all_cars (list): A list of all cars in the simulation.
     """
 
     if not car.passedStopLine:

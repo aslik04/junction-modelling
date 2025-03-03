@@ -1,5 +1,18 @@
 /**
- * @fileoverview
+ * @fileoverview This file is responsible for the rendering of the four-way junction on an HTML canvas.
+ * We define functions to draw the roads, lane markings, and puffin crossings.
+ * We utilise the predefined configurations and input values from the user to render the junction.
+ *
+ * Features:
+ * - We render the entire junction layout, including roads and lane markings.
+ * - We draw dashed lines between lanes, solid lines between incoming and outgoing lanes.
+ * - We draw puffin crossings with stripes that flow opposite to the direction of walking.
+ * - We use predefined colours and configurations to render the junction.
+ * - We use the user input to determine the number of lanes and the size of the junction.
+ * 
+ * Dependencies:
+ * - config.js: Utilised to retrieve constants and data related to canvas properties, colors, 
+ *   lane dimensions, and junction calculations.
  */
 
 import { 
@@ -265,9 +278,3 @@ export function drawHorizontal(xCoord, yCoord, width, height) {
     // Restore the state of the canvas to prevent unintentional clipping elsewhere.
     canvas2D.restore();
 }
-
-/*
-waiting on input page to be made
-// Draw the junction each time page loads and when input of lanes change.
-inputNumOfLanes.addEventListener("input", junctionDrawing);
-junctionDrawing();*/

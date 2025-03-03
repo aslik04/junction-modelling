@@ -5,11 +5,11 @@
  */
 
 /**
- * Initialise an empty array, which will store pngs of cars.
+ * We initialise an empty array, which will store pngs of cars.
  * 
  * @type {HTMLImageElement[]}
  */
-export const carPngs = [];
+export const carPngs = []; 
 
 /**
  * Method which loads png of cars from folder "cars", that have a list of predefined names. 

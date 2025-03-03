@@ -1,6 +1,20 @@
 /**
- * @fileoverview
+ * @fileoverview This file draws the simulation of pedestrian crossings in the four-way junction.
+ * We implemment functions to create, move, and render pedestrians as they walk across the crossing.
+ *
+ * Features:
+ * - We create pedestrians with movement data based on the direction and speed.
+ * - We update pedestrian positions and tracking progress as they walk the crossing.
+ * - We alternates between walking images 1 and 2 to simulate realistic motion.
+ * - We ensure pedestrians start on the correct side and walk correctly.
+ * - We utilise transformation, translation, and rotation to render pedestrians correctly.
+ * - We are able to adjust the speed of movement based on the multipler of the simulation.
+ *
+ * Dependencies:
+ * - config.js: This provides lane dimensions, puffin crossing properties, and junction data.
+ * - images.js: Contains pedestrian images for animation.
  */
+
 
 import {
     canvas2D, 
@@ -24,10 +38,7 @@ import {
  */
 export function makePedestrian(direction, speed) {
     // To prevent repeated code utilised method with returns object of data regarding junction.
-    const {numOfLanes,
-        roadSize, 
-        canvasX, 
-        canvasY, 
+    const {
         topHorizontal,
         bottomHorizontal,
         leftVertical,

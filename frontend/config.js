@@ -1,6 +1,14 @@
 /**
- * @fileoverview
+ * @fileoverview This module defines constants and data for rendering the junction on a HTML canvas.
+ * It sets up the canvas, lane and the road properties, alongside utility functions for 
+ * retrieving data about the junction and puffin crossing stripe length.
+ *
+ * Features:
+ * - We initialise the 2D rendering context of the canvas and the canvas itself.
+ * - We define constants for our roads as; lane width, road colors, and puffin crossing.
+ * - We calculate and return junction data based on user-defined lane configurations.
  */
+
 
 /**
  * @constant {HTMLCanvasElement} junctionCanvas : The canvas where the junction is drawn.
@@ -54,6 +62,7 @@ export function puffinCrossingStripeLength() {
  * Data includes the size of the road, centre of canvas, road boundaries, and dimensions of the car.
  *
  * @returns {Object} An object containing:
+ *   - numOfLanes {number} : The number of lanes input by the user, or default to 5 lanes.
  *   - roadSize {number} : The total size of the road for incoming and outgoing traffic (in pixels).
  *   - canvasX {number} : The x-coordinate of the centre of the canvas.
  *   - canvasY {number} : The y-coordinate of the centre of the canvas.
@@ -65,6 +74,7 @@ export function puffinCrossingStripeLength() {
  *   - heightOfCar {number} : The height of a car (2 times lane width).
  */
 export function getJunctionData() {
+    // Number of lanes input by the user, or default to 5 lanes.
     const numOfLanes = parseInt(localStorage.getItem("numOfLanes"), 10) || 5;
 
     // The total size of the road, incoming and outgoing lanes included.

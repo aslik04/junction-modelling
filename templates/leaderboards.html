@@ -181,7 +181,8 @@
 
     <div class="nav-container">
         <a class="nav-button" href="/index">❌ End Session</a>
-        <a class="nav-button" href="/parameters">✅ Continue Session</a>
+        <a class="nav-button" id="backBtn" href="/parameters">✅ Continue Session (Back to Inputs)</a>
+        <a class="nav-button" id="session" href="/session_leaderboard">Session Leaderboard</a>
     </div>
     <script>
         function handleRowClick(runId) {
@@ -190,6 +191,25 @@
                 window.location.href = "/junction_details?run_id=" + runId;
             }
         }
+
+        document.getElementById("backBtn").addEventListener("click", async () => {
+            console.log("Back button clicked. Stopping FastAPI...");
+
+            try {
+                let stopResponse = await fetch('/stop_simulation', { method: 'POST' });
+                let stopData = await stopResponse.json();
+                
+                if (stopResponse.ok) {
+                    console.log("✅ FastAPI stopped:", stopData.message);
+                    // Redirect back to the parameters page
+                    window.location.href = "/parameters";
+                } else {
+                    console.error("❌ Error stopping FastAPI:", stopData.error);
+                }
+            } catch (error) {
+                console.error("❌ Error sending stop request:", error);
+            }
+        });
     </script>        
 </body>
 </html>

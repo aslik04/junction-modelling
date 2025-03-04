@@ -1062,27 +1062,46 @@ def get_all_time_best_configurations():
     
     """
     
-    all_results = LeaderboardResult.query.all()
+    all_results = db.session.query(LeaderboardResult, AlgorithmLeaderboardResult) \
+    .join(
+        AlgorithmLeaderboardResult,
+        LeaderboardResult.run_id == AlgorithmLeaderboardResult.run_id
+    ) \
+    .all()
+
     results_with_scores = []
     
-    for r in all_results:
+    for ur, ar in all_results:
 
-        score = compute_score_4directions(
+        user_score = compute_score_4directions(
 
-            r.avg_wait_time_north, r.max_wait_time_north, r.max_queue_length_north,
+            ur.avg_wait_time_north, ur.max_wait_time_north, ur.max_queue_length_north,
 
-            r.avg_wait_time_south, r.max_wait_time_south, r.max_queue_length_south,
+            ur.avg_wait_time_south, ur.max_wait_time_south, ur.max_queue_length_south,
 
-            r.avg_wait_time_east, r.max_wait_time_east, r.max_queue_length_east,
+            ur.avg_wait_time_east, ur.max_wait_time_east, ur.max_queue_length_east,
 
-            r.avg_wait_time_west, r.max_wait_time_west, r.max_queue_length_west,
+            ur.avg_wait_time_west, ur.max_wait_time_west, ur.max_queue_length_west,
 
             False
         )
 
-        r.score = score
+        algorithm_score = compute_score_4directions(
 
-        results_with_scores.append(r)
+            ar.avg_wait_time_north, ar.max_wait_time_north, ar.max_queue_length_north,
+
+            ar.avg_wait_time_south, ar.max_wait_time_south, ar.max_queue_length_south,
+
+            ar.avg_wait_time_east, ar.max_wait_time_east, ar.max_queue_length_east,
+
+            ar.avg_wait_time_west, ar.max_wait_time_west, ar.max_queue_length_west,
+
+            True
+        )
+
+        ur.score = algorithm_score - user_score
+
+        results_with_scores.append(ur)
     
     results_with_scores.sort(key=lambda x: x.score)
     
@@ -1265,39 +1284,58 @@ def get_recent_runs_with_scores(session_id):
         .filter_by(session_id=session_id)
         .order_by(LeaderboardResult.run_id.desc())
         .limit(10)
+        .all(),
+        AlgorithmLeaderboardResult.query
+        .filter_by(session_id=session_id)
+        .order_by(AlgorithmLeaderboardResult.run_id.desc())
+        .limit(10)
         .all()
     )
     
     runs_with_scores = []
 
-    for r in recent_runs:
-        final_score = compute_score_4directions(
-            # 12 actual metrics
-            r.avg_wait_time_north, r.max_wait_time_north, r.max_queue_length_north,
-            r.avg_wait_time_south, r.max_wait_time_south, r.max_queue_length_south,
-            r.avg_wait_time_east,  r.max_wait_time_east,  r.max_queue_length_east,
-            r.avg_wait_time_west,  r.max_wait_time_west,  r.max_queue_length_west,
+    leaderboard_results, algorithm_leaderboard_results = recent_runs
+
+    for ur, ar in zip(leaderboard_results, algorithm_leaderboard_results):
+
+        user_final_score = compute_score_4directions(
+
+            ur.avg_wait_time_north, ur.max_wait_time_north, ur.max_queue_length_north,
+            ur.avg_wait_time_south, ur.max_wait_time_south, ur.max_queue_length_south,
+            ur.avg_wait_time_east,  ur.max_wait_time_east,  ur.max_queue_length_east,
+            ur.avg_wait_time_west,  ur.max_wait_time_west,  ur.max_queue_length_west,
             False
         )
 
+        algorithm_final_score = compute_score_4directions(
+
+            ar.avg_wait_time_north, ar.max_wait_time_north, ar.max_queue_length_north,
+            ar.avg_wait_time_south, ar.max_wait_time_south, ar.max_queue_length_south,
+            ar.avg_wait_time_east,  ar.max_wait_time_east,  ar.max_queue_length_east,
+            ar.avg_wait_time_west,  ar.max_wait_time_west,  ar.max_queue_length_west,
+            True
+        )
+
+        final_score = algorithm_final_score - user_final_score
+
         runs_with_scores.append({
-            "run_id": r.run_id,
+            "run_id": ur.run_id,
 
-            "nb_avg_wait": r.avg_wait_time_north,
-            "nb_max_wait": r.max_wait_time_north,
-            "nb_max_queue": r.max_queue_length_north,
+            "nb_avg_wait": ur.avg_wait_time_north,
+            "nb_max_wait": ur.max_wait_time_north,
+            "nb_max_queue": ur.max_queue_length_north,
 
-            "sb_avg_wait": r.avg_wait_time_south,
-            "sb_max_wait": r.max_wait_time_south,
-            "sb_max_queue": r.max_queue_length_south,
+            "sb_avg_wait": ur.avg_wait_time_south,
+            "sb_max_wait": ur.max_wait_time_south,
+            "sb_max_queue": ur.max_queue_length_south,
 
-            "eb_avg_wait": r.avg_wait_time_east,
-            "eb_max_wait": r.max_wait_time_east,
-            "eb_max_queue": r.max_queue_length_east,
+            "eb_avg_wait": ur.avg_wait_time_east,
+            "eb_max_wait": ur.max_wait_time_east,
+            "eb_max_queue": ur.max_queue_length_east,
 
-            "wb_avg_wait": r.avg_wait_time_west,
-            "wb_max_wait": r.max_wait_time_west,
-            "wb_max_queue": r.max_queue_length_west,
+            "wb_avg_wait": ur.avg_wait_time_west,
+            "wb_max_wait": ur.max_wait_time_west,
+            "wb_max_queue": ur.max_queue_length_west,
 
             "score": final_score
         })
@@ -1305,7 +1343,7 @@ def get_recent_runs_with_scores(session_id):
     if not runs_with_scores:
         return []
 
-    best_run = min(runs_with_scores, key=lambda x: x["score"])
+    best_run = max(runs_with_scores, key=lambda x: x["score"])
 
     runs_with_scores.remove(best_run)
 

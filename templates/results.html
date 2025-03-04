@@ -39,9 +39,8 @@
       font-weight: 600;
       margin-bottom: 1.5vh;
     }
-    /* Score Comparison Container */
-    {% set algo_score = algorithm_metrics.score %}
-    {% set diff = algo_score - score%}
+
+    {% set diff = algorithm_metrics.score - score%}
     #scoreComparison {
       width: 80vw;
       padding: 2vh;
@@ -190,7 +189,8 @@
   <!-- Header Section -->
   <div id="resultsHeader">🎉 Results 🎉</div>
 
-  <!-- Score Comparison Container -->
+<!-!-- S->
+ Comparison Container -->
   <div id="scoreComparison">
     Overall Score Difference: 
     <span style="color: {% if diff > 0 %}green{% elif diff < 0 %}red{% else %}black{% endif %};">

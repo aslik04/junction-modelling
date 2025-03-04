@@ -37,10 +37,10 @@
     }
     /* Top Containers: Junction & Traffic Light Settings */
     #topContainer {
-      width: 80vw;
+      width: 80vh;
       display: flex;
       justify-content: space-around;
-      gap: 2vw;
+      gap: 2vh;
       margin-bottom: 3vh;
     }
     .param-box {
@@ -57,7 +57,7 @@
     }
     .param-box ul {
       list-style: none;
-      padding-left: 1vw;
+      padding-left: 1vh;
     }
     .param-box li {
       margin: 0.5vh 0;
@@ -65,11 +65,11 @@
     }
     /* Directional Parameters Container */
     #directionContainer {
-      width: 80vw;
+      width: 80vh;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-around;
-      gap: 2vw;
+      gap: 2vh;
     }
     .direction-box {
       background-color: #f8f5e9;
@@ -86,7 +86,7 @@
     }
     .direction-box ul {
       list-style: none;
-      padding-left: 1vw;
+      padding-left: 1vh;
     }
     .direction-box li {
       margin: 0.5vh 0;
@@ -97,8 +97,8 @@
       text-decoration: none;
       color: #f8f5e9;
       background-color: #8da676;
-      padding: 1.2vh 2.5vw;
-      border-radius: 2vw;
+      padding: 1.2vh 2.5vh;
+      border-radius: 2vh;
       font-size: 1.5vh;
       font-weight: 600;
       transition: background-color 0.3s;
@@ -108,10 +108,10 @@
     }
     @media (max-width: 600px) {
       h1 {
-        font-size: 6vw;
+        font-size: 6vh;
       }
       #topContainer, #directionContainer {
-        width: 90vw;
+        width: 90vh;
         flex-direction: column;
         align-items: center;
       }
@@ -119,17 +119,17 @@
         width: 90%;
       }
       .param-box li, .direction-box li {
-        font-size: 4vw;
+        font-size: 4vh;
       }
       a {
-        font-size: 4vw;
-        padding: 2vh 4vw;
+        font-size: 4vh;
+        padding: 2vh 4vh;
       }
     }
   </style>
 </head>
 <body>
-  <h1>Configuration Details for Run {{ configuration.run_id }}</h1>
+  <h1>Configuration Details from Run {{ configuration.run_id }} in Session  {{ configuration.session_id }}</h1>
 
   <!-- Top Containers: Junction Settings and Traffic Light Settings -->
   <div id="topContainer">
@@ -205,6 +205,6 @@
     </div>
   </div>
 
-  <a href="{{ url_for('session_leaderboard_page', session_id=configuration.session_id) }}">Back to Session Leaderboard</a>
+  <a href="javascript:history.back()">Back</a>
 </body>
 </html>

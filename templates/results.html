@@ -39,8 +39,12 @@
       font-weight: 600;
       margin-bottom: 1.5vh;
     }
+<<<<<<< HEAD
 
     {% set diff = algorithm_metrics.score - score%}
+=======
+    /* Score Comparison Container */
+>>>>>>> 79d9fa0ee6d1062a54a52a9be24847c17d8781e5
     #scoreComparison {
       width: 80vw;
       padding: 2vh;
@@ -186,17 +190,21 @@
   </style>
 </head>
 <body>
+  {% set algo_score = algorithm_metrics.score %}
+  {% set diff = (algo_score - score) | default(0) %}
+
   <!-- Header Section -->
   <div id="resultsHeader">🎉 Results 🎉</div>
 
 <!-!-- S->
  Comparison Container -->
   <div id="scoreComparison">
-    Overall Score Difference: 
-    <span style="color: {% if diff > 0 %}green{% elif diff < 0 %}red{% else %}black{% endif %};">
-      {% if diff > 0 %}+{% endif %}{{ diff|round|int }}
+    Overall Score Difference:
+    <span style="color: {% if diff > 0 %} green {% elif diff < 0 %} red {% else %} black {% endif %};">
+      {% if diff > 0 %}+{% endif %}{{ diff|round(0) }}
     </span>
   </div>
+  
 
   <!-- Big Results Container -->
   <div id="resultsPairContainer">
@@ -350,7 +358,7 @@
 
   <!-- Navigation Section -->
   <div class="nav-container">
-    <a class="res-button" href="/parameters">🏠 Back to Inputs</a>
+    <a class="res-button" id="backBtn" href="/parameters">🏠 Back to Inputs</a>
     <a class="res-button" href="/session_leaderboard">📊 See Leaderboards</a>
   </div>
 
@@ -381,6 +389,25 @@
       }
       equalizeDropdownHeights();
     }
+
+    document.getElementById("backBtn").addEventListener("click", async () => {
+        console.log("Back button clicked. Stopping FastAPI...");
+
+        try {
+            let stopResponse = await fetch('/stop_simulation', { method: 'POST' });
+            let stopData = await stopResponse.json();
+            
+            if (stopResponse.ok) {
+                console.log("✅ FastAPI stopped:", stopData.message);
+                // Redirect back to the parameters page
+                window.location.href = "/parameters";
+            } else {
+                console.error("❌ Error stopping FastAPI:", stopData.error);
+            }
+        } catch (error) {
+            console.error("❌ Error sending stop request:", error);
+        }
+    });
     
     // Attach event listeners for all dropdown headings
     document.getElementById("configHeading").addEventListener("click", function() {

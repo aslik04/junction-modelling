@@ -301,7 +301,6 @@
                   console.error("Error fetching IDs:", data.error);
                   return;
               }
-
               window.location.href = `/results?session_id=${data.session_id}&run_id=${data.run_id}`;
           //} else {
               //console.error("❌ Error stopping simulation:", stopData.error);

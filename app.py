@@ -9,7 +9,7 @@ import subprocess
 import csv
 import io
 import requests
-from flask import Flask, request, jsonify, render_template, url_for, redirect, send_from_directory
+from flask import Flask, flash, request, jsonify, render_template, url_for, redirect, send_from_directory
 from models import db, Configuration, LeaderboardResult, Session, TrafficSettings
 from sqlalchemy import inspect
 from models import TrafficSettings
@@ -1153,6 +1153,20 @@ def get_recent_runs_with_scores(session_id):
     final_list = [best_run] + runs_with_scores
 
     return final_list
+
+@app.route('/junction_details')
+def junction_details():
+    run_id = request.args.get('run_id', type=int)
+    if not run_id:
+        flash('No run ID provided.')
+        return redirect('/session_leaderboard')
+
+    configuration = Configuration.query.filter_by(run_id=run_id).first()
+    if not configuration:
+        flash('Configuration details not found for the provided run.')
+        return redirect('/session_leaderboard')
+    
+    return render_template('junction_details.html', configuration=configuration)
 
 if __name__ == '__main__':
     app.run(debug=True)

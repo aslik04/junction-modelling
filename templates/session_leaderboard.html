@@ -198,27 +198,10 @@
     </div>
 
     <script>
-        // Updated row click function to handle 12 new columns + Score
+        // Redirect to the configuration details page when row is clicked
         function handleRowClick(row) {
-            const cells = row.getElementsByTagName("td");
-            const data = {
-                recentRun: cells[0].innerText,
-                runId: cells[1].innerText,
-                nbAvgWait: cells[2].innerText,
-                nbMaxWait: cells[3].innerText,
-                nbMaxQueue: cells[4].innerText,
-                sbAvgWait: cells[5].innerText,
-                sbMaxWait: cells[6].innerText,
-                sbMaxQueue: cells[7].innerText,
-                ebAvgWait: cells[8].innerText,
-                ebMaxWait: cells[9].innerText,
-                ebMaxQueue: cells[10].innerText,
-                wbAvgWait: cells[11].innerText,
-                wbMaxWait: cells[12].innerText,
-                wbMaxQueue: cells[13].innerText,
-                score: cells[14].innerText
-            };
-            console.log(JSON.stringify(data));
+            const runId = row.getElementsByTagName("td")[1].innerText;
+            window.location.href = "/junction_details?run_id=" + runId;
         }
     </script>
 </body>

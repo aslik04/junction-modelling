@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Junction Configuration Details</title>
+    <style>
+        body {
+            background-color: #a2bf89;
+            font-family: 'SF Pro', sans-serif;
+            color: #6b6b6b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5vh 0;
+        }
+        h1 {
+            color: #f8f5e9;
+            margin-bottom: 2vh;
+        }
+        table {
+            background-color: #f8f5e9;
+            border-collapse: collapse;
+            border-radius: 1.2vw;
+            width: 80%;
+            max-width: 800px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 1.2vh 1.5vw;
+            text-align: left;
+            font-size: 1.2vw;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #8da676;
+            color: white;
+        }
+        tr:hover {
+            background-color: #dce7c5;
+            transition: 0.3s;
+        }
+        a {
+            margin-top: 2vh;
+            text-decoration: none;
+            color: #f8f5e9;
+            background-color: #8da676;
+            padding: 1.2vh 2.5vw;
+            border-radius: 2vw;
+            font-size: 1.2vw;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        a:hover {
+            background-color: #789563;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 6vw;
+            }
+            th, td {
+                font-size: 4vw;
+            }
+            a {
+                font-size: 3vw;
+                padding: 2vh 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Configuration Details for Run {{ configuration.run_id }}</h1>
+    <table>
+        <tr>
+            <th>Parameter</th>
+            <th>Value</th>
+        </tr>
+        <tr>
+            <td>Lanes</td>
+            <td>{{ configuration.lanes }}</td>
+        </tr>
+        <tr>
+            <td>Left Turn Lane</td>
+            <td>{{ configuration.left_turn_lane }}</td>
+        </tr>
+        <tr>
+            <td>Bus Lane</td>
+            <td>{{ configuration.bus_lane }}</td>
+        </tr>
+        <tr>
+            <td>Pedestrian Duration (s)</td>
+            <td>{{ configuration.pedestrian_duration }}</td>
+        </tr>
+        <tr>
+            <td>Pedestrian Frequency (per hour)</td>
+            <td>{{ configuration.pedestrian_frequency }}</td>
+        </tr>
+        <tr>
+            <td>North VPH</td>
+            <td>{{ configuration.north_vph }}</td>
+        </tr>
+        <tr>
+            <td>North Forward VPH</td>
+            <td>{{ configuration.north_forward_vph }}</td>
+        </tr>
+        <tr>
+            <td>North Left VPH</td>
+            <td>{{ configuration.north_left_vph }}</td>
+        </tr>
+        <tr>
+            <td>North Right VPH</td>
+            <td>{{ configuration.north_right_vph }}</td>
+        </tr>
+        <tr>
+            <td>South VPH</td>
+            <td>{{ configuration.south_vph }}</td>
+        </tr>
+        <tr>
+            <td>South Forward VPH</td>
+            <td>{{ configuration.south_forward_vph }}</td>
+        </tr>
+        <tr>
+            <td>South Left VPH</td>
+            <td>{{ configuration.south_left_vph }}</td>
+        </tr>
+        <tr>
+            <td>South Right VPH</td>
+            <td>{{ configuration.south_right_vph }}</td>
+        </tr>
+        <tr>
+            <td>East VPH</td>
+            <td>{{ configuration.east_vph }}</td>
+        </tr>
+        <tr>
+            <td>East Forward VPH</td>
+            <td>{{ configuration.east_forward_vph }}</td>
+        </tr>
+        <tr>
+            <td>East Left VPH</td>
+            <td>{{ configuration.east_left_vph }}</td>
+        </tr>
+        <tr>
+            <td>East Right VPH</td>
+            <td>{{ configuration.east_right_vph }}</td>
+        </tr>
+        <tr>
+            <td>West VPH</td>
+            <td>{{ configuration.west_vph }}</td>
+        </tr>
+        <tr>
+            <td>West Forward VPH</td>
+            <td>{{ configuration.west_forward_vph }}</td>
+        </tr>
+        <tr>
+            <td>West Left VPH</td>
+            <td>{{ configuration.west_left_vph }}</td>
+        </tr>
+        <tr>
+            <td>West Right VPH</td>
+            <td>{{ configuration.west_right_vph }}</td>
+        </tr>
+    </table>
+    <a href="{{ url_for('session_leaderboard_page', session_id=configuration.session_id) }}">Back to Session Leaderboard</a>
+</body>
+</html>

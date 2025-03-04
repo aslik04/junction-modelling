@@ -144,36 +144,38 @@
                 </tr>
             </thead>
             <tbody>
-                {# Loop exactly 10 times; if fewer than 10 results, show empty cells #}
                 {% for i in range(10) %}
-                <tr>
-                    <td>{{ results[i].run_id if results|length > i else "" }}</td>
-
-                    <!-- Northbound -->
-                    <td>{{ results[i].avg_wait_time_north | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].max_wait_time_north | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].max_queue_length_north if results|length > i else "" }}</td>
-
-                    <!-- Southbound -->
-                    <td>{{ results[i].avg_wait_time_south | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].max_wait_time_south | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].max_queue_length_south if results|length > i else "" }}</td>
-
-                    <!-- Eastbound -->
-                    <td>{{ results[i].avg_wait_time_east | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].max_wait_time_east | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].max_queue_length_east if results|length > i else "" }}</td>
-
-                    <!-- Westbound -->
-                    <td>{{ results[i].avg_wait_time_west | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].max_wait_time_west | round(2) if results|length > i else "" }}</td>
-                    <td>{{ results[i].max_queue_length_west if results|length > i else "" }}</td>
-
-                    <!-- Score -->
-                    <td>{{ results[i].score | round(2) if results|length > i else "" }}</td>
-                </tr>
+                    {% if results|length > i %}
+                    <!-- We have an actual result -->
+                    <tr onclick="handleRowClick('{{ results[i].run_id }}')">
+                        <td>{{ results[i].run_id }}</td>
+                        <!-- Northbound -->
+                        <td>{{ results[i].avg_wait_time_north|round(2) }}</td>
+                        <td>{{ results[i].max_wait_time_north|round(2) }}</td>
+                        <td>{{ results[i].max_queue_length_north }}</td>
+                        <!-- Southbound -->
+                        <td>{{ results[i].avg_wait_time_south|round(2) }}</td>
+                        <td>{{ results[i].max_wait_time_south|round(2) }}</td>
+                        <td>{{ results[i].max_queue_length_south }}</td>
+                        <!-- Eastbound -->
+                        <td>{{ results[i].avg_wait_time_east|round(2) }}</td>
+                        <td>{{ results[i].max_wait_time_east|round(2) }}</td>
+                        <td>{{ results[i].max_queue_length_east }}</td>
+                        <!-- Westbound -->
+                        <td>{{ results[i].avg_wait_time_west|round(2) }}</td>
+                        <td>{{ results[i].max_wait_time_west|round(2) }}</td>
+                        <td>{{ results[i].max_queue_length_west }}</td>
+                        <!-- Score -->
+                        <td>{{ results[i].score|round(2) }}</td>
+                    </tr>
+                    {% else %}
+                    <!-- If there's no result for this index, show an empty row: -->
+                    <tr>
+                        <td colspan="14"></td>
+                    </tr>
+                    {% endif %}
                 {% endfor %}
-            </tbody>
+            </tbody>            
         </table>
     </div>
 
@@ -181,5 +183,13 @@
         <a class="nav-button" href="/index">❌ End Session</a>
         <a class="nav-button" href="/parameters">✅ Continue Session</a>
     </div>
+    <script>
+        function handleRowClick(runId) {
+            // Only redirect if we got a valid runId
+            if (runId) {
+                window.location.href = "/junction_details?run_id=" + runId;
+            }
+        }
+    </script>        
 </body>
 </html>

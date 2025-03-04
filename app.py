@@ -10,9 +10,8 @@ import csv
 import io
 import requests
 from flask import Flask, flash, request, jsonify, render_template, url_for, redirect, send_from_directory
-from models import db, Configuration, LeaderboardResult, Session, TrafficSettings
+from models import db, Configuration, LeaderboardResult, Session, TrafficSettings, AlgorithmLeaderboardResult, AlgorithmTrafficSettings
 from sqlalchemy import inspect
-from models import TrafficSettings
 
 app = Flask(__name__)
 
@@ -257,6 +256,39 @@ def save_session_leaderboard_result(run_id, session_id,
     db.session.add(result)
     db.session.commit()
 
+def save_algorithm_result(run_id, session_id,
+                                    avg_wait_time_n, max_wait_time_n, max_queue_length_n,
+                                    avg_wait_time_s, max_wait_time_s, max_queue_length_s, 
+                                    avg_wait_time_e, max_wait_time_e, max_queue_length_e,
+                                    avg_wait_time_w, max_wait_time_w, max_queue_length_w):
+    """
+    
+    """
+
+    result = AlgorithmLeaderboardResult(
+        session_id=session_id,
+        run_id=run_id,
+
+        avg_wait_time_north=avg_wait_time_n,
+        max_wait_time_north=max_wait_time_n, 
+        max_queue_length_north=max_queue_length_n,
+
+        avg_wait_time_south=avg_wait_time_s,
+        max_wait_time_south=max_wait_time_s,
+        max_queue_length_south=max_queue_length_s,
+
+        avg_wait_time_east=avg_wait_time_e,
+        max_wait_time_east=max_wait_time_e,
+        max_queue_length_east=max_queue_length_e,
+
+        avg_wait_time_west=avg_wait_time_w,
+        max_wait_time_west=max_wait_time_w,
+        max_queue_length_west=max_queue_length_w
+    )
+
+    db.session.add(result)
+    db.session.commit()    
+
 def get_latest_spawn_rates():
     """
     Retrieve the latest spawn rates for traffic from the most recent configuration.
@@ -459,33 +491,7 @@ def results():
         if not session_id or not run_id:
             return jsonify({"error": "Missing session_id or run_id"}), 400
 
-        result = get_session_leaderboard_result(session_id, run_id)
-        if result:
-
-            avg_wait_time_n = result.avg_wait_time_north
-            avg_wait_time_s = result.avg_wait_time_south
-            avg_wait_time_e = result.avg_wait_time_east
-            avg_wait_time_w = result.avg_wait_time_west
-
-            max_wait_time_n = result.max_wait_time_north
-            max_wait_time_s = result.max_wait_time_south
-            max_wait_time_e = result.max_wait_time_east
-            max_wait_time_w = result.max_wait_time_west
-
-            max_queue_length_n = result.max_queue_length_north
-            max_queue_length_s = result.max_queue_length_south
-            max_queue_length_e = result.max_queue_length_east
-            max_queue_length_w = result.max_queue_length_west
-
-            score = compute_score_4directions(
-                avg_wait_time_n, max_wait_time_n, max_queue_length_n,
-                avg_wait_time_s, max_wait_time_s, max_queue_length_s,
-                avg_wait_time_e, max_wait_time_e, max_queue_length_e,
-                avg_wait_time_w, max_wait_time_w, max_queue_length_w
-            )
-        else:
-
-            with app.test_request_context(
+        with app.test_request_context(
                 '/simulate', 
                 method='POST', 
                 json={'session_id': session_id, 'run_id': run_id}
@@ -496,26 +502,63 @@ def results():
                 else:
                     response_data = response.json
 
-            avg_wait_time_n = response_data.get('avg_wait_time_n')
-            avg_wait_time_s = response_data.get('avg_wait_time_s')
-            avg_wait_time_e = response_data.get('avg_wait_time_e')
-            avg_wait_time_w = response_data.get('avg_wait_time_w')
+                user_metrics = response_data.get('user', {})
 
-            max_wait_time_n = response_data.get('max_wait_time_n')
-            max_wait_time_s = response_data.get('max_wait_time_s')
-            max_wait_time_e = response_data.get('max_wait_time_e')
-            max_wait_time_w = response_data.get('max_wait_time_w')
+                avg_wait_time_n = user_metrics.get('avg_wait_time_n')
+                avg_wait_time_s = user_metrics.get('avg_wait_time_s')
+                avg_wait_time_e = user_metrics.get('avg_wait_time_e')
+                avg_wait_time_w = user_metrics.get('avg_wait_time_w')
 
-            max_queue_length_n = response_data.get('max_queue_length_n')
-            max_queue_length_s = response_data.get('max_queue_length_s')
-            max_queue_length_e = response_data.get('max_queue_length_e')
-            max_queue_length_w = response_data.get('max_queue_length_w')
+                max_wait_time_n = user_metrics.get('max_wait_time_n')
+                max_wait_time_s = user_metrics.get('max_wait_time_s')
+                max_wait_time_e = user_metrics.get('max_wait_time_e')
+                max_wait_time_w = user_metrics.get('max_wait_time_w')
 
-            score = response_data.get('score')
+                max_queue_length_n = user_metrics.get('max_queue_length_n')
+                max_queue_length_s = user_metrics.get('max_queue_length_s')
+                max_queue_length_e = user_metrics.get('max_queue_length_e')
+                max_queue_length_w = user_metrics.get('max_queue_length_w')
+
+                score = user_metrics.get('score')
+
+                default_metrics = response_data.get('default', {})
+
+                algorithm_metrics = {
+                    "avg_wait_time_n": default_metrics.get('avg_wait_time_n'),
+                    "avg_wait_time_s": default_metrics.get('avg_wait_time_s'),
+                    "avg_wait_time_e": default_metrics.get('avg_wait_time_e'),
+                    "avg_wait_time_w": default_metrics.get('avg_wait_time_w'),
+
+                    "max_wait_time_n": default_metrics.get('max_wait_time_n'),
+                    "max_wait_time_s": default_metrics.get('max_wait_time_s'),
+                    "max_wait_time_e": default_metrics.get('max_wait_time_e'),
+                    "max_wait_time_w": default_metrics.get('max_wait_time_w'),
+
+                    "max_queue_length_n": default_metrics.get('max_queue_length_n'),
+                    "max_queue_length_s": default_metrics.get('max_queue_length_s'),
+                    "max_queue_length_e": default_metrics.get('max_queue_length_e'),
+                    "max_queue_length_w": default_metrics.get('max_queue_length_w'),
+
+                    "score": default_metrics.get('score')
+                }
 
         spawn_rates = get_latest_spawn_rates()
         junction_settings = get_latest_junction_settings()
         traffic_light_settings = get_latest_traffic_light_settings()
+
+        # Retrieve the default (algorithm) traffic settings from the AlgorithmTrafficSettings table
+        default_traffic = AlgorithmTrafficSettings.query.filter_by(session_id=session_id, run_id=run_id).first()
+        if default_traffic:
+            default_traffic_settings = {
+                "enabled": default_traffic.enabled,
+                "sequences_per_hour": default_traffic.sequences_per_hour,
+                "vertical_main_green": default_traffic.vertical_main_green,
+                "horizontal_main_green": default_traffic.horizontal_main_green,
+                "vertical_right_green": default_traffic.vertical_right_green,
+                "horizontal_right_green": default_traffic.horizontal_right_green,
+            }
+        else:
+            default_traffic_settings = {}
 
         return render_template(
             'results.html',
@@ -534,7 +577,9 @@ def results():
             score=score,
             spawn_rates=spawn_rates,
             junction_settings=junction_settings,
-            traffic_light_settings=traffic_light_settings
+            traffic_light_settings=traffic_light_settings,
+            algorithm_metrics=algorithm_metrics,
+            default_traffic_settings=default_traffic_settings
         )
 
     except Exception as e:        
@@ -905,46 +950,90 @@ def simulate():
         sim_response.raise_for_status()  
         
         metrics = sim_response.json()
-        avg_wait_time_n = metrics.get("avg_wait_time_n")
-        avg_wait_time_s = metrics.get("avg_wait_time_s")
-        avg_wait_time_e = metrics.get("avg_wait_time_e")
-        avg_wait_time_w = metrics.get("avg_wait_time_w")
-        
-        max_wait_time_n = metrics.get("max_wait_time_n")
-        max_wait_time_s = metrics.get("max_wait_time_s")
-        max_wait_time_e = metrics.get("max_wait_time_e")
-        max_wait_time_w = metrics.get("max_wait_time_w")
 
-        max_queue_length_n = metrics.get("max_queue_length_n")
-        max_queue_length_s = metrics.get("max_queue_length_s")
-        max_queue_length_e = metrics.get("max_queue_length_e")
-        max_queue_length_w = metrics.get("max_queue_length_w")
-        
-        save_session_leaderboard_result(run_id, session_id,
-                                          avg_wait_time_n, max_wait_time_n,
-                                          max_queue_length_n,
-                                          avg_wait_time_s, max_wait_time_s,
-                                          max_queue_length_s,
-                                          avg_wait_time_e, max_wait_time_e,
-                                          max_queue_length_e,
-                                          avg_wait_time_w, max_wait_time_w,
-                                          max_queue_length_w)
-        
-        score = compute_score_4directions(
-            avg_wait_time_n, max_wait_time_n, max_queue_length_n,
-            avg_wait_time_s, max_wait_time_s, max_queue_length_s,
-            avg_wait_time_e, max_wait_time_e, max_queue_length_e,
-            avg_wait_time_w, max_wait_time_w, max_queue_length_w
+        user_metrics = metrics["user"]
+        algorithm_metrics = metrics["default"]
+        algorithm_traffic_settings = metrics["default_traffic_settings"]
+
+        default_traffic_result = AlgorithmTrafficSettings(
+            run_id=run_id,
+            session_id=session_id,
+            enabled=algorithm_traffic_settings.get("enabled", False),
+            sequences_per_hour=algorithm_traffic_settings.get("sequences_per_hour", 0),
+            vertical_main_green=algorithm_traffic_settings.get("vertical_main_green", 0),
+            horizontal_main_green=algorithm_traffic_settings.get("horizontal_main_green", 0),
+            vertical_right_green=algorithm_traffic_settings.get("vertical_right_green", 0),
+            horizontal_right_green=algorithm_traffic_settings.get("horizontal_right_green", 0)
         )
-                                          
+        
+        db.session.add(default_traffic_result)
+        db.session.commit()
+
+        save_session_leaderboard_result(
+            run_id, session_id,
+            user_metrics["avg_wait_time_n"], user_metrics["max_wait_time_n"], user_metrics["max_queue_length_n"],
+            user_metrics["avg_wait_time_s"], user_metrics["max_wait_time_s"], user_metrics["max_queue_length_s"],
+            user_metrics["avg_wait_time_e"], user_metrics["max_wait_time_e"], user_metrics["max_queue_length_e"],
+            user_metrics["avg_wait_time_w"], user_metrics["max_wait_time_w"], user_metrics["max_queue_length_w"]
+        )
+        
+        save_algorithm_result(
+            run_id, session_id,
+            algorithm_metrics["avg_wait_time_n"], algorithm_metrics["max_wait_time_n"], algorithm_metrics["max_queue_length_n"],
+            algorithm_metrics["avg_wait_time_s"], algorithm_metrics["max_wait_time_s"], algorithm_metrics["max_queue_length_s"],
+            algorithm_metrics["avg_wait_time_e"], algorithm_metrics["max_wait_time_e"], algorithm_metrics["max_queue_length_e"],
+            algorithm_metrics["avg_wait_time_w"], algorithm_metrics["max_wait_time_w"], algorithm_metrics["max_queue_length_w"]
+        )
+        
+        user_score = compute_score_4directions(
+            user_metrics["avg_wait_time_n"], user_metrics["max_wait_time_n"], user_metrics["max_queue_length_n"],
+            user_metrics["avg_wait_time_s"], user_metrics["max_wait_time_s"], user_metrics["max_queue_length_s"],
+            user_metrics["avg_wait_time_e"], user_metrics["max_wait_time_e"], user_metrics["max_queue_length_e"],
+            user_metrics["avg_wait_time_w"], user_metrics["max_wait_time_w"], user_metrics["max_queue_length_w"], 
+            False
+        )
+        
+        default_score = compute_score_4directions(
+            algorithm_metrics["avg_wait_time_n"], algorithm_metrics["max_wait_time_n"], algorithm_metrics["max_queue_length_n"],
+            algorithm_metrics["avg_wait_time_s"], algorithm_metrics["max_wait_time_s"], algorithm_metrics["max_queue_length_s"],
+            algorithm_metrics["avg_wait_time_e"], algorithm_metrics["max_wait_time_e"], algorithm_metrics["max_queue_length_e"],
+            algorithm_metrics["avg_wait_time_w"], algorithm_metrics["max_wait_time_w"], algorithm_metrics["max_queue_length_w"],
+            True
+        )
+        
         return jsonify({
             "message": "sim results saved",
-            "max_wait_time_n": max_wait_time_n, "max_wait_time_s": max_wait_time_s, "max_wait_time_e": max_wait_time_e, "max_wait_time_w": max_wait_time_w,
-            "max_queue_length_n": max_queue_length_n, "max_queue_length_s": max_queue_length_s, "max_queue_length_e": max_queue_length_e, "max_queue_length_w": max_queue_length_w,
-            "avg_wait_time_n": avg_wait_time_n, "avg_wait_time_s": avg_wait_time_s, "avg_wait_time_e": avg_wait_time_e, "avg_wait_time_w": avg_wait_time_w, 
-            "score": score
+            "user": {
+                "max_wait_time_n": user_metrics["max_wait_time_n"],
+                "max_wait_time_s": user_metrics["max_wait_time_s"],
+                "max_wait_time_e": user_metrics["max_wait_time_e"],
+                "max_wait_time_w": user_metrics["max_wait_time_w"],
+                "max_queue_length_n": user_metrics["max_queue_length_n"],
+                "max_queue_length_s": user_metrics["max_queue_length_s"],
+                "max_queue_length_e": user_metrics["max_queue_length_e"],
+                "max_queue_length_w": user_metrics["max_queue_length_w"],
+                "avg_wait_time_n": user_metrics["avg_wait_time_n"],
+                "avg_wait_time_s": user_metrics["avg_wait_time_s"],
+                "avg_wait_time_e": user_metrics["avg_wait_time_e"],
+                "avg_wait_time_w": user_metrics["avg_wait_time_w"],
+                "score": user_score
+            },
+            "default": {
+                "max_wait_time_n": algorithm_metrics["max_wait_time_n"],
+                "max_wait_time_s": algorithm_metrics["max_wait_time_s"],
+                "max_wait_time_e": algorithm_metrics["max_wait_time_e"],
+                "max_wait_time_w": algorithm_metrics["max_wait_time_w"],
+                "max_queue_length_n": algorithm_metrics["max_queue_length_n"],
+                "max_queue_length_s": algorithm_metrics["max_queue_length_s"],
+                "max_queue_length_e": algorithm_metrics["max_queue_length_e"],
+                "max_queue_length_w": algorithm_metrics["max_queue_length_w"],
+                "avg_wait_time_n": algorithm_metrics["avg_wait_time_n"],
+                "avg_wait_time_s": algorithm_metrics["avg_wait_time_s"],
+                "avg_wait_time_e": algorithm_metrics["avg_wait_time_e"],
+                "avg_wait_time_w": algorithm_metrics["avg_wait_time_w"],
+                "score": default_score
+            }
         }), 201
-        
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 400
@@ -986,7 +1075,9 @@ def get_all_time_best_configurations():
 
             r.avg_wait_time_east, r.max_wait_time_east, r.max_queue_length_east,
 
-            r.avg_wait_time_west, r.max_wait_time_west, r.max_queue_length_west
+            r.avg_wait_time_west, r.max_wait_time_west, r.max_queue_length_west,
+
+            False
         )
 
         r.score = score
@@ -1018,12 +1109,15 @@ def simulate_endpoint():
     return simulate()  # Your existing simulate() function
 
 
-def get_global_extremes():
+def get_global_extremes(for_algorithm_bool):
     """
     
     """
     
-    results = LeaderboardResult.query.all()
+    if for_algorithm_bool:
+        results = AlgorithmLeaderboardResult.query.all()
+    else:
+        results = LeaderboardResult.query.all()
     
     if not results:
 
@@ -1090,12 +1184,13 @@ def compute_score_4directions(
     sb_avg, sb_max, sb_queue,
     eb_avg, eb_max, eb_queue,
     wb_avg, wb_max, wb_queue,
+    for_algorithm_bool
 ):
     """
     
     """
     
-    extremes = get_global_extremes() 
+    extremes = get_global_extremes(for_algorithm_bool)
     
     nb_best_avg = extremes["north"]["best_avg"]
     nb_worst_avg = extremes["north"]["worst_avg"]
@@ -1181,7 +1276,8 @@ def get_recent_runs_with_scores(session_id):
             r.avg_wait_time_north, r.max_wait_time_north, r.max_queue_length_north,
             r.avg_wait_time_south, r.max_wait_time_south, r.max_queue_length_south,
             r.avg_wait_time_east,  r.max_wait_time_east,  r.max_queue_length_east,
-            r.avg_wait_time_west,  r.max_wait_time_west,  r.max_queue_length_west
+            r.avg_wait_time_west,  r.max_wait_time_west,  r.max_queue_length_west,
+            False
         )
 
         runs_with_scores.append({

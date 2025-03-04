@@ -19,6 +19,8 @@ class TrafficLightController:
 
         self.simulationSpeedMultiplier = 1.0
 
+        self.use_default_traffic_settings = False
+
         self.vehicle_data = None
         self.junction_settings = None
         self.traffic_settings = None
@@ -64,14 +66,15 @@ class TrafficLightController:
     def set_broadcast_callback(self, cb):
         self._broadcast_callback = cb
 
-    def update_traffic_settings(self, traffic_settings: Dict[str, Any]) -> None:
+    def update_traffic_settings(self, traffic_settings: Dict[str, Any], use_default: bool = False) -> None:
         """
         
         """
 
         self.traffic_settings = traffic_settings
+        self.use_default_traffic_settings = use_default
 
-        if traffic_settings.get("traffic-light-enable", False):
+        if traffic_settings.get("traffic-light-enable", False) and (not use_default) :
 
             sequences = traffic_settings.get("sequences", {})
 
@@ -100,11 +103,13 @@ class TrafficLightController:
 
             if traffic_settings.get("traffic-light-enable", False):
 
-                self.VERTICAL_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_main_green", self.VERTICAL_SEQUENCE_LENGTH))
-                self.HORIZONTAL_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_main_green", self.HORIZONTAL_SEQUENCE_LENGTH))
-                self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_right_green", self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH))
-                self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_right_green", self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH))
+                sequences = traffic_settings.get("sequences", {})
 
+                self.VERTICAL_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_main_green", self.VERTICAL_SEQUENCE_LENGTH)) / sequences
+                self.HORIZONTAL_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_main_green", self.HORIZONTAL_SEQUENCE_LENGTH)) / sequences
+                self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_right_green", self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH)) / sequences
+                self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_right_green", self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH)) / sequences
+                
         main_vertical = main_horizontal = vertical_right = horizontal_right = 0
 
         increment = 4

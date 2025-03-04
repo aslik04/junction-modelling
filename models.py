@@ -122,3 +122,78 @@ class TrafficSettings(db.Model):
             "vertical_right_green": self.vertical_right_green,
             "horizontal_right_green": self.horizontal_right_green
         }
+    
+
+class AlgorithmLeaderboardResult(db.Model):
+    __tablename__ = 'algorithm_leaderboard_results'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    run_id = db.Column(db.Integer, db.ForeignKey('configurations.run_id'), nullable=False)
+    session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False)
+
+    # North direction metrics
+    avg_wait_time_north = db.Column(db.Float, nullable=False)
+    max_wait_time_north = db.Column(db.Float, nullable=False)
+    max_queue_length_north = db.Column(db.Integer, nullable=False)
+
+    # South direction metrics
+    avg_wait_time_south = db.Column(db.Float, nullable=False)
+    max_wait_time_south = db.Column(db.Float, nullable=False)
+    max_queue_length_south = db.Column(db.Integer, nullable=False)
+
+    # East direction metrics
+    avg_wait_time_east = db.Column(db.Float, nullable=False)
+    max_wait_time_east = db.Column(db.Float, nullable=False)
+    max_queue_length_east = db.Column(db.Integer, nullable=False)
+
+    # West direction metrics
+    avg_wait_time_west = db.Column(db.Float, nullable=False)
+    max_wait_time_west = db.Column(db.Float, nullable=False)
+    max_queue_length_west = db.Column(db.Integer, nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "run_id": self.run_id,
+            "session_id": self.session_id,
+            "avg_wait_time_north": self.avg_wait_time_north,
+            "max_wait_time_north": self.max_wait_time_north,
+            "max_queue_length_north": self.max_queue_length_north,
+            "avg_wait_time_south": self.avg_wait_time_south,
+            "max_wait_time_south": self.max_wait_time_south,
+            "max_queue_length_south": self.max_queue_length_south,
+            "avg_wait_time_east": self.avg_wait_time_east,
+            "max_wait_time_east": self.max_wait_time_east,
+            "max_queue_length_east": self.max_queue_length_east,
+            "avg_wait_time_west": self.avg_wait_time_west,
+            "max_wait_time_west": self.max_wait_time_west,
+            "max_queue_length_west": self.max_queue_length_west
+        }
+
+
+class AlgorithmTrafficSettings(db.Model):
+    __tablename__ = 'algorithm_traffic_settings'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    run_id = db.Column(db.Integer, db.ForeignKey('configurations.run_id'), nullable=False)
+    session_id = db.Column(db.Integer, db.ForeignKey('sessions.id'), nullable=False)
+
+    enabled = db.Column(db.Boolean, nullable=False, default=False)
+    sequences_per_hour = db.Column(db.Integer, nullable=False, default=0)
+    vertical_main_green = db.Column(db.Integer, nullable=False, default=0)
+    horizontal_main_green = db.Column(db.Integer, nullable=False, default=0)
+    vertical_right_green = db.Column(db.Integer, nullable=False, default=0)
+    horizontal_right_green = db.Column(db.Integer, nullable=False, default=0)
+
+    const_gaps_in_sequence = db.Column(db.Integer, default=5 * 1)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "run_id": self.run_id,
+            "session_id": self.session_id,
+            "enabled": self.enabled,
+            "sequences_per_hour": self.sequences_per_hour,
+            "vertical_main_green": self.vertical_main_green,
+            "horizontal_main_green": self.horizontal_main_green,
+            "vertical_right_green": self.vertical_right_green,
+            "horizontal_right_green": self.horizontal_right_green
+        }

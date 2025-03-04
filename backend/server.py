@@ -513,9 +513,9 @@ async def update_car_loop():
 
 async def run_fast_simulation():
     """
-    
+
     """
-    
+
     global simulationSpeedMultiplier
     global max_wait_time_n, max_wait_time_s, max_wait_time_e, max_wait_time_w
     global total_wait_time_n, total_wait_time_s, total_wait_time_e, total_wait_time_w
@@ -525,6 +525,11 @@ async def run_fast_simulation():
     backend_results = True
     duration = 10.0
 
+    old_multiplier = simulationSpeedMultiplier
+    simulationSpeedMultiplier = traffic_light_logic.simulationSpeedMultiplier = 10.0
+
+    # First Run is for user traffic settings
+
     reset_simulation()
 
     max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0
@@ -532,21 +537,15 @@ async def run_fast_simulation():
     wait_count_n = wait_count_s = wait_count_e = wait_count_w = 0
     max_queue_length_n = max_queue_length_s = max_queue_length_e = max_queue_length_w = 0
 
-    old_multiplier = simulationSpeedMultiplier
-    simulationSpeedMultiplier = traffic_light_logic.simulationSpeedMultiplier = 10.0
-
-    print(f"Running fast simulation for {duration}s at multiplier {simulationSpeedMultiplier} ...")
+    print(f"[RUN #1] Running fast sim (user logic) for {duration}s @ multiplier {simulationSpeedMultiplier}...")
     await asyncio.sleep(duration)
 
-    simulationSpeedMultiplier = old_multiplier
-    traffic_light_logic.simulationSpeedMultiplier = old_multiplier
+    user_avg_wait_time_n = total_wait_time_n / wait_count_n if wait_count_n > 0 else 0
+    user_avg_wait_time_s = total_wait_time_s / wait_count_s if wait_count_s > 0 else 0
+    user_avg_wait_time_e = total_wait_time_e / wait_count_e if wait_count_e > 0 else 0
+    user_avg_wait_time_w = total_wait_time_w / wait_count_w if wait_count_w > 0 else 0
 
-    avg_wait_time_n = total_wait_time_n / wait_count_n if wait_count_n > 0 else 0
-    avg_wait_time_s = total_wait_time_s / wait_count_s if wait_count_s > 0 else 0
-    avg_wait_time_e = total_wait_time_e / wait_count_e if wait_count_e > 0 else 0
-    avg_wait_time_w = total_wait_time_w / wait_count_w if wait_count_w > 0 else 0
-
-    return {
+    user_results = {
         "max_wait_time_n": max_wait_time_n, 
         "max_wait_time_s": max_wait_time_s, 
         "max_wait_time_e": max_wait_time_e, 
@@ -555,10 +554,66 @@ async def run_fast_simulation():
         "max_queue_length_s": max_queue_length_s, 
         "max_queue_length_e": max_queue_length_e, 
         "max_queue_length_w": max_queue_length_w,
-        "avg_wait_time_n": avg_wait_time_n, 
-        "avg_wait_time_s": avg_wait_time_s, 
-        "avg_wait_time_e": avg_wait_time_e, 
-        "avg_wait_time_w": avg_wait_time_w
+        "avg_wait_time_n": user_avg_wait_time_n, 
+        "avg_wait_time_s": user_avg_wait_time_s, 
+        "avg_wait_time_e": user_avg_wait_time_e, 
+        "avg_wait_time_w": user_avg_wait_time_w
+    }
+
+    print("[RUN #1] Complete. User logic results:", user_results)
+
+    # Run the algo traffic settings after user
+
+    reset_simulation()
+
+    max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0
+    total_wait_time_n = total_wait_time_s = total_wait_time_e = total_wait_time_w = 0
+    wait_count_n = wait_count_s = wait_count_e = wait_count_w = 0
+    max_queue_length_n = max_queue_length_s = max_queue_length_e = max_queue_length_w = 0
+
+    traffic_light_logic.update_traffic_settings(traffic_light_logic.traffic_settings, use_default=True)
+
+    print(f"[RUN #2] Running fast sim (default logic) for {duration}s @ multiplier {simulationSpeedMultiplier}...")
+    await asyncio.sleep(duration)
+
+    def_avg_wait_time_n = total_wait_time_n / wait_count_n if wait_count_n > 0 else 0
+    def_avg_wait_time_s = total_wait_time_s / wait_count_s if wait_count_s > 0 else 0
+    def_avg_wait_time_e = total_wait_time_e / wait_count_e if wait_count_e > 0 else 0
+    def_avg_wait_time_w = total_wait_time_w / wait_count_w if wait_count_w > 0 else 0
+
+    default_results = {
+        "max_wait_time_n": max_wait_time_n, 
+        "max_wait_time_s": max_wait_time_s, 
+        "max_wait_time_e": max_wait_time_e, 
+        "max_wait_time_w": max_wait_time_w,
+        "max_queue_length_n": max_queue_length_n, 
+        "max_queue_length_s": max_queue_length_s, 
+        "max_queue_length_e": max_queue_length_e, 
+        "max_queue_length_w": max_queue_length_w,
+        "avg_wait_time_n": def_avg_wait_time_n, 
+        "avg_wait_time_s": def_avg_wait_time_s, 
+        "avg_wait_time_e": def_avg_wait_time_e, 
+        "avg_wait_time_w": def_avg_wait_time_w
+    }
+
+    default_traffic_settings = {
+        "vertical_main_green": traffic_light_logic.VERTICAL_SEQUENCE_LENGTH,
+        "horizontal_main_green": traffic_light_logic.HORIZONTAL_SEQUENCE_LENGTH,
+        "vertical_right_green": traffic_light_logic.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH,
+        "horizontal_right_green": traffic_light_logic.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH,
+    }
+
+    print("[RUN #2] Complete. Default logic results:", default_results)
+
+    simulationSpeedMultiplier = old_multiplier
+    traffic_light_logic.simulationSpeedMultiplier = old_multiplier
+
+    traffic_light_logic.update_traffic_settings(traffic_light_logic.traffic_settings, use_default=False)
+
+    return {
+        "user": user_results,
+        "default": default_results,
+        "default_traffic_settings": default_traffic_settings
     }
 
 @app.get("/simulate_fast")

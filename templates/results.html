@@ -11,20 +11,17 @@
       font-style: normal;
       font-weight: 400;
     }
-
     /* Reset & Base Styles */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     html, body {
       width: 100%;
       height: 100%;
-      overflow: hidden; /* Prevent scrolling */
+      overflow-x: hidden;
     }
-
     body {
       background-color: #a2bf89; /* Green background */
       font-family: 'SF Pro', sans-serif;
@@ -32,34 +29,56 @@
       color: #6b6b6b;
       display: flex;
       flex-direction: column;
-      justify-content: space-evenly; /* Equal vertical spacing between sections */
       align-items: center;
       padding: 2vh 0;
     }
-
     /* Header Section */
     #resultsHeader {
       font-size: 5vh;
       color: #f8f5e9;
       font-weight: 600;
+      margin-bottom: 1.5vh;
     }
-
-    /* Results Container */
-    #resultsContainer {
+    /* Score Comparison Container */
+    {% set algo_score = algorithm_metrics.score %}
+    {% set diff = algo_score - score%}
+    #scoreComparison {
       width: 80vw;
+      padding: 2vh;
+      border-radius: 2vh;
+      margin-bottom: 2vh;
+      text-align: center;
+      font-size: 3vh;
+      font-weight: bold;
+      color: #6b6b6b;
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+      background-color: #f8f5e9;
+    }
+    /* Big Results Container: Two side-by-side boxes */
+    #resultsPairContainer {
+      width: 80vw;
+      display: flex;
+      justify-content: space-between;
+      gap: 2vw;
+      margin-bottom: 3vh;
+    }
+    .results-box {
       background-color: #f8f5e9;
       border-radius: 2vh;
       padding: 2vh;
       box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
-      text-align: center;
+      width: 48%;
     }
-    .score {
+    .results-box h2 {
       font-size: 3vh;
-      margin-bottom: 2vh;
+      color: #8da676;
+      margin-bottom: 1vh;
+    }
+    .score-header {
+      font-size: 2.5vh;
+      margin-bottom: 1vh;
       color: #6b6b6b;
     }
-
-    /* Breakdown Table */
     .resultsTable {
       width: 100%;
       border-collapse: collapse;
@@ -81,17 +100,14 @@
       background-color: #dce7c5;
       transition: 0.3s;
     }
-
-    /* Parameters Container */
+    /* Parameters Container: 3 boxes side by side (expanding independently) */
     #paramsContainer {
       width: 80vw;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start; /* ensures boxes use their own height */
+      align-items: flex-start;
       gap: 2vw;
     }
-
-    /* Base styling for each param container */
     .param-box {
       background-color: #f8f5e9;
       border-radius: 2vh;
@@ -99,23 +115,6 @@
       width: 30%;
       box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
     }
-
-    /* Distinct classes for the two boxes */
-    .config-box {
-      background-color: #f8f5e9;
-      border-radius: 2vh;
-      padding: 2vh;
-      width: 30%;
-      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
-    }
-    .junction-box {
-      background-color: #f8f5e9;
-      border-radius: 2vh;
-      padding: 2vh;
-      width: 30%;
-      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
-    }
-
     .param-box h2 {
       color: #8da676;
       font-size: 2.5vh;
@@ -142,12 +141,12 @@
     .dropdown-content li {
       margin: 0.5vh 0;
     }
-
     /* Navigation Container */
     .nav-container {
       width: 40vw;
       display: flex;
       justify-content: space-between;
+      margin-top: 2vh;
     }
     .res-button {
       background-color: #8da676;
@@ -165,29 +164,20 @@
     .res-button:hover {
       background-color: #789563;
     }
-
     /* Responsive adjustments */
     @media (max-width: 600px) {
       #resultsHeader {
         font-size: 6vw;
       }
-      #resultsContainer {
+      #scoreComparison, #resultsPairContainer, #paramsContainer {
         width: 90vw;
-        padding: 3vh;
       }
-      .score {
-        font-size: 4vw;
-      }
-      .resultsTable th, .resultsTable td {
-        font-size: 3.5vw;
-      }
-      #paramsContainer {
+      #resultsPairContainer {
         flex-direction: column;
-        width: 90vw;
+        align-items: center;
       }
-      .param-box {
-        width: 100%;
-        margin-bottom: 2vh;
+      .results-box, .param-box {
+        width: 90%;
       }
       .res-button {
         font-size: 4vw;
@@ -200,51 +190,103 @@
   <!-- Header Section -->
   <div id="resultsHeader">🎉 Results 🎉</div>
 
-  <!-- Results Container -->
-  <div id="resultsContainer">
-    <div class="score">Overall Score: <strong>{{ score|round|int }}</strong></div>
-    <table class="resultsTable">
-      <thead>
-        <tr>
-          <th>Direction</th>
-          <th>AVG Wait Time (s)</th>
-          <th>MAX Wait Time (s)</th>
-          <th>MAX Queue Length</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Northbound</td>
-          <td>{{ avg_wait_time_n|round|int }}</td>
-          <td>{{ max_wait_time_n|round|int }}</td>
-          <td>{{ max_queue_length_n|round|int }}</td>
-        </tr>
-        <tr>
-          <td>Southbound</td>
-          <td>{{ avg_wait_time_s|round|int }}</td>
-          <td>{{ max_wait_time_s|round|int }}</td>
-          <td>{{ max_queue_length_s|round|int }}</td>
-        </tr>
-        <tr>
-          <td>Eastbound</td>
-          <td>{{ avg_wait_time_e|round|int }}</td>
-          <td>{{ max_wait_time_e|round|int }}</td>
-          <td>{{ max_queue_length_e|round|int }}</td>
-        </tr>
-        <tr>
-          <td>Westbound</td>
-          <td>{{ avg_wait_time_w|round|int }}</td>
-          <td>{{ max_wait_time_w|round|int }}</td>
-          <td>{{ max_queue_length_w|round|int }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Score Comparison Container -->
+  <div id="scoreComparison">
+    Overall Score Difference: 
+    <span style="color: {% if diff > 0 %}green{% elif diff < 0 %}red{% else %}black{% endif %};">
+      {% if diff > 0 %}+{% endif %}{{ diff|round|int }}
+    </span>
   </div>
 
+  <!-- Big Results Container -->
+  <div id="resultsPairContainer">
+    <!-- User Results Box -->
+    <div class="results-box" id="userResultsBox">
+      <h2>User Results</h2>
+      <div class="score-header">Overall Score: {{ score }}</div>
+      <table class="resultsTable">
+        <thead>
+          <tr>
+            <th>Direction</th>
+            <th>AVG Wait (s)</th>
+            <th>MAX Wait (s)</th>
+            <th>MAX Queue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>North</td>
+            <td>{{ avg_wait_time_n|round|int }}</td>
+            <td>{{ max_wait_time_n|round|int }}</td>
+            <td>{{ max_queue_length_n|round|int }}</td>
+          </tr>
+          <tr>
+            <td>South</td>
+            <td>{{ avg_wait_time_s|round|int }}</td>
+            <td>{{ max_wait_time_s|round|int }}</td>
+            <td>{{ max_queue_length_s|round|int }}</td>
+          </tr>
+          <tr>
+            <td>East</td>
+            <td>{{ avg_wait_time_e|round|int }}</td>
+            <td>{{ max_wait_time_e|round|int }}</td>
+            <td>{{ max_queue_length_e|round|int }}</td>
+          </tr>
+          <tr>
+            <td>West</td>
+            <td>{{ avg_wait_time_w|round|int }}</td>
+            <td>{{ max_wait_time_w|round|int }}</td>
+            <td>{{ max_queue_length_w|round|int }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Algorithm Results Box (dummy score of 0) -->
+    <div class="results-box" id="algoResultsBox">
+      <h2>Algorithm Results</h2>
+      <div class="score-header">Overall Score: {{ algorithm_metrics.score }}</div>
+      <table class="resultsTable">
+        <thead>
+          <tr>
+            <th>Direction</th>
+            <th>AVG Wait (s)</th>
+            <th>MAX Wait (s)</th>
+            <th>MAX Queue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>North</td>
+            <td>{{ algorithm_metrics.avg_wait_time_n|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_n|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_n|round|int }}</td>
+          </tr>
+          <tr>
+            <td>South</td>
+            <td>{{ algorithm_metrics.avg_wait_time_s|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_s|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_s|round|int }}</td>
+          </tr>
+          <tr>
+            <td>East</td>
+            <td>{{ algorithm_metrics.avg_wait_time_e|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_e|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_e|round|int }}</td>
+          </tr>
+          <tr>
+            <td>West</td>
+            <td>{{ algorithm_metrics.avg_wait_time_w|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_w|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_w|round|int }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <!-- Parameters Container -->
   <div id="paramsContainer">
-    <!-- Left: Configurable Parameters -->
+    <!-- Configurable Parameters -->
     <div class="param-box config-box">
       <h2 id="configHeading" class="dropdown-heading" data-target="configContent">
         <span class="symbol">—</span> Configurable Parameters
@@ -258,8 +300,7 @@
         </ul>
       </div>
     </div>
-
-    <!-- Middle: Junction Settings -->
+    <!-- Junction Settings -->
     <div class="param-box junction-box">
       <h2 id="junctionHeading" class="dropdown-heading" data-target="junctionContent">
         <span class="symbol">—</span> Junction Settings
@@ -274,11 +315,10 @@
         </ul>
       </div>
     </div>
-
-    <!-- Right: Traffic Light Settings -->
+    <!-- Traffic Light Settings -->
     <div class="param-box traffic-box">
       <h2 id="trafficHeading" class="dropdown-heading" data-target="trafficContent">
-        <span class="symbol">—</span> Traffic Light Settings
+        <span class="symbol">—</span> User Traffic Settings
       </h2>
       <div class="dropdown-content" id="trafficContent">
         <ul>
@@ -291,8 +331,22 @@
         </ul>
       </div>
     </div>
+    <!-- Algorithm Traffic Light Settings -->
+    <div class="param-box default-traffic-box">
+      <h2 id="defaultTrafficHeading" class="dropdown-heading" data-target="defaultTrafficContent">
+        <span class="symbol">—</span> Algorithm Traffic Settings
+      </h2>
+      <div class="dropdown-content" id="defaultTrafficContent">
+        <ul>
+          <li><strong>Sequences per Hour:</strong> {{ 4 }}</li>
+          <li><strong>Vertical Main Green (sec):</strong> {{ default_traffic_settings.vertical_main_green * 4}}</li>
+          <li><strong>Horizontal Main Green (sec):</strong> {{ default_traffic_settings.horizontal_main_green * 4}}</li>
+          <li><strong>Vertical Right Green (sec):</strong> {{ default_traffic_settings.vertical_right_green * 4}}</li>
+          <li><strong>Horizontal Right Green (sec):</strong> {{ default_traffic_settings.horizontal_right_green * 4}}</li>
+        </ul>
+      </div>
+    </div>
   </div>
-
 
   <!-- Navigation Section -->
   <div class="nav-container">
@@ -306,14 +360,8 @@
       const dropdowns = document.querySelectorAll('.dropdown-content');
       let openDropdowns = Array.from(dropdowns).filter(div => div.style.display === "block");
       if (openDropdowns.length === 0) return;
-      
-      // Remove any previously set inline height so we can get the natural scrollHeight
       openDropdowns.forEach(div => div.style.height = "");
-      
-      // Find the maximum scrollHeight among open dropdowns
       let maxHeight = Math.max(...openDropdowns.map(div => div.scrollHeight));
-      
-      // Set each open dropdown's height to the maximum value
       openDropdowns.forEach(div => {
         div.style.height = maxHeight + "px";
       });
@@ -326,7 +374,6 @@
       if (content.style.display === "block") {
         content.style.display = "none";
         heading.querySelector('.symbol').textContent = "—";
-        // Remove inline height so that when reopened it can recalc naturally
         content.style.height = "";
       } else {
         content.style.display = "block";
@@ -335,7 +382,7 @@
       equalizeDropdownHeights();
     }
     
-    // Attach separate listeners
+    // Attach event listeners for all dropdown headings
     document.getElementById("configHeading").addEventListener("click", function() {
       toggleDropdown("configHeading", "configContent");
     });
@@ -344,6 +391,9 @@
     });
     document.getElementById("trafficHeading").addEventListener("click", function() {
       toggleDropdown("trafficHeading", "trafficContent");
+    });
+    document.getElementById("defaultTrafficHeading").addEventListener("click", function() {
+      toggleDropdown("defaultTrafficHeading", "defaultTrafficContent");
     });
   </script>   
 </body>

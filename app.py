@@ -26,7 +26,7 @@ db.init_app(app)
 
 with app.app_context():
     """
-    
+    Initialize database and create all tables.
     """
     
     db.create_all()
@@ -35,7 +35,11 @@ server_process = None
 
 def start_fastapi():
     """
+    Start the FastAPI server as a subprocess.
     
+    It provides a small delay to allow the server to initialize.
+    
+    Global variable 'server_process' is used to track the subprocess.
     """
     
     global server_process
@@ -52,7 +56,11 @@ def start_fastapi():
 
 def stop_fastapi():
     """
+    Stop the running FastAPI server subprocess.
+    If the process does not terminate within the timeout,
+    it is forcibly killed.
     
+    Global variable 'server_process' is used to track and manage the subprocess.
     """
     
     global server_process
@@ -72,7 +80,9 @@ def stop_fastapi():
 @app.route('/start_simulation', methods=['POST'])
 def start_simulation():
     """
-    
+    API endpoint to start the simulation.
+    Returns:
+        tuple: A JSON response with a success message and 200 status code.
     """
     
     start_fastapi()
@@ -82,7 +92,9 @@ def start_simulation():
 @app.route('/stop_simulation', methods=['POST'])
 def stop_simulation():
     """
-    
+    API endpoint to stop the simulation.
+    Returns:
+        tuple: A JSON response with a success message and 200 status code.
     """
     
     stop_fastapi()
@@ -92,7 +104,9 @@ def stop_simulation():
 @app.route('/back_to_parameters', methods=['GET'])
 def back_to_parameters():
     """
-    
+    API endpoint to stop the simulation and redirect to parameters page.
+    Returns:
+        flask.Response: A redirect response to the parameters route.
     """
     
     stop_fastapi()
@@ -102,7 +116,13 @@ def back_to_parameters():
 @app.route('/frontend/<path:filename>')
 def serve_frontend(filename):
     """
+    Serve frontend files from the frontend directory.
     
+    Args:
+        filename (str): The name of the file to be served.
+    
+    Returns:
+        flask.Response: The requested frontend file.
     """
     
     frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend")
@@ -111,7 +131,13 @@ def serve_frontend(filename):
 
 def create_session():
     """
+    Create a new database session for tracking simulations.
     
+    Creates a new Session record in the database, commits it, and returns
+    the unique session ID.
+    
+    Returns:
+        int: The ID of the newly created session.
     """
     
     session = Session()
@@ -124,7 +150,10 @@ def create_session():
 
 def end_session(session_id):
     """
+    Mark a specific session as inactive.
     
+    Args:
+        session_id (int): The ID of the session to be ended.
     """
     
     session = Session.query.get(session_id)
@@ -135,7 +164,14 @@ def end_session(session_id):
 
 def get_session_leaderboard(session):
     """
+    Retrieve and store the leaderboard results for a given session.
     
+    Calculates normalised performance scores for leaderboard results 
+    Args:
+        session (int): The session ID to retrieve leaderboard for.
+    
+    Returns:
+        list: A sorted list of the top 10 leaderboard results.
     """
     results = LeaderboardResult.query.filter_by(session_id=session).all()
     
@@ -155,7 +191,15 @@ def get_session_leaderboard(session):
 
     def compute_metric_score(x, best, worst):
         """
+        Compute a normalized score for a metric.
         
+        Args:
+            x (float): The current metric value.
+            best (float): The best (lowest) value for the metric.
+            worst (float): The worst (highest) value for the metric.
+        
+        Returns:
+            float: A normalized score between 0 and 100.
         """
         
         return 0 if worst == best else 100 * (x - best) / (worst - best)
@@ -178,7 +222,15 @@ def save_session_leaderboard_result(run_id, session_id,
                                   avg_wait_time_e, max_wait_time_e, max_queue_length_e,
                                   avg_wait_time_w, max_wait_time_w, max_queue_length_w):
     """
-   
+    Save performance metrics for a specific simulation run to the leaderboard.
+    
+    Args:
+        run_id (int): Unique identifier for the simulation run.
+        session_id (int): ID of the session associated with the run.
+        avg_wait_time_n (float): Average wait time for north-bound traffic.
+        max_wait_time_n (float): Maximum wait time for north-bound traffic.
+        max_queue_length_n (int): Maximum queue length for north-bound traffic.
+        # Similar parameters for south, east, and west directions
     """
     
     result = LeaderboardResult(
@@ -207,7 +259,11 @@ def save_session_leaderboard_result(run_id, session_id,
 
 def get_latest_spawn_rates():
     """
-
+    Retrieve the latest spawn rates for traffic from the most recent configuration.
+    
+    Returns:
+        dict: A nested dictionary containing spawn rates for each direction 
+              and movement type (forward, left, right).
     """
     
     latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
@@ -241,9 +297,13 @@ def get_latest_spawn_rates():
 
 def get_latest_junction_settings():
     """
-
+    Retrieve the latest junction configuration settings.
+    
+    
+    Returns:
+        dict: A dictionary containing junction configuration settings 
+              like number of lanes, pedestrian settings, etc.
     """
-
     try:
 
         latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
@@ -952,6 +1012,11 @@ def session_leaderboard_page():
     runs = get_recent_runs_with_scores(session_id) if session_id else []
     
     return render_template('session_leaderboard.html', runs=runs)
+
+@app.route('/simulate', methods=['POST'])
+def simulate_endpoint():
+    return simulate()  # Your existing simulate() function
+
 
 def get_global_extremes():
     """

@@ -1157,16 +1157,52 @@ def get_recent_runs_with_scores(session_id):
 @app.route('/junction_details')
 def junction_details():
     run_id = request.args.get('run_id', type=int)
-    if not run_id:
-        flash('No run ID provided.')
-        return redirect('/session_leaderboard')
 
+    # If no run_id is provided, get the latest run_id
+    if not run_id:
+        latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
+        if latest_config:
+            run_id = latest_config.run_id
+        else:
+            flash('No run ID provided and no configurations exist.')
+            return redirect('/session_leaderboard')
+
+    # Retrieve configuration based on run_id
     configuration = Configuration.query.filter_by(run_id=run_id).first()
     if not configuration:
         flash('Configuration details not found for the provided run.')
         return redirect('/session_leaderboard')
-    
-    return render_template('junction_details.html', configuration=configuration)
+
+    # Retrieve traffic light settings for the run_id
+    traffic_light_settings = TrafficSettings.query.filter_by(run_id=run_id).first()
+
+    # If no traffic settings exist, provide default values
+    if not traffic_light_settings:
+        traffic_light_settings = {
+            "enabled": False,
+            "sequences_per_hour": 0,
+            "vertical_main_green": 0,
+            "horizontal_main_green": 0,
+            "vertical_right_green": 0,
+            "horizontal_right_green": 0
+        }
+    else:
+        # Convert SQLAlchemy object to dictionary (if found)
+        traffic_light_settings = {
+            "enabled": traffic_light_settings.enabled,
+            "sequences_per_hour": traffic_light_settings.sequences_per_hour,
+            "vertical_main_green": traffic_light_settings.vertical_main_green,
+            "horizontal_main_green": traffic_light_settings.horizontal_main_green,
+            "vertical_right_green": traffic_light_settings.vertical_right_green,
+            "horizontal_right_green": traffic_light_settings.horizontal_right_green
+        }
+
+    return render_template(
+        'junction_details.html',
+        configuration=configuration,
+        traffic_light_settings=traffic_light_settings
+    )
+
 
 if __name__ == '__main__':
     app.run(debug=True)

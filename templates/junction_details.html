@@ -1,164 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Junction Configuration Details</title>
-    <style>
-        body {
-            background-color: #a2bf89;
-            font-family: 'SF Pro', sans-serif;
-            color: #6b6b6b;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 5vh 0;
-        }
-        h1 {
-            color: #f8f5e9;
-            margin-bottom: 2vh;
-        }
-        table {
-            background-color: #f8f5e9;
-            border-collapse: collapse;
-            border-radius: 1.2vw;
-            width: 80%;
-            max-width: 800px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        th, td {
-            padding: 1.2vh 1.5vw;
-            text-align: left;
-            font-size: 1.2vw;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #8da676;
-            color: white;
-        }
-        tr:hover {
-            background-color: #dce7c5;
-            transition: 0.3s;
-        }
-        a {
-            margin-top: 2vh;
-            text-decoration: none;
-            color: #f8f5e9;
-            background-color: #8da676;
-            padding: 1.2vh 2.5vw;
-            border-radius: 2vw;
-            font-size: 1.2vw;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-        a:hover {
-            background-color: #789563;
-        }
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 6vw;
-            }
-            th, td {
-                font-size: 4vw;
-            }
-            a {
-                font-size: 3vw;
-                padding: 2vh 4vw;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Junction Configuration Details</title>
+  <style>
+    /* Load SF Pro font */
+    @font-face {
+      font-family: 'SF Pro';
+      src: url("{{ url_for('static', filename='fonts/SF-Pro.ttf') }}") format('truetype');
+      font-style: normal;
+      font-weight: 400;
+    }
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      overflow: auto;
+    }
+    body {
+      background-color: #a2bf89;
+      font-family: 'SF Pro', sans-serif;
+      color: #6b6b6b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 5vh 0;
+    }
+    h1 {
+      color: #f8f5e9;
+      margin-bottom: 2vh;
+    }
+    /* Top Containers: Junction & Traffic Light Settings */
+    #topContainer {
+      width: 80vw;
+      display: flex;
+      justify-content: space-around;
+      gap: 2vw;
+      margin-bottom: 3vh;
+    }
+    .param-box {
+      background-color: #f8f5e9;
+      border-radius: 2vh;
+      padding: 2vh;
+      width: 45%;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .param-box h2 {
+      font-size: 2.5vh;
+      color: #8da676;
+      margin-bottom: 1vh;
+    }
+    .param-box ul {
+      list-style: none;
+      padding-left: 1vw;
+    }
+    .param-box li {
+      margin: 0.5vh 0;
+      font-size: 2vh;
+    }
+    /* Directional Parameters Container */
+    #directionContainer {
+      width: 80vw;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 2vw;
+    }
+    .direction-box {
+      background-color: #f8f5e9;
+      border-radius: 2vh;
+      padding: 2vh;
+      width: 45%;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2vh;
+    }
+    .direction-box h2 {
+      font-size: 2.5vh;
+      color: #8da676;
+      margin-bottom: 1vh;
+    }
+    .direction-box ul {
+      list-style: none;
+      padding-left: 1vw;
+    }
+    .direction-box li {
+      margin: 0.5vh 0;
+      font-size: 2vh;
+    }
+    a {
+      margin-top: 2vh;
+      text-decoration: none;
+      color: #f8f5e9;
+      background-color: #8da676;
+      padding: 1.2vh 2.5vw;
+      border-radius: 2vw;
+      font-size: 1.5vh;
+      font-weight: 600;
+      transition: background-color 0.3s;
+    }
+    a:hover {
+      background-color: #789563;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 6vw;
+      }
+      #topContainer, #directionContainer {
+        width: 90vw;
+        flex-direction: column;
+        align-items: center;
+      }
+      .param-box, .direction-box {
+        width: 90%;
+      }
+      .param-box li, .direction-box li {
+        font-size: 4vw;
+      }
+      a {
+        font-size: 4vw;
+        padding: 2vh 4vw;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1>Configuration Details for Run {{ configuration.run_id }}</h1>
-    <table>
-        <tr>
-            <th>Parameter</th>
-            <th>Value</th>
-        </tr>
-        <tr>
-            <td>Lanes</td>
-            <td>{{ configuration.lanes }}</td>
-        </tr>
-        <tr>
-            <td>Left Turn Lane</td>
-            <td>{{ configuration.left_turn_lane }}</td>
-        </tr>
-        <tr>
-            <td>Bus Lane</td>
-            <td>{{ configuration.bus_lane }}</td>
-        </tr>
-        <tr>
-            <td>Pedestrian Duration (s)</td>
-            <td>{{ configuration.pedestrian_duration }}</td>
-        </tr>
-        <tr>
-            <td>Pedestrian Frequency (per hour)</td>
-            <td>{{ configuration.pedestrian_frequency }}</td>
-        </tr>
-        <tr>
-            <td>North VPH</td>
-            <td>{{ configuration.north_vph }}</td>
-        </tr>
-        <tr>
-            <td>North Forward VPH</td>
-            <td>{{ configuration.north_forward_vph }}</td>
-        </tr>
-        <tr>
-            <td>North Left VPH</td>
-            <td>{{ configuration.north_left_vph }}</td>
-        </tr>
-        <tr>
-            <td>North Right VPH</td>
-            <td>{{ configuration.north_right_vph }}</td>
-        </tr>
-        <tr>
-            <td>South VPH</td>
-            <td>{{ configuration.south_vph }}</td>
-        </tr>
-        <tr>
-            <td>South Forward VPH</td>
-            <td>{{ configuration.south_forward_vph }}</td>
-        </tr>
-        <tr>
-            <td>South Left VPH</td>
-            <td>{{ configuration.south_left_vph }}</td>
-        </tr>
-        <tr>
-            <td>South Right VPH</td>
-            <td>{{ configuration.south_right_vph }}</td>
-        </tr>
-        <tr>
-            <td>East VPH</td>
-            <td>{{ configuration.east_vph }}</td>
-        </tr>
-        <tr>
-            <td>East Forward VPH</td>
-            <td>{{ configuration.east_forward_vph }}</td>
-        </tr>
-        <tr>
-            <td>East Left VPH</td>
-            <td>{{ configuration.east_left_vph }}</td>
-        </tr>
-        <tr>
-            <td>East Right VPH</td>
-            <td>{{ configuration.east_right_vph }}</td>
-        </tr>
-        <tr>
-            <td>West VPH</td>
-            <td>{{ configuration.west_vph }}</td>
-        </tr>
-        <tr>
-            <td>West Forward VPH</td>
-            <td>{{ configuration.west_forward_vph }}</td>
-        </tr>
-        <tr>
-            <td>West Left VPH</td>
-            <td>{{ configuration.west_left_vph }}</td>
-        </tr>
-        <tr>
-            <td>West Right VPH</td>
-            <td>{{ configuration.west_right_vph }}</td>
-        </tr>
-    </table>
-    <a href="{{ url_for('session_leaderboard_page', session_id=configuration.session_id) }}">Back to Session Leaderboard</a>
+  <h1>Configuration Details for Run {{ configuration.run_id }}</h1>
+
+  <!-- Top Containers: Junction Settings and Traffic Light Settings -->
+  <div id="topContainer">
+    <!-- Junction Settings -->
+    <div class="param-box">
+      <h2>Junction Settings</h2>
+      <ul>
+        <li><strong>Lanes:</strong> {{ configuration.lanes }}</li>
+        <li><strong>Left Turn Lane:</strong> {{ "Enabled" if configuration.left_turn_lane else "Disabled" }}</li>
+        <li><strong>Bus Lane:</strong> {{ "Enabled" if configuration.bus_lane else "Disabled" }}</li>
+        <li><strong>Pedestrian Duration (s):</strong> {{ configuration.pedestrian_duration }}</li>
+        <li><strong>Pedestrian Frequency:</strong> {{ configuration.pedestrian_frequency }}</li>
+      </ul>
+    </div>
+    <!-- Traffic Light Settings -->
+    <div class="param-box">
+      <h2>Traffic Light Settings</h2>
+      <ul>
+        <li><strong>Enabled:</strong> {{ "Yes" if traffic_light_settings.get("enabled") else "No" }}</li>
+        <li><strong>Sequences per Hour:</strong> {{ traffic_light_settings.get("sequences_per_hour", 0) }}</li>
+        <li><strong>Vertical Main Green (s):</strong> {{ traffic_light_settings.get("vertical_main_green", 0) }}</li>
+        <li><strong>Horizontal Main Green (s):</strong> {{ traffic_light_settings.get("horizontal_main_green", 0) }}</li>
+        <li><strong>Vertical Right Green (s):</strong> {{ traffic_light_settings.get("vertical_right_green", 0) }}</li>
+        <li><strong>Horizontal Right Green (s):</strong> {{ traffic_light_settings.get("horizontal_right_green", 0) }}</li>
+     </ul>
+    </div>
+  </div>
+
+  <!-- Directional Parameters Container -->
+  <div id="directionContainer">
+    <!-- North Parameters -->
+    <div class="direction-box">
+      <h2>North Parameters</h2>
+      <ul>
+        <li><strong>VPH:</strong> {{ configuration.north_vph }}</li>
+        <li><strong>Forward VPH:</strong> {{ configuration.north_forward_vph }}</li>
+        <li><strong>Left VPH:</strong> {{ configuration.north_left_vph }}</li>
+        <li><strong>Right VPH:</strong> {{ configuration.north_right_vph }}</li>
+      </ul>
+    </div>
+
+    <!-- South Parameters -->
+    <div class="direction-box">
+      <h2>South Parameters</h2>
+      <ul>
+        <li><strong>VPH:</strong> {{ configuration.south_vph }}</li>
+        <li><strong>Forward VPH:</strong> {{ configuration.south_forward_vph }}</li>
+        <li><strong>Left VPH:</strong> {{ configuration.south_left_vph }}</li>
+        <li><strong>Right VPH:</strong> {{ configuration.south_right_vph }}</li>
+      </ul>
+    </div>
+
+    <!-- East Parameters -->
+    <div class="direction-box">
+      <h2>East Parameters</h2>
+      <ul>
+        <li><strong>VPH:</strong> {{ configuration.east_vph }}</li>
+        <li><strong>Forward VPH:</strong> {{ configuration.east_forward_vph }}</li>
+        <li><strong>Left VPH:</strong> {{ configuration.east_left_vph }}</li>
+        <li><strong>Right VPH:</strong> {{ configuration.east_right_vph }}</li>
+      </ul>
+    </div>
+
+    <!-- West Parameters -->
+    <div class="direction-box">
+      <h2>West Parameters</h2>
+      <ul>
+        <li><strong>VPH:</strong> {{ configuration.west_vph }}</li>
+        <li><strong>Forward VPH:</strong> {{ configuration.west_forward_vph }}</li>
+        <li><strong>Left VPH:</strong> {{ configuration.west_left_vph }}</li>
+        <li><strong>Right VPH:</strong> {{ configuration.west_right_vph }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <a href="{{ url_for('session_leaderboard_page', session_id=configuration.session_id) }}">Back to Session Leaderboard</a>
 </body>
 </html>

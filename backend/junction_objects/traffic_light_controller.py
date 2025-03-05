@@ -82,73 +82,13 @@ class TrafficLightController:
             self.HORIZONTAL_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_main_green", self.HORIZONTAL_SEQUENCE_LENGTH)) / sequences
             self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_right_green", self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH)) / sequences
             self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_right_green", self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH)) / sequences
-            
-        else:
-
-            main_vertical, main_horizontal, vertical_right, horizontal_right = self.get_sequence_lengths()
-            
-            self.VERTICAL_SEQUENCE_LENGTH = main_vertical
-            self.HORIZONTAL_SEQUENCE_LENGTH = main_horizontal
-            self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = vertical_right
-            self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = horizontal_right
-
-    def get_sequence_lengths(self) -> tuple:
-        """
         
-        """
-
-        if self.traffic_settings is not None:
-
-            traffic_settings = self.traffic_settings
-
-            if traffic_settings.get("traffic-light-enable", False):
-
-                sequences = traffic_settings.get("sequences", {})
-
-                self.VERTICAL_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_main_green", self.VERTICAL_SEQUENCE_LENGTH)) / sequences
-                self.HORIZONTAL_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_main_green", self.HORIZONTAL_SEQUENCE_LENGTH)) / sequences
-                self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("vertical_right_green", self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH)) / sequences
-                self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = int(traffic_settings.get("horizontal_right_green", self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH)) / sequences
-                
-        main_vertical = main_horizontal = vertical_right = horizontal_right = 0
-
-        increment = 4
-
-        if self.vehicle_data:
-
-            north = self.vehicle_data.get("north", {})
-            south = self.vehicle_data.get("south", {})
-            east = self.vehicle_data.get("east", {})
-            west = self.vehicle_data.get("west", {})
-
-            vertical_total = (north.get("forward", 0) + north.get("left", 0) +
-                              south.get("forward", 0) + south.get("left", 0))
+        else :
+            self.VERTICAL_SEQUENCE_LENGTH = 0
+            self.HORIZONTAL_SEQUENCE_LENGTH = 0
+            self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = 0
+            self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = 0
             
-            horizontal_total = (east.get("forward", 0) + east.get("left", 0) +
-                                west.get("forward", 0) + west.get("left", 0))
-            
-            vertical_right_total = north.get("right", 0) + south.get("right", 0)
-
-            horizontal_right_total = east.get("right", 0) + west.get("right", 0)
-
-            total = vertical_total + horizontal_total + vertical_right_total + horizontal_right_total
-            
-            if total > 0:
-
-                raw_main_vertical = 60 * (vertical_total / total)
-                raw_main_horizontal = 60 * (horizontal_total / total)
-                raw_vertical_right = 60 * (vertical_right_total / total)
-                raw_horizontal_right = 60 * (horizontal_right_total / total)
-
-                main_vertical = math.ceil(raw_main_vertical / increment)
-
-                main_horizontal = math.ceil(raw_main_horizontal / increment)
-
-                vertical_right = math.ceil(raw_vertical_right / increment)
-
-                horizontal_right = math.ceil(raw_horizontal_right / increment)
-
-        return main_vertical, main_horizontal, vertical_right, horizontal_right
 
     def update_vehicle_data(self, vehicle_data: Dict[str, Any]) -> None:
         """
@@ -156,13 +96,6 @@ class TrafficLightController:
         """
 
         self.vehicle_data = vehicle_data
-
-        main_vertical, main_horizontal, vertical_right, horizontal_right = self.get_sequence_lengths()
-        
-        self.VERTICAL_SEQUENCE_LENGTH = main_vertical
-        self.HORIZONTAL_SEQUENCE_LENGTH = main_horizontal
-        self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = vertical_right
-        self.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH = horizontal_right
         
     def update_junction_settings(self, junction_settings: Dict[str, Any]) -> None:
         """

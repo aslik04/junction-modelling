@@ -17,6 +17,8 @@ from junction_objects.traffic_light_state import run_traffic_loop
 from junction_objects.vehicle import Car
 from junction_objects.vehicle_movement import update_vehicle
 from junction_objects.vehicle_stop_line import has_crossed_line
+from junction_objects.adaptive_controller import run_adaptive_traffic_loop
+
 
 app = FastAPI()
 
@@ -53,8 +55,6 @@ lastUpdateTime = None
 
 simulation_running = True
 
-backend_results = False
-
 max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0
 
 total_wait_time_n = total_wait_time_s = total_wait_time_e = total_wait_time_w = 0
@@ -70,6 +70,8 @@ junctionSettings: Dict[str, Any] = {}
 trafficLightSettings: Dict[str, Any] = {}
 
 cars = []
+
+default_traffic_loop_task = None
 
 async def broadcast_to_all(data_str: str):
     """
@@ -522,7 +524,6 @@ async def run_fast_simulation():
     global wait_count_n, wait_count_s, wait_count_e, wait_count_w
     global max_queue_length_n, max_queue_length_s, max_queue_length_e, max_queue_length_w
 
-    backend_results = True
     duration = 1.0
 
     old_multiplier = simulationSpeedMultiplier
@@ -530,7 +531,12 @@ async def run_fast_simulation():
 
     # First Run is for user traffic settings
 
+    global default_traffic_loop_task
+    default_traffic_loop_task = asyncio.create_task(run_traffic_loop(traffic_light_logic))
+
     reset_simulation()
+
+    simulationTime = 0
 
     max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0
     total_wait_time_n = total_wait_time_s = total_wait_time_e = total_wait_time_w = 0
@@ -561,14 +567,25 @@ async def run_fast_simulation():
 
     # Run the algo traffic settings after user
 
-    reset_simulation()
+    if default_traffic_loop_task is not None:
+        default_traffic_loop_task.cancel()
+        
+    try:
+        await default_traffic_loop_task
+    except asyncio.CancelledError:
+        print("Default traffic loop cancelled.")
+
+
+    reset_simulation_for_default()
+
+    simulationTime = 0
+
+    await asyncio.sleep(duration)
 
     max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0
     total_wait_time_n = total_wait_time_s = total_wait_time_e = total_wait_time_w = 0
     wait_count_n = wait_count_s = wait_count_e = wait_count_w = 0
     max_queue_length_n = max_queue_length_s = max_queue_length_e = max_queue_length_w = 0
-
-    traffic_light_logic.update_traffic_settings(traffic_light_logic.traffic_settings, use_default=True)
 
     await asyncio.sleep(duration)
 
@@ -604,8 +621,6 @@ async def run_fast_simulation():
     simulationSpeedMultiplier = old_multiplier
     traffic_light_logic.simulationSpeedMultiplier = old_multiplier
 
-    traffic_light_logic.update_traffic_settings(traffic_light_logic.traffic_settings, use_default=False)
-
     return {
         "user": user_results,
         "default": default_results,
@@ -624,18 +639,32 @@ async def simulate_fast_endpoint():
 
 def reset_simulation():
     """
-    
+
     """
-    
     global simulationTime, lastUpdateTime, cars, spawnRates, traffic_light_logic
     simulationTime = 0
     lastUpdateTime = None
     cars = []
 
-    asyncio.create_task(run_traffic_loop(traffic_light_logic))
     asyncio.create_task(spawn_car_loop())
     asyncio.create_task(update_car_loop())
     asyncio.create_task(update_simulation_time())
+
+def reset_simulation_for_default():
+    """
+    
+    """
+    global simulationTime, lastUpdateTime, cars, spawnRates, traffic_light_logic
+    simulationTime = 0
+    lastUpdateTime = None
+    cars = []
+
+    asyncio.create_task(run_adaptive_traffic_loop(traffic_light_logic, cars))
+    asyncio.create_task(spawn_car_loop())
+    asyncio.create_task(update_car_loop())
+    asyncio.create_task(update_simulation_time())
+
+
 
 @app.on_event("startup")
 async def on_startup():

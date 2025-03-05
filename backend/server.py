@@ -518,25 +518,21 @@ async def run_fast_simulation():
 
     """
 
-    global simulationSpeedMultiplier
+    global simulationSpeedMultiplier, simulationTime
     global max_wait_time_n, max_wait_time_s, max_wait_time_e, max_wait_time_w
     global total_wait_time_n, total_wait_time_s, total_wait_time_e, total_wait_time_w
     global wait_count_n, wait_count_s, wait_count_e, wait_count_w
     global max_queue_length_n, max_queue_length_s, max_queue_length_e, max_queue_length_w
+    global default_traffic_loop_task
 
-    duration = 1.0
+    duration = 5.0
 
     old_multiplier = simulationSpeedMultiplier
     simulationSpeedMultiplier = traffic_light_logic.simulationSpeedMultiplier = 100.0
 
     # First Run is for user traffic settings
 
-    global default_traffic_loop_task
-    default_traffic_loop_task = asyncio.create_task(run_traffic_loop(traffic_light_logic))
-
     reset_simulation()
-
-    simulationTime = 0
 
     max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0
     total_wait_time_n = total_wait_time_s = total_wait_time_e = total_wait_time_w = 0
@@ -567,18 +563,14 @@ async def run_fast_simulation():
 
     # Run the algo traffic settings after user
 
-    if default_traffic_loop_task is not None:
-        default_traffic_loop_task.cancel()
-        
+    default_traffic_loop_task.cancel()
+
     try:
         await default_traffic_loop_task
     except asyncio.CancelledError:
         print("Default traffic loop cancelled.")
 
-
     reset_simulation_for_default()
-
-    simulationTime = 0
 
     await asyncio.sleep(duration)
 
@@ -672,9 +664,11 @@ async def on_startup():
     
     """
     
-    global simulation_running
+    global simulation_running, default_traffic_loop_task
     simulation_running = True
-    asyncio.create_task(run_traffic_loop(traffic_light_logic))
+
+    default_traffic_loop_task = asyncio.create_task(run_traffic_loop(traffic_light_logic))
+
     asyncio.create_task(spawn_car_loop())
     asyncio.create_task(update_car_loop())
     asyncio.create_task(update_simulation_time())

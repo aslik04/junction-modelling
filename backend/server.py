@@ -537,7 +537,6 @@ async def run_fast_simulation():
     wait_count_n = wait_count_s = wait_count_e = wait_count_w = 0
     max_queue_length_n = max_queue_length_s = max_queue_length_e = max_queue_length_w = 0
 
-    print(f"[RUN #1] Running fast sim (user logic) for {duration}s @ multiplier {simulationSpeedMultiplier}...")
     await asyncio.sleep(duration)
 
     user_avg_wait_time_n = total_wait_time_n / wait_count_n if wait_count_n > 0 else 0
@@ -560,8 +559,6 @@ async def run_fast_simulation():
         "avg_wait_time_w": user_avg_wait_time_w
     }
 
-    print("[RUN #1] Complete. User logic results:", user_results)
-
     # Run the algo traffic settings after user
 
     reset_simulation()
@@ -573,7 +570,6 @@ async def run_fast_simulation():
 
     traffic_light_logic.update_traffic_settings(traffic_light_logic.traffic_settings, use_default=True)
 
-    print(f"[RUN #2] Running fast sim (default logic) for {duration}s @ multiplier {simulationSpeedMultiplier}...")
     await asyncio.sleep(duration)
 
     def_avg_wait_time_n = total_wait_time_n / wait_count_n if wait_count_n > 0 else 0

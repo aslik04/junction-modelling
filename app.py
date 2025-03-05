@@ -12,6 +12,7 @@ import requests
 from flask import Flask, flash, request, jsonify, render_template, url_for, redirect, send_from_directory
 from models import db, Configuration, LeaderboardResult, Session, TrafficSettings, AlgorithmLeaderboardResult, AlgorithmTrafficSettings
 from sqlalchemy import inspect
+import json
 
 app = Flask(__name__)
 
@@ -190,7 +191,7 @@ def get_session_leaderboard(session):
 
     def compute_metric_score(x, best, worst):
         """
-        Compute a normalized score for a metric.
+        Compute a normalised score for a metric.
         
         Args:
             x (float): The current metric value.
@@ -198,7 +199,7 @@ def get_session_leaderboard(session):
             worst (float): The worst (highest) value for the metric.
         
         Returns:
-            float: A normalized score between 0 and 100.
+            float: A normalised score between 0 and 100.
         """
         
         return 0 if worst == best else 100 * (x - best) / (worst - best)
@@ -624,98 +625,85 @@ def get_session_leaderboard_result(session_id, run_id):
 @app.route('/parameters', methods=['GET', 'POST'])
 def parameters():
     """
-    
+    Handles manual parameter submission.
+    On POST, it extracts form data, stores configuration in the database,
+    and sends spawn rates, junction settings, and traffic light settings
+    to the FastAPI server. On GET, it renders the parameters page.
     """
-    
     if request.method == 'POST':
-    
         print("📥 Received Form Data:", request.form)
-    
         try:
-            data = request.form 
-
+            data = request.form
             print("📥 Received Form Data:", data)
 
+            # Retrieve or create an active session
             session = Session.query.filter_by(active=True).first()
             if not session:
                 session = Session(active=True)
                 db.session.add(session)
                 db.session.commit()
-            
+
+            # Modified safe_int: converts any input to string first
             def safe_int(value):
-                return int(value) if value.strip().isdigit() else 0  
+                try:
+                    val = str(value).strip()
+                    return int(val) if val.isdigit() else 0
+                except Exception:
+                    return 0
 
-            north_vph = (
-                int(data.get('nb_forward', 0)) +
-                int(data.get('nb_left', 0)) +
-                int(data.get('nb_right', 0))
-            )
+            # Calculate vehicle volumes per hour (VPH) for each direction
+            north_vph = safe_int(data.get('nb_forward', 0)) + safe_int(data.get('nb_left', 0)) + safe_int(data.get('nb_right', 0))
+            south_vph = safe_int(data.get('sb_forward', 0)) + safe_int(data.get('sb_left', 0)) + safe_int(data.get('sb_right', 0))
+            east_vph  = safe_int(data.get('eb_forward', 0)) + safe_int(data.get('eb_left', 0)) + safe_int(data.get('eb_right', 0))
+            west_vph  = safe_int(data.get('wb_forward', 0)) + safe_int(data.get('wb_left', 0)) + safe_int(data.get('wb_right', 0))
 
-            south_vph = (
-                int(data.get('sb_forward', 0)) +
-                int(data.get('sb_left', 0)) +
-                int(data.get('sb_right', 0))
-            )
+            pedestrian_duration = safe_int(data.get('pedestrian-duration', 0))
+            pedestrian_frequency = safe_int(data.get('pedestrian-frequency', 0))
 
-            east_vph = (
-                int(data.get('eb_forward', 0)) +
-                int(data.get('eb_left', 0)) +
-                int(data.get('eb_right', 0))
-            )
-
-            west_vph = (
-                int(data.get('wb_forward', 0)) +
-                int(data.get('wb_left', 0)) +
-                int(data.get('wb_right', 0))
-            )
-
-            pedestrian_duration = safe_int(request.form.get('pedestrian-duration', '0'))
-            pedestrian_frequency=int(data.get('pedestrian-frequency', 0))
-
+            # Create and store the configuration object
             config = Configuration(
                 session_id=session.id,
-
-                lanes=int(data.get('lanes', 5)),  
-                left_turn_lane=('left-turn' in data),  
-                pedestrian_duration=safe_int(data.get('pedestrian-duration', 0)), 
-                pedestrian_frequency=int(data.get('pedestrian-frequency', 0)), 
+                lanes=safe_int(data.get('lanes', 5)),
+                left_turn_lane=('left-turn' in data),
+                pedestrian_duration=pedestrian_duration,
+                pedestrian_frequency=pedestrian_frequency,
 
                 north_vph=north_vph,
-                north_forward_vph=int(data.get('nb_forward', 0)),
-                north_left_vph=int(data.get('nb_left', 0)),
-                north_right_vph=int(data.get('nb_right', 0)),
+                north_forward_vph=safe_int(data.get('nb_forward', 0)),
+                north_left_vph=safe_int(data.get('nb_left', 0)),
+                north_right_vph=safe_int(data.get('nb_right', 0)),
 
                 south_vph=south_vph,
-                south_forward_vph=int(data.get('sb_forward', 0)),
-                south_left_vph=int(data.get('sb_left', 0)),
-                south_right_vph=int(data.get('sb_right', 0)),
+                south_forward_vph=safe_int(data.get('sb_forward', 0)),
+                south_left_vph=safe_int(data.get('sb_left', 0)),
+                south_right_vph=safe_int(data.get('sb_right', 0)),
 
                 east_vph=east_vph,
-                east_forward_vph=int(data.get('eb_forward', 0)),
-                east_left_vph=int(data.get('eb_left', 0)),
-                east_right_vph=int(data.get('eb_right', 0)),
+                east_forward_vph=safe_int(data.get('eb_forward', 0)),
+                east_left_vph=safe_int(data.get('eb_left', 0)),
+                east_right_vph=safe_int(data.get('eb_right', 0)),
 
                 west_vph=west_vph,
-                west_forward_vph=int(data.get('wb_forward', 0)),
-                west_left_vph=int(data.get('wb_left', 0)),
-                west_right_vph=int(data.get('wb_right', 0))
+                west_forward_vph=safe_int(data.get('wb_forward', 0)),
+                west_left_vph=safe_int(data.get('wb_left', 0)),
+                west_right_vph=safe_int(data.get('wb_right', 0))
             )
-
             db.session.add(config)
             db.session.commit()
             print(f"✅ Data stored with run_id {config.run_id}")
 
+            # Process traffic light settings based on checkbox state
             traffic_enabled = data.get('traffic-light-enable', '') == 'on'
             if traffic_enabled:
                 tl_config = TrafficSettings(
                     run_id=config.run_id,
                     session_id=session.id,
                     enabled=True,
-                    sequences_per_hour=int(data.get('tl_sequences', 0)),
-                    vertical_main_green=int(data.get('tl_vmain', 0)),
-                    horizontal_main_green=int(data.get('tl_hmain', 0)),
-                    vertical_right_green=int(data.get('tl_vright', 0)),
-                    horizontal_right_green=int(data.get('tl_hright', 0))
+                    sequences_per_hour=safe_int(data.get('tl_sequences', 0)),
+                    vertical_main_green=safe_int(data.get('tl_vmain', 0)),
+                    horizontal_main_green=safe_int(data.get('tl_hmain', 0)),
+                    vertical_right_green=safe_int(data.get('tl_vright', 0)),
+                    horizontal_right_green=safe_int(data.get('tl_hright', 0))
                 )
             else:
                 tl_config = TrafficSettings(
@@ -732,71 +720,62 @@ def parameters():
             db.session.commit()
             print(f"✅ Traffic settings stored for run_id {config.run_id}")
 
+            # Build spawn rates dictionary to send to FastAPI
             spawn_rates = {
                 "north": {
-                    "forward": int(data.get('nb_forward', 0)),
-                    "left": int(data.get('nb_left', 0)),
-                    "right": int(data.get('nb_right', 0))
+                    "forward": safe_int(data.get('nb_forward', 0)),
+                    "left": safe_int(data.get('nb_left', 0)),
+                    "right": safe_int(data.get('nb_right', 0))
                 },
                 "south": {
-                    "forward": int(data.get('sb_forward', 0)),
-                    "left": int(data.get('sb_left', 0)),
-                    "right": int(data.get('sb_right', 0))
+                    "forward": safe_int(data.get('sb_forward', 0)),
+                    "left": safe_int(data.get('sb_left', 0)),
+                    "right": safe_int(data.get('sb_right', 0))
                 },
                 "east": {
-                    "forward": int(data.get('eb_forward', 0)),
-                    "left": int(data.get('eb_left', 0)),
-                    "right": int(data.get('eb_right', 0))
+                    "forward": safe_int(data.get('eb_forward', 0)),
+                    "left": safe_int(data.get('eb_left', 0)),
+                    "right": safe_int(data.get('eb_right', 0))
                 },
                 "west": {
-                    "forward": int(data.get('wb_forward', 0)),
-                    "left": int(data.get('wb_left', 0)),
-                    "right": int(data.get('wb_right', 0))
+                    "forward": safe_int(data.get('wb_forward', 0)),
+                    "left": safe_int(data.get('wb_left', 0)),
+                    "right": safe_int(data.get('wb_right', 0))
                 }
             }
-
             try:
-                
                 response = requests.post("http://127.0.0.1:8000/update_spawn_rates", json=spawn_rates)
-                
                 if response.status_code == 200:
                     print("✅ Spawn rates sent successfully to server.py.")
-            
             except requests.exceptions.RequestException as e:
-             
                 print(f"⚠️ Could not reach server.py: {e}")
 
+            # Build and send junction settings dictionary
             junction_settings = {
-                "lanes": int(data.get('lanes', 5)),
+                "lanes": safe_int(data.get('lanes', 5)),
                 "left_turn_lane": 'left-turn' in data,
                 "bus_lane": 'bus_lane' in data,
-                "pedestrian_duration": safe_int(data.get('pedestrian-duration', 0)),
-                "pedestrian_frequency":  safe_int(data.get('pedestrian-frequency', 0)),
+                "pedestrian_duration": pedestrian_duration,
+                "pedestrian_frequency": pedestrian_frequency,
             }
-
             try:
-                
                 response = requests.post("http://127.0.0.1:8000/update_junction_settings", json=junction_settings)
-                
                 if response.status_code == 200:
                     print("✅ Junction settings sent successfully to server.py.")
-                
                 else:
                     print(f"❌ Error sending junction settings: {response.text}")
-            
             except requests.exceptions.RequestException as e:
                 print(f"⚠️ Could not reach server.py: {e}")
 
-
+            # Build and send traffic light settings dictionary
             traffic_light_settings = {
-                    "traffic-light-enable": "on" if traffic_enabled else "",  # or just traffic_enabled
-                    "sequences": tl_config.sequences_per_hour,
-                    "vertical_main_green": tl_config.vertical_main_green,
-                    "horizontal_main_green": tl_config.horizontal_main_green,
-                    "vertical_right_green": tl_config.vertical_right_green,
-                    "horizontal_right_green": tl_config.horizontal_right_green
+                "traffic-light-enable": "on" if traffic_enabled else "",
+                "sequences": tl_config.sequences_per_hour,
+                "vertical_main_green": tl_config.vertical_main_green,
+                "horizontal_main_green": tl_config.horizontal_main_green,
+                "vertical_right_green": tl_config.vertical_right_green,
+                "horizontal_right_green": tl_config.horizontal_right_green
             }
-
             try:
                 response = requests.post("http://127.0.0.1:8000/update_traffic_light_settings", json=traffic_light_settings)
                 if response.status_code == 200:
@@ -806,8 +785,7 @@ def parameters():
             except requests.exceptions.RequestException as e:
                 print(f"⚠️ Could not reach server.py for traffic lights: {e}")
 
-            return redirect(url_for('junctionPage')) 
-
+            return redirect(url_for('junctionPage'))
         except Exception as e:
             db.session.rollback()
             print(f"❌ Error: {e}")
@@ -844,95 +822,298 @@ def uploadfile():
 
     return f"File '{file.filename}' uploaded successfully!"
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['POST'])
 def upload():
-    """
-    
-    """
-    
-    if request.method == 'POST':
-    
-        try:
-    
-            if 'file' in request.files:
-    
-                file = request.files['file']
-    
-                configurations = process_csv(file)
-    
-                for config in configurations:
-                    db.session.add(config)
-                db.session.commit()
-    
-                return render_template('success.html', message='parameters saved')
+
+    stop_fastapi()
+    start_fastapi()
+
+    if 'file' not in request.files:
+        return "No file part", 400
+    file = request.files['file']
+    if file.filename == '':
+        return "No selected file", 400
+
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in ['.json', '.csv']:
+        return render_template('failure.html')
+
+    # Build a dictionary that will mimic the form data from /parameters
+    data = {}
+    try:
+        if ext == '.json':
+            # Read and parse JSON file
+            file_content = file.read().decode('utf-8')
+            json_data = json.loads(file_content)
+            
+            # Map JSON vehicle settings to expected keys
+            vehicle = json_data.get("vehicle_settings", {})
+            north = vehicle.get("north", {})
+            east = vehicle.get("east", {})
+            south = vehicle.get("south", {})
+            west = vehicle.get("west", {})
+
+            data['nb_forward'] = north.get("forward", 0)
+            data['nb_left'] = north.get("turning_left", 0)
+            data['nb_right'] = north.get("turning_right", 0)
+
+            data['eb_forward'] = east.get("forward", 0)
+            data['eb_left'] = east.get("turning_left", 0)
+            data['eb_right'] = east.get("turning_right", 0)
+
+            data['sb_forward'] = south.get("forward", 0)
+            data['sb_left'] = south.get("turning_left", 0)
+            data['sb_right'] = south.get("turning_right", 0)
+
+            data['wb_forward'] = west.get("forward", 0)
+            data['wb_left'] = west.get("turning_left", 0)
+            data['wb_right'] = west.get("turning_right", 0)
+
+            # Map JSON junction settings
+            junction = json_data.get("junction_settings", {})
+            data['lanes'] = junction.get("number_of_lanes", 5)
+            if junction.get("left_turn_lane", False):
+                # Original code checks for key presence so set a key value
+                data['left-turn'] = 'on'
+            data['pedestrian-duration'] = junction.get("pedestrian_duration", 0)
+            data['pedestrian-frequency'] = junction.get("pedestrian_frequency", 0)
+            # Also pass bus_lane if needed
+            data['bus_lane'] = junction.get("bus_lane", False)
+
+            # Map JSON traffic light settings
+            tls = json_data.get("traffic_light_settings", {})
+            if tls.get("enabled", False):
+                data['traffic-light-enable'] = 'on'
             else:
-                
-                data = request.form
+                data['traffic-light-enable'] = ''
+            data['tl_sequences'] = tls.get("traffic_cycles", 0)
+            vertical_seq = tls.get("vertical_sequence", {})
+            horizontal_seq = tls.get("horizontal_sequence", {})
+            data['tl_vmain'] = vertical_seq.get("main_green_length", 0)
+            data['tl_vright'] = vertical_seq.get("right_green_length", 0)
+            data['tl_hmain'] = horizontal_seq.get("main_green_length", 0)
+            # Use 0 if right_green_length is None
+            data['tl_hright'] = horizontal_seq.get("right_green_length") or 0
 
-                config = Configuration(
-                    run_id=int(data.get('run_id', 0)),
-                    pedestrian_duration=int(data.get('pedestrian_duration', 0)),
-                    pedestrian_frequency=int(data.get('pedestrian_frequency', 0)),
-                    north_vph=int(data.get('north_vph', 0)),
-                    north_forward_vph=int(data.get('north_forward_vph', 0)),
-                    north_left_vph=int(data.get('north_left_vph', 0)),
-                    north_right_vph=int(data.get('north_right_vph', 0)),
-                    south_vph=int(data.get('south_vph', 0)),
-                    south_forward_vph=int(data.get('south_forward_vph', 0)),
-                    south_left_vph=int(data.get('south_left_vph', 0)),
-                    south_right_vph=int(data.get('south_right_vph', 0)),
-                    east_vph=int(data.get('east_vph', 0)),
-                    east_forward_vph=int(data.get('east_forward_vph', 0)),
-                    east_left_vph=int(data.get('east_left_vph', 0)),
-                    east_right_vph=int(data.get('east_right_vph', 0)),
-                    west_vph=int(data.get('west_vph', 0)),
-                    west_forward_vph=int(data.get('west_forward_vph', 0)),
-                    west_left_vph=int(data.get('west_left_vph', 0)),
-                    west_right_vph=int(data.get('west_right_vph', 0))
-                )
+        elif ext == '.csv':
+            # Read and parse CSV file
+            file_content = file.read().decode('utf-8')
+            csv_reader = csv.DictReader(StringIO(file_content))
+            row = next(csv_reader)  # Assuming a single row of data
 
-                db.session.add(config)
-                db.session.commit()  # Save to the database
-                
-            spawn_rates = {
-                "north": {
-                    "forward": int(data.get('north_forward_vph', 0)),
-                    "left": int(data.get('north_left_vph', 0)),
-                    "right": int(data.get('north_right_vph', 0))
-                },
-                "south": {
-                    "forward": int(data.get('south_forward_vph', 0)),
-                    "left": int(data.get('south_left_vph', 0)),
-                    "right": int(data.get('south_right_vph', 0))
-                },
-                "east": {
-                    "forward": int(data.get('east_forward_vph', 0)),
-                    "left": int(data.get('east_left_vph', 0)),
-                    "right": int(data.get('east_right_vph', 0))
-                },
-                "west": {
-                    "forward": int(data.get('west_forward_vph', 0)),
-                    "left": int(data.get('west_left_vph', 0)),
-                    "right": int(data.get('west_right_vph', 0))
-                }
-            }
+            # Map CSV columns to expected keys
+            data['nb_forward'] = row.get("north_forward", 0)
+            data['nb_left'] = row.get("north_tleft", 0)
+            data['nb_right'] = row.get("north_tright", 0)
 
+            data['eb_forward'] = row.get("east_forward", 0)
+            data['eb_left'] = row.get("east_tleft", 0)
+            data['eb_right'] = row.get("east_tright", 0)
+
+            data['sb_forward'] = row.get("south_forward", 0)
+            data['sb_left'] = row.get("south_tleft", 0)
+            data['sb_right'] = row.get("south_tright", 0)
+
+            data['wb_forward'] = row.get("west_forward", 0)
+            data['wb_left'] = row.get("west_tleft", 0)
+            data['wb_right'] = row.get("west_tright", 0)
+
+            data['lanes'] = row.get("number_of_lanes", 5)
+            if row.get("left_turn_lane", "").lower() == "true":
+                data['left-turn'] = 'on'
+            data['bus_lane'] = row.get("bus_lane", "").lower() == "true"
+            data['pedestrian-frequency'] = row.get("pedestrian_frequency", 0)
+            data['pedestrian-duration'] = row.get("pedestrian_duration", 0)
+
+            if row.get("enable_traffic_light_settings", "").lower() == "true":
+                data['traffic-light-enable'] = 'on'
+            else:
+                data['traffic-light-enable'] = ''
+            data['tl_sequences'] = row.get("traffic_cycles", 0)
+            data['tl_vmain'] = row.get("vertical_sequence_main_green_length", 0)
+            data['tl_vright'] = row.get("vertical_sequence_right_green_length", 0)
+            data['tl_hmain'] = row.get("horizontal_sequence_main_green_length", 0)
+            data['tl_hright'] = row.get("horizontal_sequence_right_green_length", 0)
+    except Exception as e:
+        print("Error parsing file:", e)
+        return render_template('failure.html')
+
+    print("📥 Parsed file data:", data)
+
+    # Now run the same processing logic as in your /parameters POST
+    try:
+        # Find or create a session
+        session_obj = Session.query.filter_by(active=True).first()
+        if not session_obj:
+            session_obj = Session(active=True)
+            db.session.add(session_obj)
+            db.session.commit()
+
+        def safe_int(value):
             try:
-                response = requests.post("http://127.0.0.1:8000/update_spawn_rates", json=spawn_rates)
-                if response.status_code == 200:
-                    print("✅ Spawn rates sent successfully to server.py.")
-                else:
-                    print(f"❌ Error sending spawn rates to server.py: {response.text}")
-            except requests.exceptions.RequestException as e:
-                print(f"⚠️ Could not reach server.py: {e}")
+                if isinstance(value, str):
+                    return int(value.strip()) if value.strip().isdigit() else 0
+                return int(value)
+            except:
+                return 0
 
-            return render_template('success.html')
+        # Calculate VPH totals for each direction
+        north_vph = safe_int(data.get('nb_forward')) + safe_int(data.get('nb_left')) + safe_int(data.get('nb_right'))
+        south_vph = safe_int(data.get('sb_forward')) + safe_int(data.get('sb_left')) + safe_int(data.get('sb_right'))
+        east_vph  = safe_int(data.get('eb_forward')) + safe_int(data.get('eb_left')) + safe_int(data.get('eb_right'))
+        west_vph  = safe_int(data.get('wb_forward')) + safe_int(data.get('wb_left')) + safe_int(data.get('wb_right'))
 
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({'error': str(e)}), 400
+        print(f"🟢 Calculated VPH - North: {north_vph}, South: {south_vph}, East: {east_vph}, West: {west_vph}")
+        pedestrian_duration = safe_int(data.get('pedestrian-duration'))
+        pedestrian_frequency = safe_int(data.get('pedestrian-frequency'))
+        print(f"🟢 Pedestrian frequency per Hour: {pedestrian_frequency}")
+        print(f"🟢 Pedestrian Crossing Duration: {pedestrian_duration} seconds (Type: {type(pedestrian_duration)})")
 
-    return render_template('upload.html')
+        # Store user input in the database (Configuration)
+        config = Configuration(
+            session_id=session_obj.id,
+            # Junction Settings
+            lanes=safe_int(data.get('lanes', 5)),
+            left_turn_lane=('left-turn' in data),
+            pedestrian_duration=safe_int(data.get('pedestrian-duration')),
+            pedestrian_frequency=safe_int(data.get('pedestrian-frequency')),
+            # North
+            north_vph=north_vph,
+            north_forward_vph=safe_int(data.get('nb_forward')),
+            north_left_vph=safe_int(data.get('nb_left')),
+            north_right_vph=safe_int(data.get('nb_right')),
+            # South
+            south_vph=south_vph,
+            south_forward_vph=safe_int(data.get('sb_forward')),
+            south_left_vph=safe_int(data.get('sb_left')),
+            south_right_vph=safe_int(data.get('sb_right')),
+            # East
+            east_vph=east_vph,
+            east_forward_vph=safe_int(data.get('eb_forward')),
+            east_left_vph=safe_int(data.get('eb_left')),
+            east_right_vph=safe_int(data.get('eb_right')),
+            # West
+            west_vph=west_vph,
+            west_forward_vph=safe_int(data.get('wb_forward')),
+            west_left_vph=safe_int(data.get('wb_left')),
+            west_right_vph=safe_int(data.get('wb_right'))
+        )
+        db.session.add(config)
+        db.session.commit()
+        print(f"✅ Data stored with run_id {config.run_id}")
+
+        # Process traffic light settings
+        traffic_enabled = data.get('traffic-light-enable', '') == 'on'
+        if traffic_enabled:
+            tl_config = TrafficSettings(
+                run_id=config.run_id,
+                session_id=session_obj.id,
+                enabled=True,
+                sequences_per_hour=safe_int(data.get('tl_sequences')),
+                vertical_main_green=safe_int(data.get('tl_vmain')),
+                horizontal_main_green=safe_int(data.get('tl_hmain')),
+                vertical_right_green=safe_int(data.get('tl_vright')),
+                horizontal_right_green=safe_int(data.get('tl_hright'))
+            )
+        else:
+            tl_config = TrafficSettings(
+                run_id=config.run_id,
+                session_id=session_obj.id,
+                enabled=False,
+                sequences_per_hour=0,
+                vertical_main_green=0,
+                horizontal_main_green=0,
+                vertical_right_green=0,
+                horizontal_right_green=0
+            )
+        db.session.add(tl_config)
+        db.session.commit()
+        print(f"✅ Traffic settings stored for run_id {config.run_id}")
+
+        # Construct spawn rates dictionary
+        spawn_rates = {
+            "north": {
+                "forward": safe_int(data.get('nb_forward')),
+                "left": safe_int(data.get('nb_left')),
+                "right": safe_int(data.get('nb_right'))
+            },
+            "south": {
+                "forward": safe_int(data.get('sb_forward')),
+                "left": safe_int(data.get('sb_left')),
+                "right": safe_int(data.get('sb_right'))
+            },
+            "east": {
+                "forward": safe_int(data.get('eb_forward')),
+                "left": safe_int(data.get('eb_left')),
+                "right": safe_int(data.get('eb_right'))
+            },
+            "west": {
+                "forward": safe_int(data.get('wb_forward')),
+                "left": safe_int(data.get('wb_left')),
+                "right": safe_int(data.get('wb_right'))
+            }
+        }
+        print("✅ Parsed Spawn Rates:", spawn_rates)
+
+        # Send spawn rates to server.py
+        try:
+            response = requests.post("http://127.0.0.1:8000/update_spawn_rates", json=spawn_rates)
+            if response.status_code == 200:
+                print("✅ Spawn rates sent successfully to server.py.")
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️ Could not reach server.py: {e}")
+
+        # Construct junction settings dictionary
+        junction_settings = {
+            "lanes": safe_int(data.get('lanes', 5)),
+            "left_turn_lane": 'left-turn' in data,
+            "bus_lane": data.get('bus_lane', False),
+            "pedestrian_duration": safe_int(data.get('pedestrian-duration')),
+            "pedestrian_frequency": safe_int(data.get('pedestrian-frequency'))
+        }
+        print("✅ Parsed Junction Settings:", junction_settings)
+
+        # Send junction settings to server.py
+        try:
+            response = requests.post("http://127.0.0.1:8000/update_junction_settings", json=junction_settings)
+            if response.status_code == 200:
+                print("✅ Junction settings sent successfully to server.py.")
+            else:
+                print(f"❌ Error sending junction settings: {response.text}")
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️ Could not reach server.py: {e}")
+
+        # Construct traffic light settings dictionary
+        traffic_light_settings = {
+            "traffic-light-enable": "on" if traffic_enabled else "",
+            "sequences": safe_int(data.get('tl_sequences')),
+            "vertical_main_green": safe_int(data.get('tl_vmain')),
+            "horizontal_main_green": safe_int(data.get('tl_hmain')),
+            "vertical_right_green": safe_int(data.get('tl_vright')),
+            "horizontal_right_green": safe_int(data.get('tl_hright'))
+        }
+        try:
+            response = requests.post("http://127.0.0.1:8000/update_traffic_light_settings", json=traffic_light_settings)
+            if response.status_code == 200:
+                print("Traffic light settings sent successfully to server.py.")
+            else:
+                print(f"Error sending traffic light settings: {response.text}")
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️ Could not reach server.py for traffic lights: {e}")
+
+        print("THIS IS DEBUG" + str(safe_int(data.get('lanes', 5))))
+
+        return jsonify({
+            "redirect_url": url_for('junctionPage'),
+            "lanes": safe_int(data.get('lanes', 5))
+            })
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Error: {e}")
+        return jsonify({'error': str(e)}), 400
+
+
 
 
 def simulate():
@@ -1239,7 +1420,7 @@ def compute_score_4directions(
     wb_best_queue = extremes["west"]["best_queue"]
     wb_worst_queue = extremes["west"]["worst_queue"]
 
-    def normalize(x, best, worst):
+    def normalise(x, best, worst):
         """
     
         """
@@ -1250,24 +1431,24 @@ def compute_score_4directions(
         
         return 100.0 * (x - best) / (worst - best)
 
-    s_nb_avg = normalize(nb_avg, nb_best_avg, nb_worst_avg)
-    s_nb_max = normalize(nb_max, nb_best_max, nb_worst_max)
-    s_nb_queue = normalize(nb_queue, nb_best_queue, nb_worst_queue)
+    s_nb_avg = normalise(nb_avg, nb_best_avg, nb_worst_avg)
+    s_nb_max = normalise(nb_max, nb_best_max, nb_worst_max)
+    s_nb_queue = normalise(nb_queue, nb_best_queue, nb_worst_queue)
     nb_direction_score = (s_nb_avg + s_nb_max + s_nb_queue) / 3.0
 
-    s_sb_avg = normalize(sb_avg, sb_best_avg, sb_worst_avg)
-    s_sb_max = normalize(sb_max, sb_best_max, sb_worst_max)
-    s_sb_queue = normalize(sb_queue, sb_best_queue, sb_worst_queue)
+    s_sb_avg = normalise(sb_avg, sb_best_avg, sb_worst_avg)
+    s_sb_max = normalise(sb_max, sb_best_max, sb_worst_max)
+    s_sb_queue = normalise(sb_queue, sb_best_queue, sb_worst_queue)
     sb_direction_score = (s_sb_avg + s_sb_max + s_sb_queue) / 3.0
 
-    s_eb_avg = normalize(eb_avg, eb_best_avg, eb_worst_avg)
-    s_eb_max = normalize(eb_max, eb_best_max, eb_worst_max)
-    s_eb_queue = normalize(eb_queue, eb_best_queue, eb_worst_queue)
+    s_eb_avg = normalise(eb_avg, eb_best_avg, eb_worst_avg)
+    s_eb_max = normalise(eb_max, eb_best_max, eb_worst_max)
+    s_eb_queue = normalise(eb_queue, eb_best_queue, eb_worst_queue)
     eb_direction_score = (s_eb_avg + s_eb_max + s_eb_queue) / 3.0
 
-    s_wb_avg = normalize(wb_avg, wb_best_avg, wb_worst_avg)
-    s_wb_max = normalize(wb_max, wb_best_max, wb_worst_max)
-    s_wb_queue = normalize(wb_queue, wb_best_queue, wb_worst_queue)
+    s_wb_avg = normalise(wb_avg, wb_best_avg, wb_worst_avg)
+    s_wb_max = normalise(wb_max, wb_best_max, wb_worst_max)
+    s_wb_queue = normalise(wb_queue, wb_best_queue, wb_worst_queue)
     wb_direction_score = (s_wb_avg + s_wb_max + s_wb_queue) / 3.0
 
     final_score = nb_direction_score + sb_direction_score + eb_direction_score + wb_direction_score

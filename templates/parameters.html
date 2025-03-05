@@ -184,7 +184,6 @@
       max-width: 8em; /* optional max width if you want to cap it */
     }
 
-
     /* Slider container (Number of lanes) */
     .slider-container {
       margin: 2vh 0;
@@ -246,12 +245,13 @@
       padding: 3vh 2vh;
       color: #6b6b6b;
       cursor: pointer;
-      max-width: 600px;
+      width: 100%;
       margin: 0 auto;
+      margin-bottom: -15px;
     }
 
     .drag-drop-box p {
-      font-size: 1.5vh;
+      font-size: 3vh;
       margin: 1vh 0;
     }
 
@@ -316,6 +316,9 @@
   </style>
 
   <script>
+    // Global flag to indicate that a file upload is being used
+    let fileUploadUsed = false;
+  
     document.addEventListener('DOMContentLoaded', function () {
       // Toggle logic for each drop-down (only one open at a time)
       const dropdowns = document.querySelectorAll('.dropdown-heading');
@@ -340,10 +343,44 @@
           }
         });
       });
-
+  
       // Drag & Drop functionality for file upload area
       const dropZone = document.querySelector('.drag-drop-box');
       const fileInput = document.getElementById('file-input');
+  
+      // Function to automatically upload the file using fetch,
+      // and redirect if a redirect_url is returned.
+      function autoUploadFile() {
+        if (fileInput.files.length) {
+          // Set the flag to indicate we're using file data
+          fileUploadUsed = true;
+          const formData = new FormData();
+          // Append the first file (or loop if handling multiple files)
+          formData.append('file', fileInput.files[0]);
+          fetch('/upload', {
+            method: 'POST',
+            body: formData,
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log("File uploaded successfully:", data);
+            // Overwrite the current lanes value with the lanes from the JSON response
+            if(data.lanes !== undefined) {
+              localStorage.setItem("numOfLanes", data.lanes);
+              // Also update the lanes slider to reflect the returned value
+              document.getElementById("lanes").value = data.lanes;
+            }
+            // Redirect as usual
+            if(data.redirect_url) {
+              window.location.href = data.redirect_url;
+            }
+          })
+          .catch(error => {
+            console.error("File upload error:", error);
+          });
+        }
+      }
+  
       dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.style.backgroundColor = '#ececec';
@@ -356,12 +393,15 @@
         dropZone.style.backgroundColor = '#f8f5e9';
         if (e.dataTransfer.files.length) {
           fileInput.files = e.dataTransfer.files;
+          autoUploadFile(); // Automatically post the file after drop
         }
       });
       dropZone.addEventListener('click', () => {
         fileInput.click();
       });
-
+      // Listen for file selection via file input (click) and auto-upload
+      fileInput.addEventListener('change', autoUploadFile);
+  
       // Toggle enable/disable for Traffic Light Settings inputs
       const tlCheckbox = document.getElementById('traffic-light-enable');
       const tlInputs = document.querySelectorAll('.traffic-light-settings input[type="number"]');
@@ -374,61 +414,68 @@
       tlInputs.forEach(input => {
         input.disabled = !tlCheckbox.checked;
       });
-
-      // When the Start button is clicked, copy the parameter values into the hidden form and submit it.
+  
+      // When the Start button is clicked, check if a file upload was used.
+      // If not, copy the manual form values into the hidden form and submit it.
       document.getElementById("startButton").addEventListener("click", async function () {
+        // If a file upload was used, skip manual submission.
+        if (fileUploadUsed) {
+          console.log("File upload detected; using file data only. Manual parameters will be ignored.");
+          return; // Do nothing – the file upload already handled submission.
+        }
         try {
-          // ✅ Step 1: Start FastAPI before submitting form
+          // Step 1: Start FastAPI before submitting form
           let startResponse = await fetch('/start_simulation', { method: 'POST' });
           let startData = await startResponse.json();
-
+  
           if (startResponse.ok) {
-              console.log("✅ FastAPI started:", startData.message);
-
-              // ✅ Step 2: Copy form values to hidden fields
-              document.getElementById("hidden_nb_forward").value = document.getElementById("nb_forward").value;
-              document.getElementById("hidden_nb_left").value = document.getElementById("nb_left").value;
-              document.getElementById("hidden_nb_right").value = document.getElementById("nb_right").value;
-
-              document.getElementById("hidden_eb_forward").value = document.getElementById("eb_forward").value;
-              document.getElementById("hidden_eb_left").value = document.getElementById("eb_left").value;
-              document.getElementById("hidden_eb_right").value = document.getElementById("eb_right").value;
-
-              document.getElementById("hidden_sb_forward").value = document.getElementById("sb_forward").value;
-              document.getElementById("hidden_sb_left").value = document.getElementById("sb_left").value;
-              document.getElementById("hidden_sb_right").value = document.getElementById("sb_right").value;
-
-              document.getElementById("hidden_wb_forward").value = document.getElementById("wb_forward").value;
-              document.getElementById("hidden_wb_left").value = document.getElementById("wb_left").value;
-              document.getElementById("hidden_wb_right").value = document.getElementById("wb_right").value;
-
-              document.getElementById("hidden_lanes").value = document.getElementById("lanes").value;
-              document.getElementById("hidden_left-turn").value = document.getElementById("left-turn").checked ? "on" : "";
-              document.getElementById("hidden_bus-lane").value = document.getElementById("bus-lane").checked ? "on" : "";
-              document.getElementById("hidden_pedestrian_frequency").value = document.getElementById("pedestrian-frequency").value;
-              document.getElementById("hidden_pedestrian_duration").value = document.getElementById("pedestrian-duration").value;
-              
-              // Traffic Light Settings values
-              document.getElementById("hidden_tl_enabled").value = tlCheckbox.checked ? "on" : "";
-              document.getElementById("hidden_sequences").value = document.getElementById("tl_sequences").value;
-              document.getElementById("hidden_vmain").value = document.getElementById("tl_vmain").value;
-              document.getElementById("hidden_hmain").value = document.getElementById("tl_hmain").value;
-              document.getElementById("hidden_vright").value = document.getElementById("tl_vright").value;
-              document.getElementById("hidden_hright").value = document.getElementById("tl_hright").value;
-
-              // ✅ Step 3: Submit the hidden form after FastAPI has started
-              console.log("🚀 Submitting form with updated values...");
-              document.getElementById("hiddenForm").submit();
+            console.log("FastAPI started:", startData.message);
+  
+            // Step 2: Copy form values to hidden fields (manual parameters)
+            document.getElementById("hidden_nb_forward").value = document.getElementById("nb_forward").value;
+            document.getElementById("hidden_nb_left").value = document.getElementById("nb_left").value;
+            document.getElementById("hidden_nb_right").value = document.getElementById("nb_right").value;
+  
+            document.getElementById("hidden_eb_forward").value = document.getElementById("eb_forward").value;
+            document.getElementById("hidden_eb_left").value = document.getElementById("eb_left").value;
+            document.getElementById("hidden_eb_right").value = document.getElementById("eb_right").value;
+  
+            document.getElementById("hidden_sb_forward").value = document.getElementById("sb_forward").value;
+            document.getElementById("hidden_sb_left").value = document.getElementById("sb_left").value;
+            document.getElementById("hidden_sb_right").value = document.getElementById("sb_right").value;
+  
+            document.getElementById("hidden_wb_forward").value = document.getElementById("wb_forward").value;
+            document.getElementById("hidden_wb_left").value = document.getElementById("wb_left").value;
+            document.getElementById("hidden_wb_right").value = document.getElementById("wb_right").value;
+  
+            document.getElementById("hidden_lanes").value = document.getElementById("lanes").value;
+            document.getElementById("hidden_left-turn").value = document.getElementById("left-turn").checked ? "on" : "";
+            document.getElementById("hidden_bus-lane").value = document.getElementById("bus-lane").checked ? "on" : "";
+            document.getElementById("hidden_pedestrian_frequency").value = document.getElementById("pedestrian-frequency").value;
+            document.getElementById("hidden_pedestrian_duration").value = document.getElementById("pedestrian-duration").value;
+  
+            // Traffic Light Settings values
+            document.getElementById("hidden_tl_enabled").value = tlCheckbox.checked ? "on" : "";
+            document.getElementById("hidden_sequences").value = document.getElementById("tl_sequences").value;
+            document.getElementById("hidden_vmain").value = document.getElementById("tl_vmain").value;
+            document.getElementById("hidden_hmain").value = document.getElementById("tl_hmain").value;
+            document.getElementById("hidden_vright").value = document.getElementById("tl_vright").value;
+            document.getElementById("hidden_hright").value = document.getElementById("tl_hright").value;
+  
+            // Step 3: Submit the hidden form after FastAPI has started
+            console.log("Submitting form with manual parameters...");
+            document.getElementById("hiddenForm").submit();
           } else {
-              console.error("❌ Error starting FastAPI:", startData.error);
+            console.error("Error starting FastAPI:", startData.error);
           }
         } catch (error) {
-          console.error("❌ Error sending start request:", error);
+          console.error("Error sending start request:", error);
         }
       });
     });
-  </script>
+  </script>  
   <script>
+    // This script listens for changes to the lanes slider and stores its value in local storage.
     document.addEventListener('DOMContentLoaded', function () {
       const lanesSlider = document.getElementById("lanes");
       lanesSlider.addEventListener("input", function() {
@@ -445,7 +492,7 @@
         // Use the stored value if it exists
         pedestrianDurationInput.value = storedDuration;
       } else {
-        // Otherwise, set a default value (e.g., "2") and store it
+        // Otherwise, set a default value (e.g., "1") and store it
         pedestrianDurationInput.value = "1";
         localStorage.setItem("pedestrianDuration", "1");
       }
@@ -563,167 +610,162 @@
         }
       });
     });
-    </script>
-<script>
-  // Replicate your Python calculations in JavaScript
-
-  function updateAndValidateTrafficSettings() {
-    // Retrieve the number of sequences and set gap duration
-    let sequences = parseInt(document.getElementById("tl_sequences").value) || 1;
-    let gap = 1;
-    
-    // Retrieve the current green time values
-    let vmainInput = document.getElementById("tl_vmain");
-    let vrightInput = document.getElementById("tl_vright");
-    let hmainInput = document.getElementById("tl_hmain");
-    let hrightInput = document.getElementById("tl_hright");
-    
-    let vmain = parseInt(vmainInput.value) || 0;
-    let vright = parseInt(vrightInput.value) || 0;
-    let hmain = parseInt(hmainInput.value) || 0;
-    let hright = parseInt(hrightInput.value) || 0;
-    
-    // Calculate total vertical and horizontal values
-    // Adding (5 * gap) as the fixed transition time component
-    let vTotal = vmain + vright;
-    let hTotal = hmain + hright;
-    
-    // Compute the maximum allowed totals for each direction
-    let maxV = 60 - hTotal;
-    let maxH = 60 - vTotal;
-    
-    // Validate vertical green times
-    if (vTotal > maxV) {
-      vright = Math.max(0, maxV - (vmain + (5 * gap)));
-      vrightInput.value = vright;
-      console.log("Adjusted vertical_right_green to", vright, "to meet max allowed vertical sum of", maxV);
+  </script>
+  <script>
+    // Replicate your Python calculations in JavaScript
+    function updateAndValidateTrafficSettings() {
+      // Retrieve the number of sequences and set gap duration
+      let sequences = parseInt(document.getElementById("tl_sequences").value) || 1;
+      let gap = 1;
+      
+      // Retrieve the current green time values
+      let vmainInput = document.getElementById("tl_vmain");
+      let vrightInput = document.getElementById("tl_vright");
+      let hmainInput = document.getElementById("tl_hmain");
+      let hrightInput = document.getElementById("tl_hright");
+      
+      let vmain = parseInt(vmainInput.value) || 0;
+      let vright = parseInt(vrightInput.value) || 0;
+      let hmain = parseInt(hmainInput.value) || 0;
+      let hright = parseInt(hrightInput.value) || 0;
+      
+      // Calculate total vertical and horizontal values
+      // Adding (5 * gap) as the fixed transition time component
+      let vTotal = vmain + vright + (5 * gap);
+      let hTotal = hmain + hright + (5 * gap);
+      
+      // Compute the maximum allowed totals for each direction
+      let maxV = 60 - hTotal;
+      let maxH = 60 - vTotal;
+      
+      // Validate vertical green times
+      if (vTotal > maxV) {
+        vright = Math.max(0, maxV - (vmain + (5 * gap)));
+        vrightInput.value = vright;
+        console.log("Adjusted vertical_right_green to", vright, "to meet max allowed vertical sum of", maxV);
+      }
+      
+      // Validate horizontal green times
+      if (hTotal > maxH) {
+        hright = Math.max(0, maxH - (hmain + (5 * gap)));
+        hrightInput.value = hright;
+        console.log("Adjusted horizontal_right_green to", hright, "to meet max allowed horizontal sum of", maxH);
+      }
+      
+      // Return the normalized values (dividing by number of sequences)
+      return {
+        vertical_main_green: vmain / sequences,
+        vertical_right_green: vright / sequences,
+        horizontal_main_green: hmain / sequences,
+        horizontal_right_green: hright / sequences,
+      };
+    }
+  
+    // Attach event listeners to update limits and validate as the user types:
+    document.addEventListener('DOMContentLoaded', function () {
+      // When tl_sequences changes, update the limits and validate the green fields
+      document.getElementById("tl_sequences").addEventListener('input', () => {
+        updateAndValidateTrafficSettings();
+      });
+      // Also attach validation to the green fields
+      const greenFields = ["tl_vmain", "tl_vright", "tl_hmain", "tl_hright"];
+      greenFields.forEach(id => {
+        document.getElementById(id).addEventListener('input', updateAndValidateTrafficSettings);
+      });
+    });
+  
+    // Compute cycle times (using 2-second transitions as in Python)
+    function getCycleTimes(seqLengths, gap) {
+      const verticalCycleTime = seqLengths.main_vertical + seqLengths.vertical_right + 5*gap;
+      const horizontalCycleTime = seqLengths.main_horizontal + seqLengths.horizontal_right + 5*gap;
+      return { verticalCycleTime, horizontalCycleTime };
     }
     
-    // Validate horizontal green times
-    if (hTotal > maxH) {
-      hright = Math.max(0, maxH - (hmain + (5 * gap)));
-      hrightInput.value = hright;
-      console.log("Adjusted horizontal_right_green to", hright, "to meet max allowed horizontal sum of", maxH);
+    // Calculate max gap opportunities per minute
+    function getMaxGapsPerMinute(seqLengths, gap) {
+      const cycleTimes = getCycleTimes(seqLengths, gap);
+      const maxVerticalGaps = 60 / cycleTimes.verticalCycleTime;
+      const maxHorizontalGaps = 60 / cycleTimes.horizontalCycleTime;
+      return maxVerticalGaps + maxHorizontalGaps;
     }
     
-    // Return the normalized values (dividing by number of sequences)
-    return {
-      vertical_main_green: vmain / sequences,
-      vertical_right_green: vright / sequences,
-      horizontal_main_green: hmain / sequences,
-      horizontal_right_green: hright / sequences,
-    };
-  }
-
-
-  // Attach event listeners to update limits and validate as the user types:
-  document.addEventListener('DOMContentLoaded', function () {
-    // When tl_sequences changes, update the limits and validate the green fields
-    document.getElementById("tl_sequences").addEventListener('input', () => {
-      updateAndValidateTrafficSettings();
-    });
-    // Also attach validation to the green fields
-    const greenFields = ["tl_vmain", "tl_vright", "tl_hmain", "tl_hright"];
-    greenFields.forEach(id => {
-      document.getElementById(id).addEventListener('input', updateAndValidateTrafficSettings);
-    });
-  });
-
-
+    // This function reads the current vehicle data, calculates max gaps,
+    // and updates the max attribute of the pedestrian frequency input.
+    function updatePedestrianMax() {
+      const vehicleData = {
+        north: {
+          forward: document.getElementById('nb_forward').value,
+          left: document.getElementById('nb_left').value,
+          right: document.getElementById('nb_right').value
+        },
+        east: {
+          forward: document.getElementById('eb_forward').value,
+          left: document.getElementById('eb_left').value,
+          right: document.getElementById('eb_right').value
+        },
+        south: {
+          forward: document.getElementById('sb_forward').value,
+          left: document.getElementById('sb_left').value,
+          right: document.getElementById('sb_right').value
+        },
+        west: {
+          forward: document.getElementById('wb_forward').value,
+          left: document.getElementById('wb_left').value,
+          right: document.getElementById('wb_right').value
+        }
+      };
   
-  // Compute cycle times (using 2-second transitions as in Python)
-  function getCycleTimes(seqLengths, gap) {
-    const verticalCycleTime = seqLengths.main_vertical + seqLengths.vertical_right + 5*gap;
-    const horizontalCycleTime = seqLengths.main_horizontal + seqLengths.horizontal_right + 5*gap;
-    return { verticalCycleTime, horizontalCycleTime };
-  }
+      let enabled = document.getElementById("traffic-light-enable").checked;
   
-  // Calculate max gap opportunities per minute
-  function getMaxGapsPerMinute(seqLengths, gap) {
-    const cycleTimes = getCycleTimes(seqLengths, gap);
-    const maxVerticalGaps = 60 / cycleTimes.verticalCycleTime;
-    const maxHorizontalGaps = 60 / cycleTimes.horizontalCycleTime;
-    return maxVerticalGaps + maxHorizontalGaps;
-  }
-  
-  // This function reads the current vehicle data, calculates max gaps,
-  // and updates the max attribute of the pedestrian frequency input.
-  function updatePedestrianMax() {
-    const vehicleData = {
-      north: {
-        forward: document.getElementById('nb_forward').value,
-        left: document.getElementById('nb_left').value,
-        right: document.getElementById('nb_right').value
-      },
-      east: {
-        forward: document.getElementById('eb_forward').value,
-        left: document.getElementById('eb_left').value,
-        right: document.getElementById('eb_right').value
-      },
-      south: {
-        forward: document.getElementById('sb_forward').value,
-        left: document.getElementById('sb_left').value,
-        right: document.getElementById('sb_right').value
-      },
-      west: {
-        forward: document.getElementById('wb_forward').value,
-        left: document.getElementById('wb_left').value,
-        right: document.getElementById('wb_right').value
+      let seqLengths;
+      if (enabled) {
+        seqLengths = updateAndValidateTrafficSettings();
+      } else {
+        seqLengths = getSequenceLengths(vehicleData);
       }
-    };
-
-    let enabled = document.getElementById("traffic-light-enable").checked;
-
-    if (enabled) {
-      const seqLengths = updateAndValidateTrafficSettings();
-    } else {
-      const seqLengths = getSequenceLengths(vehicleData);
+      const gap = 1; // Adjust gap duration as needed
+      const maxGaps = getMaxGapsPerMinute(seqLengths, gap);
+      
+      // Update the pedestrian frequency input's max attribute
+      const pedInput = document.getElementById('pedestrian-frequency');
+      pedInput.max = Math.floor(maxGaps);
     }
-    const gap = 1; // Adjust gap duration as needed
-    const maxGaps = getMaxGapsPerMinute(seqLengths, gap);
     
-    // Update the pedestrian frequency input's max attribute
-    const pedInput = document.getElementById('pedestrian-frequency');
-    pedInput.max = Math.floor(maxGaps);
-  }
-  
-  // Attach updatePedestrianMax to all vehicle input frequency
-  document.addEventListener('DOMContentLoaded', function () {
-    const vehicleInputs = [
-      'nb_forward', 'nb_left', 'nb_right',
-      'eb_forward', 'eb_left', 'eb_right',
-      'sb_forward', 'sb_left', 'sb_right',
-      'wb_forward', 'wb_left', 'wb_right'
-    ];
-  
-    vehicleInputs.forEach(function(id) {
-      const field = document.getElementById(id);
-      if (field) {
-        field.addEventListener('input', updatePedestrianMax);
-      }
+    // Attach updatePedestrianMax to all vehicle input frequency
+    document.addEventListener('DOMContentLoaded', function () {
+      const vehicleInputs = [
+        'nb_forward', 'nb_left', 'nb_right',
+        'eb_forward', 'eb_left', 'eb_right',
+        'sb_forward', 'sb_left', 'sb_right',
+        'wb_forward', 'wb_left', 'wb_right'
+      ];
+    
+      vehicleInputs.forEach(function(id) {
+        const field = document.getElementById(id);
+        if (field) {
+          field.addEventListener('input', updatePedestrianMax);
+        }
+      });
     });
-  });
-</script> 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // These are your traffic light input IDs
-    const trafficLightFields = ["tl_vmain", "tl_vright", "tl_hmain", "tl_hright"];
-
-    trafficLightFields.forEach(id => {
-      const field = document.getElementById(id);
-      if (field) {
-        // For each input change, call the function that updates your max calc
-        field.addEventListener("input", () => {
-          // If your main function is updatePedestrianMax, call that:
-          updatePedestrianMax(); 
-          // Or if you rely on updateAndValidateTrafficSettings, call that too:
-          updateAndValidateTrafficSettings();
-        });
-      }
+  </script> 
+  <script>
+    // Additional listener for Traffic Light fields to update calculations
+    document.addEventListener("DOMContentLoaded", function () {
+      // These are your traffic light input IDs
+      const trafficLightFields = ["tl_vmain", "tl_vright", "tl_hmain", "tl_hright"];
+  
+      trafficLightFields.forEach(id => {
+        const field = document.getElementById(id);
+        if (field) {
+          // For each input change, call the function that updates your max calc
+          field.addEventListener("input", () => {
+            updatePedestrianMax(); 
+            updateAndValidateTrafficSettings();
+          });
+        }
+      });
     });
-  });
-</script>
-
+  </script>
 </head>
 <body>
   <div class="main-container">
@@ -918,7 +960,7 @@
       </form>
 
       <!-- Bottom box: File Upload area -->
-      <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data" style="flex: 0;">
+      <form action="/upload" method="POST" enctype="multipart/form-data" style="flex: 0;">
         <div class="bottom-box">
           <div class="drag-drop-box">
             <p style="font-size: 3vh;">+</p>

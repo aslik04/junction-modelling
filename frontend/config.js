@@ -9,7 +9,6 @@
  * - We calculate and return junction data based on user-defined lane configurations.
  */
 
-
 /**
  * @constant {HTMLCanvasElement} junctionCanvas : The canvas where the junction is drawn.
  */

@@ -367,7 +367,7 @@ async def spawn_car_loop():
                         else:
                             lane = 0
 
-                    speed = 10.0 if backend_results else 2.0
+                    speed = 4.0
                     new_car = Car(
                         direction=direction,
                         lane=lane,
@@ -379,7 +379,7 @@ async def spawn_car_loop():
                     new_car.wait_recorded = False
                     cars.append(new_car)
 
-        await asyncio.sleep(1)
+        await asyncio.sleep(1 / simulationSpeedMultiplier)
 
 def isOffCanvas(car):
     """
@@ -439,7 +439,7 @@ async def update_car_loop():
         right_lights = traffic_light_logic.rightTurnLightStates
 
         for c in cars:
-            base_speed = 10.0 if backend_results else 2.0
+            base_speed = 4.0
             c.speed = base_speed * simulationSpeedMultiplier
             update_vehicle(c, main_lights, right_lights, cars)
 
@@ -523,10 +523,10 @@ async def run_fast_simulation():
     global max_queue_length_n, max_queue_length_s, max_queue_length_e, max_queue_length_w
 
     backend_results = True
-    duration = 10.0
+    duration = 1.0
 
     old_multiplier = simulationSpeedMultiplier
-    simulationSpeedMultiplier = traffic_light_logic.simulationSpeedMultiplier = 10.0
+    simulationSpeedMultiplier = traffic_light_logic.simulationSpeedMultiplier = 100.0
 
     # First Run is for user traffic settings
 

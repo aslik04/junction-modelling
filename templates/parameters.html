@@ -541,8 +541,8 @@
     // Function to compute cycle times (using 2-second transitions as in your Python code)
     function getCycleTimes(seqLengths) {
       const gap = 1;
-      const verticalCycleTime = (5 * gap) + seqLengths.main_vertical + seqLengths.vertical_right;
-      const horizontalCycleTime = (5 * gap) + seqLengths.main_horizontal + seqLengths.horizontal_right;
+      const verticalCycleTime = seqLengths.main_vertical + seqLengths.vertical_right;
+      const horizontalCycleTime = seqLengths.main_horizontal + seqLengths.horizontal_right;
       return { verticalCycleTime, horizontalCycleTime };
     }
     
@@ -630,9 +630,9 @@
       let hright = parseInt(hrightInput.value) || 0;
       
       // Calculate total vertical and horizontal values
-      // Adding (5 * gap) as the fixed transition time component
-      let vTotal = vmain + vright + (5 * gap);
-      let hTotal = hmain + hright + (5 * gap);
+      // Adding  as the fixed transition time component
+      let vTotal = vmain + vright;
+      let hTotal = hmain + hright;
       
       // Compute the maximum allowed totals for each direction
       let maxV = 60 - hTotal;
@@ -640,14 +640,14 @@
       
       // Validate vertical green times
       if (vTotal > maxV) {
-        vright = Math.max(0, maxV - (vmain + (5 * gap)));
+        vright = Math.max(0, maxV - vmain);
         vrightInput.value = vright;
         console.log("Adjusted vertical_right_green to", vright, "to meet max allowed vertical sum of", maxV);
       }
       
       // Validate horizontal green times
       if (hTotal > maxH) {
-        hright = Math.max(0, maxH - (hmain + (5 * gap)));
+        hright = Math.max(0, maxH - hmain);
         hrightInput.value = hright;
         console.log("Adjusted horizontal_right_green to", hright, "to meet max allowed horizontal sum of", maxH);
       }

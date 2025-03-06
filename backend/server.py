@@ -528,7 +528,7 @@ async def run_fast_simulation():
     duration = 5.0
 
     old_multiplier = simulationSpeedMultiplier
-    simulationSpeedMultiplier = traffic_light_logic.simulationSpeedMultiplier = 100.0
+    simulationSpeedMultiplier = traffic_light_logic.simulationSpeedMultiplier = 10.0
 
     # First Run is for user traffic settings
 
@@ -570,9 +570,8 @@ async def run_fast_simulation():
     except asyncio.CancelledError:
         print("Default traffic loop cancelled.")
 
-    reset_simulation_for_default()
-
-    await asyncio.sleep(duration)
+    reset_simulation()
+    asyncio.create_task(run_adaptive_traffic_loop(traffic_light_logic, cars, 0.0005))
 
     max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0
     total_wait_time_n = total_wait_time_s = total_wait_time_e = total_wait_time_w = 0
@@ -601,13 +600,6 @@ async def run_fast_simulation():
         "avg_wait_time_w": def_avg_wait_time_w
     }
 
-    default_traffic_settings = {
-        "vertical_main_green": traffic_light_logic.VERTICAL_SEQUENCE_LENGTH,
-        "horizontal_main_green": traffic_light_logic.HORIZONTAL_SEQUENCE_LENGTH,
-        "vertical_right_green": traffic_light_logic.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH,
-        "horizontal_right_green": traffic_light_logic.HORIZONTAL_RIGHT_TURN_SEQUENCE_LENGTH,
-    }
-
     print("[RUN #2] Complete. Default logic results:", default_results)
 
     simulationSpeedMultiplier = old_multiplier
@@ -616,7 +608,6 @@ async def run_fast_simulation():
     return {
         "user": user_results,
         "default": default_results,
-        "default_traffic_settings": default_traffic_settings
     }
 
 @app.get("/simulate_fast")
@@ -642,22 +633,6 @@ def reset_simulation():
     asyncio.create_task(update_car_loop())
     asyncio.create_task(update_simulation_time())
 
-def reset_simulation_for_default():
-    """
-    
-    """
-    global simulationTime, lastUpdateTime, cars, spawnRates, traffic_light_logic
-    simulationTime = 0
-    lastUpdateTime = None
-    cars = []
-
-    asyncio.create_task(run_adaptive_traffic_loop(traffic_light_logic, cars))
-    asyncio.create_task(spawn_car_loop())
-    asyncio.create_task(update_car_loop())
-    asyncio.create_task(update_simulation_time())
-
-
-
 @app.on_event("startup")
 async def on_startup():
     """
@@ -667,7 +642,13 @@ async def on_startup():
     global simulation_running, default_traffic_loop_task
     simulation_running = True
 
-    default_traffic_loop_task = asyncio.create_task(run_traffic_loop(traffic_light_logic))
+    if trafficLightSettings and trafficLightSettings.get("traffic-light-enable", False):
+
+        default_traffic_loop_task = asyncio.create_task(run_traffic_loop(traffic_light_logic))
+
+    else:
+
+        default_traffic_loop_task = asyncio.create_task(run_adaptive_traffic_loop(traffic_light_logic, cars, 1.0))
 
     asyncio.create_task(spawn_car_loop())
     asyncio.create_task(update_car_loop())

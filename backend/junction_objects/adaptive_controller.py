@@ -1,246 +1,125 @@
+"""
+
+"""
+
 import asyncio
-import time
-from typing import List
-from junction_objects.traffic_light_controller import TrafficLightController
-from junction_objects.enums import Direction, TrafficLightSignal
-from junction_objects.vehicle_stop_line import has_crossed_line
+import random
 
-# Global variables: track last serve times and simulation start time
-last_serve_time = {
-    "NS_MAIN": 0.0,
-    "NS_RIGHT": 0.0,
-    "EW_MAIN": 0.0,
-    "EW_RIGHT": 0.0
-}
-start_time = time.time()
+def get_vertical_wait_count(cars: list) -> int:
+    return sum(1 for car in cars if car.inital_direction in ("north", "south") and not car.passedStopLine and car.turn_type != "right")
 
-def get_time_since_start() -> float:
-    """Return elapsed time since the simulation started."""
-    return time.time() - start_time
+def get_horizontal_wait_count(cars: list) -> int:
+    return sum(1 for car in cars if car.inital_direction in ("east", "west") and not car.passedStopLine and car.turn_type != "right")
 
-def count_waiting_vehicles(cars: List, direction: str, turn_type: str, stop_threshold: float = 50.0) -> int:
-    """
-    Return the number of vehicles from 'cars' coming in 'direction' 
-    with the given 'turn_type' that have not crossed the stop line.
-    """
-    return sum(
-        1
-        for c in cars
-        if c.inital_direction == direction and c.turn_type == turn_type and not has_crossed_line(c)
-    )
+def get_vertical_right_wait_count(cars: list) -> int:
+    return sum(1 for car in cars if car.inital_direction in ("north", "south") and car.turn_type == "right" and not car.passedStopLine)
 
-def get_total_queue(cars: List, direction: str, include_left_forward: bool = True, include_right: bool = True) -> int:
-    """
-    Returns the total number of waiting vehicles for a given direction.
-    """
-    q = 0
-    if include_left_forward:
-        q += count_waiting_vehicles(cars, direction, "left")
-        q += count_waiting_vehicles(cars, direction, "forward")
-    if include_right:
-        q += count_waiting_vehicles(cars, direction, "right")
-    return q
+def get_horizontal_right_wait_count(cars: list) -> int:
+    return sum(1 for car in cars if car.inital_direction in ("east", "west") and car.turn_type == "right" and not car.passedStopLine)
 
-# Phase configuration mapping reduces repeated code:
-PHASE_CONFIG = {
-    "NS_MAIN": {"directions": ["north", "south"], "include_left_forward": True, "include_right": False},
-    "NS_RIGHT": {"directions": ["north", "south"], "include_left_forward": False, "include_right": True},
-    "EW_MAIN": {"directions": ["east", "west"], "include_left_forward": True, "include_right": False},
-    "EW_RIGHT": {"directions": ["east", "west"], "include_left_forward": False, "include_right": True},
-}
+def nonlinear_green(count: int, min_green: float, max_green: float, k: float = 2.0) -> float:
+    return min_green + (max_green - min_green) * (count / (count + k))
 
-def compute_phase_queue(phase_name: str, cars: List) -> int:
-    """
-    Computes the total queue size for a given phase by summing the queues 
-    for all relevant directions.
-    """
-    config = PHASE_CONFIG.get(phase_name, {})
-    return sum(
-        get_total_queue(cars, direction, config.get("include_left_forward", True), config.get("include_right", True))
-        for direction in config.get("directions", [])
-    )
+async def set_phase(controller, phase: str) -> None:
+    if phase == "vertical":
+        controller.trafficLightStates["north"] = {"red": False, "amber": False, "green": True}
+        controller.trafficLightStates["south"] = {"red": False, "amber": False, "green": True}
+        controller.trafficLightStates["east"] = {"red": True, "amber": False, "green": False}
+        controller.trafficLightStates["west"] = {"red": True, "amber": False, "green": False}
+    elif phase == "horizontal":
+        controller.trafficLightStates["east"] = {"red": False, "amber": False, "green": True}
+        controller.trafficLightStates["west"] = {"red": False, "amber": False, "green": True}
+        controller.trafficLightStates["north"] = {"red": True, "amber": False, "green": False}
+        controller.trafficLightStates["south"] = {"red": True, "amber": False, "green": False}
+    elif phase == "red":
+        for d in ["north", "east", "south", "west"]:
+            controller.trafficLightStates[d] = {"red": True, "amber": False, "green": False}
+    await controller._broadcast_state()
 
-def compute_phase_priority(phase_name: str, cars: List) -> float:
-    """
-    Compute a priority score for the phase based on its current queue and 
-    how long it has not been served.
-    """
-    now = get_time_since_start()
-    time_since_serve = now - last_serve_time[phase_name]
-    queue_size = compute_phase_queue(phase_name, cars)
-    alpha = 0.5  # weight for waiting time factor; tune as needed
-    return queue_size + alpha * (time_since_serve / 10.0)
+async def run_right_turn_phase(controller, directions: list, phase_time: float, sim_speed: float, transition_time: float) -> None:
+    for d in directions:
+        controller.rightTurnLightStates[d] = {"off": False, "on": True}
+    await controller._broadcast_state()
+    await asyncio.sleep(phase_time / sim_speed)
+    for d in directions:
+        controller.rightTurnLightStates[d] = {"off": True, "on": False}
+    await controller._broadcast_state()
+    await asyncio.sleep(transition_time / sim_speed)
 
-# Map phase names to their corresponding service functions.
-PHASE_SERVE_FUNCTIONS = {}
+async def run_pedestrian_event(controller) -> None:
+    for d in ["north", "east", "south", "west"]:
+        controller.trafficLightStates[d] = {"red": True, "amber": False, "green": False}
+        controller.rightTurnLightStates[d] = {"off": True, "on": False}
+        await asyncio.sleep(0.5 / controller.simulationSpeedMultiplier)
+        controller.pedestrianLightStates[d] = {"off": False, "on": True}
+    await controller._broadcast_state()
+    await asyncio.sleep(controller.pedestrianDuration / controller.simulationSpeedMultiplier)
+    for d in ["north", "east", "south", "west"]:
+        controller.pedestrianLightStates[d] = {"off": True, "on": False}
+    await controller._broadcast_state()
 
-async def run_adaptive_traffic_loop(controller: TrafficLightController, cars: List) -> None:
-    """
-    Continuously choose and serve the most urgent phase based on queue lengths 
-    and time since the phase was last served. The green time is dynamically adjusted.
-    """
-    global last_serve_time
-    # Initialize last serve times for all phases
-    for phase in last_serve_time:
-        last_serve_time[phase] = get_time_since_start()
-
-    # Define timing parameters (in seconds)
-    MIN_GREEN = 5.0
-    MAX_GREEN = 30.0
-    EXTEND_STEP = 5.0
-
+async def run_adaptive_traffic_loop(controller, cars: list, gap: float = 0.005) -> None:
+    min_green = 2
+    max_green = 20
+    k = 2.0
+    transition_time = gap_time = gap
+    right_turn_duration = 3.0
+    smoothing_alpha = 0.0
+    smoothed_vertical = min_green
+    smoothed_horizontal = min_green
+    loop = asyncio.get_event_loop()
+    minute_start = loop.time()
+    events_this_minute = 0
+    gaps_this_minute = 0
     while True:
-        # Calculate priority for each phase
-        phases = list(PHASE_CONFIG.keys())
-        scored_phases = [(phase, compute_phase_priority(phase, cars)) for phase in phases]
-        scored_phases.sort(key=lambda x: x[1], reverse=True)
-        chosen_phase = scored_phases[0][0]
-
-        # Estimate initial green time: 2 seconds per waiting car
-        queue_size = compute_phase_queue(chosen_phase, cars)
-        base_duration = 2.0 * queue_size
-        duration = max(MIN_GREEN, min(base_duration, MAX_GREEN))
-
-        # Serve the chosen phase
-        serve_func = PHASE_SERVE_FUNCTIONS.get(chosen_phase)
-        if serve_func:
-            await serve_func(controller, duration)
+        sim_speed = controller.simulationSpeedMultiplier
+        vertical_count = get_vertical_wait_count(cars)
+        horizontal_count = get_horizontal_wait_count(cars)
+        vertical_right_count = get_vertical_right_wait_count(cars)
+        horizontal_right_count = get_horizontal_right_wait_count(cars)
+        desired_vertical = nonlinear_green(vertical_count, min_green, max_green, k) if vertical_count > 0 else 0
+        desired_horizontal = nonlinear_green(horizontal_count, min_green, max_green, k) if horizontal_count > 0 else 0
+        smoothed_vertical = (1 - smoothing_alpha) * smoothed_vertical + smoothing_alpha * desired_vertical
+        smoothed_horizontal = (1 - smoothing_alpha) * smoothed_horizontal + smoothing_alpha * desired_horizontal
+        now = loop.time()
+        if now - minute_start >= 60:
+            minute_start = now
+            events_this_minute = 0
+            gaps_this_minute = 0
+        if smoothed_vertical > 0:
+            await set_phase(controller, "vertical")
+            await asyncio.sleep(smoothed_vertical / sim_speed)
+            await set_phase(controller, "red")
+            await asyncio.sleep(transition_time / sim_speed)
         else:
-            continue
-
-        last_serve_time[chosen_phase] = get_time_since_start()
-
-        # Optionally extend green time if the queue is still high
-        extended_time = 0.0
-        while True:
-            current_queue = compute_phase_queue(chosen_phase, cars)
-            if current_queue >= queue_size * 0.5 and (duration + extended_time < MAX_GREEN):
-                extend_block = min(EXTEND_STEP, MAX_GREEN - (duration + extended_time))
-                await serve_func(controller, extend_block)
-                extended_time += extend_block
-                last_serve_time[chosen_phase] = get_time_since_start()
-            else:
-                break
-
-# --------------------------------------------------------
-# Phase Serving Functions (largely unchanged)
-async def serve_ns_main(controller: TrafficLightController, duration: float) -> None:
-    from .adaptive_controller import set_all_red
-    set_all_red(controller)
-    await controller._broadcast_state()
-    await asyncio.sleep(1.0 / controller.simulationSpeedMultiplier)
-    # Set north-south main green and others red
-    controller.trafficLightStates[Direction.NORTH.value] = {
-        TrafficLightSignal.RED.value: False, TrafficLightSignal.AMBER.value: False, TrafficLightSignal.GREEN.value: True
-    }
-    controller.trafficLightStates[Direction.SOUTH.value] = {
-        TrafficLightSignal.RED.value: False, TrafficLightSignal.AMBER.value: False, TrafficLightSignal.GREEN.value: True
-    }
-    controller.trafficLightStates[Direction.EAST.value] = {
-        TrafficLightSignal.RED.value: True, TrafficLightSignal.AMBER.value: False, TrafficLightSignal.GREEN.value: False
-    }
-    controller.trafficLightStates[Direction.WEST.value] = {
-        TrafficLightSignal.RED.value: True, TrafficLightSignal.AMBER.value: False, TrafficLightSignal.GREEN.value: False
-    }
-    # Disable right-turn signals
-    for d in [Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST]:
-        controller.rightTurnLightStates[d.value] = {TrafficLightSignal.OFF.value: True, TrafficLightSignal.ON.value: False}
-    await controller._broadcast_state()
-    await asyncio.sleep(duration / controller.simulationSpeedMultiplier)
-    # Transition to amber
-    controller.trafficLightStates[Direction.NORTH.value][TrafficLightSignal.GREEN.value] = False
-    controller.trafficLightStates[Direction.NORTH.value][TrafficLightSignal.AMBER.value] = True
-    controller.trafficLightStates[Direction.SOUTH.value][TrafficLightSignal.GREEN.value] = False
-    controller.trafficLightStates[Direction.SOUTH.value][TrafficLightSignal.AMBER.value] = True
-    await controller._broadcast_state()
-    await asyncio.sleep(1.0 / controller.simulationSpeedMultiplier)
-    set_all_red(controller)
-    await controller._broadcast_state()
-    await asyncio.sleep(0.5 / controller.simulationSpeedMultiplier)
-
-async def serve_ns_right(controller: TrafficLightController, duration: float) -> None:
-    from .adaptive_controller import set_all_red
-    set_all_red(controller)
-    await controller._broadcast_state()
-    await asyncio.sleep(1.0 / controller.simulationSpeedMultiplier)
-    # Enable right-turn signals for north and south only
-    controller.rightTurnLightStates[Direction.NORTH.value] = {TrafficLightSignal.OFF.value: False, TrafficLightSignal.ON.value: True}
-    controller.rightTurnLightStates[Direction.SOUTH.value] = {TrafficLightSignal.OFF.value: False, TrafficLightSignal.ON.value: True}
-    # Keep main signals red
-    for d in [Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST]:
-        controller.trafficLightStates[d.value] = {TrafficLightSignal.RED.value: True, TrafficLightSignal.AMBER.value: False, TrafficLightSignal.GREEN.value: False}
-    await controller._broadcast_state()
-    await asyncio.sleep(duration / controller.simulationSpeedMultiplier)
-    # Turn off right-turn signals
-    controller.rightTurnLightStates[Direction.NORTH.value] = {TrafficLightSignal.OFF.value: True, TrafficLightSignal.ON.value: False}
-    controller.rightTurnLightStates[Direction.SOUTH.value] = {TrafficLightSignal.OFF.value: True, TrafficLightSignal.ON.value: False}
-    await controller._broadcast_state()
-    await asyncio.sleep(0.5 / controller.simulationSpeedMultiplier)
-
-async def serve_ew_main(controller: TrafficLightController, duration: float) -> None:
-    from .adaptive_controller import set_all_red
-    set_all_red(controller)
-    await controller._broadcast_state()
-    await asyncio.sleep(1.0 / controller.simulationSpeedMultiplier)
-    # Enable east-west main green
-    controller.trafficLightStates[Direction.EAST.value] = {TrafficLightSignal.RED.value: False, TrafficLightSignal.AMBER.value: False, TrafficLightSignal.GREEN.value: True}
-    controller.trafficLightStates[Direction.WEST.value] = {TrafficLightSignal.RED.value: False, TrafficLightSignal.AMBER.value: False, TrafficLightSignal.GREEN.value: True}
-    controller.trafficLightStates[Direction.NORTH.value] = {TrafficLightSignal.RED.value: True, TrafficLightSignal.AMBER.value: False, TrafficLightSignal.GREEN.value: False}
-    controller.trafficLightStates[Direction.SOUTH.value] = {TrafficLightSignal.RED.value: True, TrafficLightSignal.AMBER.value: False, TrafficLightSignal.GREEN.value: False}
-    # Disable right-turn signals
-    for d in [Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH]:
-        controller.rightTurnLightStates[d.value] = {TrafficLightSignal.OFF.value: True, TrafficLightSignal.ON.value: False}
-    await controller._broadcast_state()
-    await asyncio.sleep(duration / controller.simulationSpeedMultiplier)
-    # Transition to amber for east and west
-    controller.trafficLightStates[Direction.EAST.value][TrafficLightSignal.GREEN.value] = False
-    controller.trafficLightStates[Direction.EAST.value][TrafficLightSignal.AMBER.value] = True
-    controller.trafficLightStates[Direction.WEST.value][TrafficLightSignal.GREEN.value] = False
-    controller.trafficLightStates[Direction.WEST.value][TrafficLightSignal.AMBER.value] = True
-    await controller._broadcast_state()
-    await asyncio.sleep(1.0 / controller.simulationSpeedMultiplier)
-    set_all_red(controller)
-    await controller._broadcast_state()
-    await asyncio.sleep(0.5 / controller.simulationSpeedMultiplier)
-
-async def serve_ew_right(controller: TrafficLightController, duration: float) -> None:
-    from .adaptive_controller import set_all_red
-    set_all_red(controller)
-    await controller._broadcast_state()
-    await asyncio.sleep(1.0 / controller.simulationSpeedMultiplier)
-    # Enable right-turn signals for east and west only
-    controller.rightTurnLightStates[Direction.EAST.value] = {TrafficLightSignal.OFF.value: False, TrafficLightSignal.ON.value: True}
-    controller.rightTurnLightStates[Direction.WEST.value] = {TrafficLightSignal.OFF.value: False, TrafficLightSignal.ON.value: True}
-    # Keep all main signals red
-    for d in [Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH]:
-        controller.trafficLightStates[d.value] = {TrafficLightSignal.RED.value: True, TrafficLightSignal.AMBER.value: False, TrafficLightSignal.GREEN.value: False}
-    await controller._broadcast_state()
-    await asyncio.sleep(duration / controller.simulationSpeedMultiplier)
-    # Turn off right-turn signals
-    controller.rightTurnLightStates[Direction.EAST.value] = {TrafficLightSignal.OFF.value: True, TrafficLightSignal.ON.value: False}
-    controller.rightTurnLightStates[Direction.WEST.value] = {TrafficLightSignal.OFF.value: True, TrafficLightSignal.ON.value: False}
-    await controller._broadcast_state()
-    await asyncio.sleep(0.5 / controller.simulationSpeedMultiplier)
-
-def set_all_red(controller: TrafficLightController):
-    """
-    Helper: Set all main signals to red and all right-turn signals off.
-    """
-    for d in [Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST]:
-        controller.trafficLightStates[d.value] = {
-            TrafficLightSignal.RED.value: True,
-            TrafficLightSignal.AMBER.value: False,
-            TrafficLightSignal.GREEN.value: False
-        }
-        controller.rightTurnLightStates[d.value] = {
-            TrafficLightSignal.OFF.value: True,
-            TrafficLightSignal.ON.value: False
-        }
-
-# Populate the mapping with the serve functions
-PHASE_SERVE_FUNCTIONS.update({
-    "NS_MAIN": serve_ns_main,
-    "NS_RIGHT": serve_ns_right,
-    "EW_MAIN": serve_ew_main,
-    "EW_RIGHT": serve_ew_right,
-})
+            await set_phase(controller, "red")
+            await asyncio.sleep(gap_time / sim_speed)
+        if vertical_right_count > 0:
+            await run_right_turn_phase(controller, ["north", "south"], right_turn_duration, sim_speed, transition_time)
+        else:
+            await asyncio.sleep(gap_time / sim_speed)
+        if smoothed_horizontal > 0:
+            await set_phase(controller, "horizontal")
+            await asyncio.sleep(smoothed_horizontal / sim_speed)
+            await set_phase(controller, "red")
+            await asyncio.sleep(transition_time / sim_speed)
+        else:
+            await set_phase(controller, "red")
+            await asyncio.sleep(gap_time / sim_speed)
+        if horizontal_right_count > 0:
+            await run_right_turn_phase(controller, ["east", "west"], right_turn_duration, sim_speed, transition_time)
+        else:
+            await asyncio.sleep(gap_time / sim_speed)
+        gaps_this_minute += 2
+        now = loop.time()
+        if now - minute_start >= 60:
+            minute_start = now
+            events_this_minute = 0
+            gaps_this_minute = 0
+        remaining_gaps = (2 * 60) - gaps_this_minute
+        remaining_events = controller.pedestrianPerMinute - events_this_minute
+        p_gap = (remaining_events / remaining_gaps) if remaining_gaps > 0 else 0
+        if random.random() < p_gap:
+            await run_pedestrian_event(controller)
+            events_this_minute += 1
+        await asyncio.sleep(gap_time / sim_speed)

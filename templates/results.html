@@ -39,7 +39,7 @@
       font-weight: 600;
       margin-bottom: 1.5vh;
     }
-
+    /* Difference Box (only shown when traffic settings are enabled) */
     #scoreComparison {
       width: 80vw;
       padding: 2vh;
@@ -66,6 +66,10 @@
       padding: 2vh;
       box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
       width: 48%;
+    }
+    /* Full width override for single container */
+    .full-width {
+      width: 100%;
     }
     .results-box h2 {
       font-size: 3vh;
@@ -188,112 +192,157 @@
   <!-- Header Section -->
   <div id="resultsHeader">🎉 Results 🎉</div>
 
-  <div id="scoreComparison">
-    Overall Score Difference: 
-    <span id="scoreDiff"></span>
-  </div>
+  {% if traffic_light_settings.enabled %}
+    <!-- Only show the score difference if user traffic is enabled -->
+    <div id="scoreComparison">
+      Overall Score Difference: 
+      <span id="scoreDiff"></span>
+    </div>
+  {% endif %}
   
   <script>
-    // Parse the score values (they should be numeric; if not, adjust accordingly)
+    // Parse the score values (ensure they are numeric)
     const algorithmScore = parseFloat("{{ algorithm_metrics.score }}");
     const userScore = parseFloat("{{ score }}");
-    
-    // Calculate the difference
-    const diff = algorithmScore - userScore;
-    
-    // Get the element where the difference will be displayed
     const scoreSpan = document.getElementById('scoreDiff');
-    
-    // Update the text and set its color based on the value
-    scoreSpan.textContent = diff;
-    scoreSpan.style.color = diff >= 0 ? 'green' : 'red';
+    if(scoreSpan) {
+      // Calculate the difference
+      const diff = algorithmScore - userScore;
+      // Update the text and set its color based on the value
+      scoreSpan.textContent = diff;
+      scoreSpan.style.color = diff >= 0 ? 'green' : 'red';
+    }
   </script>
   
-
   <!-- Big Results Container -->
   <div id="resultsPairContainer">
-    <!-- User Results Box -->
-    <div class="results-box" id="userResultsBox">
-      <h2>User Results</h2>
-      <div class="score-header">Overall Score: {{ score }}</div>
-      <table class="resultsTable">
-        <thead>
-          <tr>
-            <th>Direction</th>
-            <th>AVG Wait (s)</th>
-            <th>MAX Wait (s)</th>
-            <th>MAX Queue</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>North</td>
-            <td>{{ avg_wait_time_n|round|int }}</td>
-            <td>{{ max_wait_time_n|round|int }}</td>
-            <td>{{ max_queue_length_n|round|int }}</td>
-          </tr>
-          <tr>
-            <td>South</td>
-            <td>{{ avg_wait_time_s|round|int }}</td>
-            <td>{{ max_wait_time_s|round|int }}</td>
-            <td>{{ max_queue_length_s|round|int }}</td>
-          </tr>
-          <tr>
-            <td>East</td>
-            <td>{{ avg_wait_time_e|round|int }}</td>
-            <td>{{ max_wait_time_e|round|int }}</td>
-            <td>{{ max_queue_length_e|round|int }}</td>
-          </tr>
-          <tr>
-            <td>West</td>
-            <td>{{ avg_wait_time_w|round|int }}</td>
-            <td>{{ max_wait_time_w|round|int }}</td>
-            <td>{{ max_queue_length_w|round|int }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <!-- Algorithm Results Box (dummy score of 0) -->
-    <div class="results-box" id="algoResultsBox">
-      <h2>Algorithm Results</h2>
-      <div class="score-header">Overall Score: {{ algorithm_metrics.score }}</div>
-      <table class="resultsTable">
-        <thead>
-          <tr>
-            <th>Direction</th>
-            <th>AVG Wait (s)</th>
-            <th>MAX Wait (s)</th>
-            <th>MAX Queue</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>North</td>
-            <td>{{ algorithm_metrics.avg_wait_time_n|round|int }}</td>
-            <td>{{ algorithm_metrics.max_wait_time_n|round|int }}</td>
-            <td>{{ algorithm_metrics.max_queue_length_n|round|int }}</td>
-          </tr>
-          <tr>
-            <td>South</td>
-            <td>{{ algorithm_metrics.avg_wait_time_s|round|int }}</td>
-            <td>{{ algorithm_metrics.max_wait_time_s|round|int }}</td>
-            <td>{{ algorithm_metrics.max_queue_length_s|round|int }}</td>
-          </tr>
-          <tr>
-            <td>East</td>
-            <td>{{ algorithm_metrics.avg_wait_time_e|round|int }}</td>
-            <td>{{ algorithm_metrics.max_wait_time_e|round|int }}</td>
-            <td>{{ algorithm_metrics.max_queue_length_e|round|int }}</td>
-          </tr>
-          <tr>
-            <td>West</td>
-            <td>{{ algorithm_metrics.avg_wait_time_w|round|int }}</td>
-            <td>{{ algorithm_metrics.max_wait_time_w|round|int }}</td>
-            <td>{{ algorithm_metrics.max_queue_length_w|round|int }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    {% if traffic_light_settings.enabled %}
+      <!-- When user traffic is enabled, display both boxes side by side -->
+      <!-- User Results Box -->
+      <div class="results-box" id="userResultsBox">
+        <h2>User Results</h2>
+        <div class="score-header">Overall Score: {{ score }}</div>
+        <table class="resultsTable">
+          <thead>
+            <tr>
+              <th>Direction</th>
+              <th>AVG Wait (s)</th>
+              <th>MAX Wait (s)</th>
+              <th>MAX Queue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>North</td>
+              <td>{{ avg_wait_time_n|round|int }}</td>
+              <td>{{ max_wait_time_n|round|int }}</td>
+              <td>{{ max_queue_length_n|round|int }}</td>
+            </tr>
+            <tr>
+              <td>South</td>
+              <td>{{ avg_wait_time_s|round|int }}</td>
+              <td>{{ max_wait_time_s|round|int }}</td>
+              <td>{{ max_queue_length_s|round|int }}</td>
+            </tr>
+            <tr>
+              <td>East</td>
+              <td>{{ avg_wait_time_e|round|int }}</td>
+              <td>{{ max_wait_time_e|round|int }}</td>
+              <td>{{ max_queue_length_e|round|int }}</td>
+            </tr>
+            <tr>
+              <td>West</td>
+              <td>{{ avg_wait_time_w|round|int }}</td>
+              <td>{{ max_wait_time_w|round|int }}</td>
+              <td>{{ max_queue_length_w|round|int }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Algorithm Results Box -->
+      <div class="results-box" id="algoResultsBox">
+        <h2>Algorithm Results</h2>
+        <div class="score-header">Overall Score: {{ algorithm_metrics.score }}</div>
+        <table class="resultsTable">
+          <thead>
+            <tr>
+              <th>Direction</th>
+              <th>AVG Wait (s)</th>
+              <th>MAX Wait (s)</th>
+              <th>MAX Queue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>North</td>
+              <td>{{ algorithm_metrics.avg_wait_time_n|round|int }}</td>
+              <td>{{ algorithm_metrics.max_wait_time_n|round|int }}</td>
+              <td>{{ algorithm_metrics.max_queue_length_n|round|int }}</td>
+            </tr>
+            <tr>
+              <td>South</td>
+              <td>{{ algorithm_metrics.avg_wait_time_s|round|int }}</td>
+              <td>{{ algorithm_metrics.max_wait_time_s|round|int }}</td>
+              <td>{{ algorithm_metrics.max_queue_length_s|round|int }}</td>
+            </tr>
+            <tr>
+              <td>East</td>
+              <td>{{ algorithm_metrics.avg_wait_time_e|round|int }}</td>
+              <td>{{ algorithm_metrics.max_wait_time_e|round|int }}</td>
+              <td>{{ algorithm_metrics.max_queue_length_e|round|int }}</td>
+            </tr>
+            <tr>
+              <td>West</td>
+              <td>{{ algorithm_metrics.avg_wait_time_w|round|int }}</td>
+              <td>{{ algorithm_metrics.max_wait_time_w|round|int }}</td>
+              <td>{{ algorithm_metrics.max_queue_length_w|round|int }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <!-- When user traffic is not enabled, only display the algorithm box spanning full width -->
+      <div class="results-box full-width" id="algoResultsBox">
+        <h2>Algorithm Results</h2>
+        <div class="score-header">Overall Score: {{ algorithm_metrics.score }}</div>
+        <table class="resultsTable">
+          <thead>
+            <tr>
+              <th>Direction</th>
+              <th>AVG Wait (s)</th>
+              <th>MAX Wait (s)</th>
+              <th>MAX Queue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>North</td>
+              <td>{{ algorithm_metrics.avg_wait_time_n|round|int }}</td>
+              <td>{{ algorithm_metrics.max_wait_time_n|round|int }}</td>
+              <td>{{ algorithm_metrics.max_queue_length_n|round|int }}</td>
+            </tr>
+            <tr>
+              <td>South</td>
+              <td>{{ algorithm_metrics.avg_wait_time_s|round|int }}</td>
+              <td>{{ algorithm_metrics.max_wait_time_s|round|int }}</td>
+              <td>{{ algorithm_metrics.max_queue_length_s|round|int }}</td>
+            </tr>
+            <tr>
+              <td>East</td>
+              <td>{{ algorithm_metrics.avg_wait_time_e|round|int }}</td>
+              <td>{{ algorithm_metrics.max_wait_time_e|round|int }}</td>
+              <td>{{ algorithm_metrics.max_queue_length_e|round|int }}</td>
+            </tr>
+            <tr>
+              <td>West</td>
+              <td>{{ algorithm_metrics.avg_wait_time_w|round|int }}</td>
+              <td>{{ algorithm_metrics.max_wait_time_w|round|int }}</td>
+              <td>{{ algorithm_metrics.max_queue_length_w|round|int }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
   </div>
 
   <!-- Parameters Container -->

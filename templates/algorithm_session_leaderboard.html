@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Algorithm Session Leaderboard (12 Outputs)</title>
+    <style>
+        /* Load SF Pro font (same as leaderboards.html) */
+        @font-face {
+            font-family: 'SF Pro';
+            src: url("{{ url_for('static', filename='fonts/SF-Pro.ttf') }}") format('truetype');
+            font-style: normal;
+            font-weight: 400;
+        }
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
+            background-color: #a2bf89; /* Match the green background */
+            font-family: 'SF Pro', sans-serif;
+            color: #6b6b6b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5vh 0;
+        }
+        /* Header */
+        .header {
+            width: 90%;
+            text-align: center;
+            margin-bottom: 4vh;
+        }
+        .header h1 {
+            font-size: 3vw;
+            color: #f8f5e9;
+            font-weight: 600;
+        }
+        /* Leaderboard Container */
+        .leaderboard-container {
+            background-color: #f8f5e9;
+            border-radius: 1.2vw;
+            padding: 2vh 3vh;
+            width: 90%;
+            max-width: 1400px; /* Widened for more columns */
+            text-align: center;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        /* Leaderboard Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 1.2vw;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 1.2vh;
+            text-align: center;
+            font-size: 1.2vw;
+        }
+        th {
+            background-color: #8da676;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f1f1f1;
+        }
+        tr:hover {
+            background-color: #dce7c5;
+            transition: 0.3s;
+        }
+        /* Make table rows clickable */
+        tbody tr {
+            cursor: pointer;
+        }
+        /* Navigation Container */
+        .nav-container {
+            width: 90%;
+            max-width: 1400px;
+            margin-top: 3vh;
+            display: flex;
+            justify-content: space-between;
+        }
+        .nav-container a {
+            text-decoration: none;
+            color: #f8f5e9;
+            background-color: #8da676;
+            padding: 1.2vh 2.5vw;
+            border-radius: 2vw;
+            font-size: 1.2vw;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .nav-container a:hover {
+            background-color: #789563;
+        }
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 6vw;
+            }
+            th, td {
+                font-size: 4vw;
+            }
+            .nav-container a {
+                font-size: 3vw;
+                padding: 2vh 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with bar chart emojis on either side -->
+    <div class="header">
+        <h1>📊 Algorithm Session {{ session_id }} Leaderboards 📊</h1>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="leaderboard-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Recent Runs</th>
+                    <th>Run ID</th>
+                    <!-- Northbound -->
+                    <th>NB Avg Wait (s)</th>
+                    <th>NB Max Wait (s)</th>
+                    <th>NB Max Queue</th>
+                    <!-- Southbound -->
+                    <th>SB Avg Wait (s)</th>
+                    <th>SB Max Wait (s)</th>
+                    <th>SB Max Queue</th>
+                    <!-- Eastbound -->
+                    <th>EB Avg Wait (s)</th>
+                    <th>EB Max Wait (s)</th>
+                    <th>EB Max Queue</th>
+                    <!-- Westbound -->
+                    <th>WB Avg Wait (s)</th>
+                    <th>WB Max Wait (s)</th>
+                    <th>WB Max Queue</th>
+                    <!-- Overall Score -->
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if runs and runs|length > 0 %}
+                    {% for run in runs %}
+                    <tr onclick="handleRowClick(this)">
+                        <td>{{ loop.index }}</td>
+                        <td>{{ run.run_id }}</td>
+                        <!-- Northbound -->
+                        <td>{{ run.nb_avg_wait|round|int }}</td>
+                        <td>{{ run.nb_max_wait|round|int }}</td>
+                        <td>{{ run.nb_max_queue|round|int }}</td>
+                        <!-- Southbound -->
+                        <td>{{ run.sb_avg_wait|round|int }}</td>
+                        <td>{{ run.sb_max_wait|round|int }}</td>
+                        <td>{{ run.sb_max_queue|round|int }}</td>
+                        <!-- Eastbound -->
+                        <td>{{ run.eb_avg_wait|round|int }}</td>
+                        <td>{{ run.eb_max_wait|round|int }}</td>
+                        <td>{{ run.eb_max_queue|round|int }}</td>
+                        <!-- Westbound -->
+                        <td>{{ run.wb_avg_wait|round|int }}</td>
+                        <td>{{ run.wb_max_wait|round|int }}</td>
+                        <td>{{ run.wb_max_queue|round|int }}</td>
+                        <!-- Score -->
+                        <td>{{ run.score|round|int }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="15">No session runs found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bottom Nav Buttons with emojis on both sides -->
+    <div class="nav-container">
+        <a class="nav-button" href="/index">❌ End Session</a>
+        <a class="res-button" id="searchRunsBtn" href="/search_Algorithm_Runs">🔍 Search Algorithm Runs</a>
+        <a class="nav-button" id="backBtn" href="/parameters">✅ Continue Session (Back to Inputs)</a>
+    </div>
+
+    <script>
+        // Redirect to the configuration details page when row is clicked
+        function handleRowClick(row) {
+            const runId = row.getElementsByTagName("td")[1].innerText;
+            window.location.href = "/junction_details?run_id=" + runId;
+        }
+
+        document.getElementById("backBtn").addEventListener("click", async () => {
+            console.log("Back button clicked. Stopping FastAPI...");
+
+            try {
+                let stopResponse = await fetch('/stop_simulation', { method: 'POST' });
+                let stopData = await stopResponse.json();
+                
+                if (stopResponse.ok) {
+                    console.log("✅ FastAPI stopped:", stopData.message);
+                    // Redirect back to the parameters page
+                    window.location.href = "/parameters";
+                } else {
+                    console.error("❌ Error stopping FastAPI:", stopData.error);
+                }
+            } catch (error) {
+                console.error("❌ Error sending stop request:", error);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -319,7 +319,6 @@ def get_latest_junction_settings():
             return {
                 "lanes": latest_config.lanes,
                 "left_turn_lane": latest_config.left_turn_lane,
-                "bus_lane": latest_config.bus_lane,
                 "pedestrian_duration": latest_config.pedestrian_duration,
                 "pedestrian_frequency": latest_config.pedestrian_frequency
             }
@@ -327,8 +326,6 @@ def get_latest_junction_settings():
 
             return {
                 "lanes": 5,
-                "left_turn_lane": False,
-                "bus_lane": False,
                 "pedestrian_duration": 0,
                 "pedestrian_frequency": 0
             }
@@ -338,8 +335,6 @@ def get_latest_junction_settings():
         
         return {
             "lanes": 5,
-            "left_turn_lane": False,
-            "bus_lane": False,
             "pedestrian_duration": 0,
             "pedestrian_frequency": 0
         }
@@ -464,6 +459,9 @@ def results():
     
     try:
         session_id = request.args.get('session_id', type=int)
+
+        print(session_id)
+
         run_id = request.args.get('run_id', type=int)
 
         if not session_id or not run_id:
@@ -625,7 +623,6 @@ def parameters():
             config = Configuration(
                 session_id=session.id,
                 lanes=safe_int(data.get('lanes', 5)),
-                left_turn_lane=('left-turn' in data),
                 pedestrian_duration=pedestrian_duration,
                 pedestrian_frequency=pedestrian_frequency,
 
@@ -714,8 +711,6 @@ def parameters():
             # Build and send junction settings dictionary
             junction_settings = {
                 "lanes": safe_int(data.get('lanes', 5)),
-                "left_turn_lane": 'left-turn' in data,
-                "bus_lane": 'bus_lane' in data,
                 "pedestrian_duration": pedestrian_duration,
                 "pedestrian_frequency": pedestrian_frequency,
             }
@@ -833,13 +828,8 @@ def upload():
             # Map JSON junction settings
             junction = json_data.get("junction_settings", {})
             data['lanes'] = junction.get("number_of_lanes", 5)
-            if junction.get("left_turn_lane", False):
-                # Original code checks for key presence so set a key value
-                data['left-turn'] = 'on'
             data['pedestrian-duration'] = junction.get("pedestrian_duration", 0)
             data['pedestrian-frequency'] = junction.get("pedestrian_frequency", 0)
-            # Also pass bus_lane if needed
-            data['bus_lane'] = junction.get("bus_lane", False)
 
             # Map JSON traffic light settings
             tls = json_data.get("traffic_light_settings", {})
@@ -880,9 +870,6 @@ def upload():
             data['wb_right'] = row.get("west_tright", 0)
 
             data['lanes'] = row.get("number_of_lanes", 5)
-            if row.get("left_turn_lane", "").lower() == "true":
-                data['left-turn'] = 'on'
-            data['bus_lane'] = row.get("bus_lane", "").lower() == "true"
             data['pedestrian-frequency'] = row.get("pedestrian_frequency", 0)
             data['pedestrian-duration'] = row.get("pedestrian_duration", 0)
 
@@ -931,7 +918,6 @@ def upload():
             session_id=session_obj.id,
             # Junction Settings
             lanes=safe_int(data.get('lanes', 5)),
-            left_turn_lane=('left-turn' in data),
             pedestrian_duration=safe_int(data.get('pedestrian-duration')),
             pedestrian_frequency=safe_int(data.get('pedestrian-frequency')),
             # North
@@ -1023,8 +1009,6 @@ def upload():
         # Construct junction settings dictionary
         junction_settings = {
             "lanes": safe_int(data.get('lanes', 5)),
-            "left_turn_lane": 'left-turn' in data,
-            "bus_lane": data.get('bus_lane', False),
             "pedestrian_duration": safe_int(data.get('pedestrian-duration')),
             "pedestrian_frequency": safe_int(data.get('pedestrian-frequency'))
         }
@@ -1227,7 +1211,7 @@ def get_all_time_best_configurations():
 
         results_with_scores.append(ur)
     
-    results_with_scores.sort(key=lambda x: x.score)
+    results_with_scores.sort(key=lambda x: x.score, reverse=True)
     
     return results_with_scores[:10]
 
@@ -1245,82 +1229,61 @@ def session_leaderboard_page():
     
     runs = get_recent_runs_with_scores(session_id) if session_id else []
     
-    return render_template('session_leaderboard.html', runs=runs)
+    return render_template('session_leaderboard.html', runs=runs, session_id=session_id)
+
+def get_recent_algorithm_runs(session_id):
+
+    return AlgorithmLeaderboardResult.query \
+        .filter_by(session_id=session_id) \
+        .order_by(AlgorithmLeaderboardResult.id.desc()) \
+        .limit(10) \
+        .all()
+
+@app.route('/algorithm_session_leaderboard')
+def algorithm_session_leaderboard_page():
+    session_id = request.args.get('session_id', type=int)
+    
+    if not session_id:
+        active_session = Session.query.filter_by(active=True).order_by(Session.id.desc()).first()
+        session_id = active_session.id if active_session else None
+
+    print(session_id)
+    
+    raw_runs = get_recent_algorithm_runs(session_id) if session_id else []
+    
+    processed_runs = []
+    for run in raw_runs:
+        score = compute_score_4directions(
+            run.avg_wait_time_north, run.max_wait_time_north, run.max_queue_length_north,
+            run.avg_wait_time_south, run.max_wait_time_south, run.max_queue_length_south,
+            run.avg_wait_time_east, run.max_wait_time_east, run.max_queue_length_east,
+            run.avg_wait_time_west, run.max_wait_time_west, run.max_queue_length_west
+        )
+        processed_runs.append({
+            "run_id": run.run_id,
+            "nb_avg_wait": run.avg_wait_time_north,
+            "nb_max_wait": run.max_wait_time_north,
+            "nb_max_queue": run.max_queue_length_north,
+            "sb_avg_wait": run.avg_wait_time_south,
+            "sb_max_wait": run.max_wait_time_south,
+            "sb_max_queue": run.max_queue_length_south,
+            "eb_avg_wait": run.avg_wait_time_east,
+            "eb_max_wait": run.max_wait_time_east,
+            "eb_max_queue": run.max_queue_length_east,
+            "wb_avg_wait": run.avg_wait_time_west,
+            "wb_max_wait": run.max_wait_time_west,
+            "wb_max_queue": run.max_queue_length_west,
+            "score": score
+        })
+    
+    return render_template('algorithm_session_leaderboard.html', runs=processed_runs, session_id=session_id)
+
+
 
 @app.route('/simulate', methods=['POST'])
 def simulate_endpoint():
     return simulate()  # Your existing simulate() function
 
-
-def get_global_extremes(for_algorithm_bool):
-    """
-    
-    """
-    
-    if for_algorithm_bool:
-        results = AlgorithmLeaderboardResult.query.all()
-    else:
-        results = LeaderboardResult.query.all()
-    
-    if not results:
-
-        return {
-            "north": {"best_avg": None, "worst_avg": None, "best_max": None, "worst_max": None, "best_queue": None, "worst_queue": None},
-            "south": {"best_avg": None, "worst_avg": None, "best_max": None, "worst_max": None, "best_queue": None, "worst_queue": None},
-            "east": {"best_avg": None, "worst_avg": None, "best_max": None, "worst_max": None, "best_queue": None, "worst_queue": None},
-            "west": {"best_avg": None, "worst_avg": None, "best_max": None, "worst_max": None, "best_queue": None, "worst_queue": None},
-        }
-
-    north_avg_values = [r.avg_wait_time_north for r in results]
-    north_max_values = [r.max_wait_time_north for r in results]
-    north_queue_values = [r.max_queue_length_north for r in results]
-
-    south_avg_values = [r.avg_wait_time_south for r in results]
-    south_max_values = [r.max_wait_time_south for r in results]
-    south_queue_values = [r.max_queue_length_south for r in results]
-
-    east_avg_values = [r.avg_wait_time_east for r in results]
-    east_max_values = [r.max_wait_time_east for r in results]
-    east_queue_values = [r.max_queue_length_east for r in results]
-
-    west_avg_values = [r.avg_wait_time_west for r in results]
-    west_max_values = [r.max_wait_time_west for r in results]
-    west_queue_values = [r.max_queue_length_west for r in results]
-
-    return {
-        "north": {
-            "best_avg": min(north_avg_values),
-            "worst_avg": max(north_avg_values),
-            "best_max": min(north_max_values),
-            "worst_max": max(north_max_values),
-            "best_queue": min(north_queue_values),
-            "worst_queue": max(north_queue_values),
-        },
-        "south": {
-            "best_avg": min(south_avg_values),
-            "worst_avg": max(south_avg_values),
-            "best_max": min(south_max_values),
-            "worst_max": max(south_max_values),
-            "best_queue": min(south_queue_values),
-            "worst_queue": max(south_queue_values),
-        },
-        "east": {
-            "best_avg": min(east_avg_values),
-            "worst_avg": max(east_avg_values),
-            "best_max": min(east_max_values),
-            "worst_max": max(east_max_values),
-            "best_queue": min(east_queue_values),
-            "worst_queue": max(east_queue_values),
-        },
-        "west": {
-            "best_avg": min(west_avg_values),
-            "worst_avg": max(west_avg_values),
-            "best_max": min(west_max_values),
-            "worst_max": max(west_max_values),
-            "best_queue": min(west_queue_values),
-            "worst_queue": max(west_queue_values),
-        }
-    }
 
 def compute_score_4directions(
     nb_avg, nb_max, nb_queue,

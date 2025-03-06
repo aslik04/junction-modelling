@@ -608,6 +608,40 @@
         }
       });
     });
+
+    document.addEventListener("DOMContentLoaded", function () {
+    // List of input fields to restrict
+    const inputIds = [
+        "nb_forward", "nb_left", "nb_right",
+        "eb_forward", "eb_left", "eb_right",
+        "wb_forward", "wb_left", "wb_right",
+        "sb_forward", "sb_left", "sb_right"
+    ];
+
+    inputIds.forEach(function (id) {
+        const inputField = document.getElementById(id);
+        if (inputField) {
+            // Ensure valid values (0-1000) on input
+            inputField.addEventListener("input", function () {
+                let value = parseInt(this.value, 10);
+                
+                if (isNaN(value) || value < 0) {
+                    this.value = 0;
+                } else if (value > 1000) {
+                    this.value = 1000;
+                }
+            });
+
+            // Set default value to 0 if empty
+            inputField.addEventListener("blur", function () {
+                if (this.value.trim() === "") {
+                    this.value = 0;
+                }
+            });
+        }
+    });
+});
+
   </script>
   <script>
     // Replicate your Python calculations in JavaScript

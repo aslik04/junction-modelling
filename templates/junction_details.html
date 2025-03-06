@@ -11,7 +11,7 @@
       font-style: normal;
       font-weight: 400;
     }
-    /* Base Styles */
+    /* Reset & Base Styles */
     * {
       margin: 0;
       padding: 0;
@@ -19,192 +19,398 @@
     }
     html, body {
       width: 100%;
-      min-height: 100%;
-      overflow: auto;
+      height: 100vh;
+      overflow: hidden; /* No scrolling on standard desktop */
     }
     body {
       background-color: #a2bf89;
       font-family: 'SF Pro', sans-serif;
       color: #6b6b6b;
+    }
+    /* Main wrapper fills the viewport */
+    #mainWrapper {
+      height: 100vh;
+      width: 100%;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-      padding: 5vh 0;
+      padding: 2vh 0;
     }
-    h1 {
+    /* Header: Title & (optional) Score */
+    #headerContainer {
+      flex: 0 0 auto;
+      text-align: center;
+    }
+    #headerContainer h1 {
       color: #f8f5e9;
+      font-size: 4vh;
+      margin-bottom: 1vh;
+    }
+    #scoreComparison {
+      width: 80vw;
+      padding: 2vh;
+      border-radius: 2vh;
+      margin-bottom: 2vh;
+      text-align: center;
+      font-size: 3vh;
+      font-weight: bold;
+      color: #6b6b6b;
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+      background-color: #f8f5e9;
+    }
+    /* Results Section */
+    #resultsSection {
+      flex: 0 0 auto;
+      width: 80vw;
       margin-bottom: 2vh;
     }
-    /* Top Containers: Junction & Traffic Light Settings */
-    #topContainer {
-      width: 80vh;
-      display: flex;
-      justify-content: space-around;
-      gap: 2vh;
-      margin-bottom: 3vh;
-    }
-    .param-box {
+    .results-box {
       background-color: #f8f5e9;
       border-radius: 2vh;
       padding: 2vh;
-      width: 45%;
-      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
     }
-    .param-box h2 {
+    .results-box h2 {
       font-size: 2.5vh;
       color: #8da676;
       margin-bottom: 1vh;
     }
-    .param-box ul {
-      list-style: none;
-      padding-left: 1vh;
+    .score-header {
+      font-size: 2.2vh;
+      margin-bottom: 1vh;
+      color: #6b6b6b;
     }
-    .param-box li {
-      margin: 0.5vh 0;
+    .resultsTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+    .resultsTable th, .resultsTable td {
+      padding: 1vh;
+      text-align: center;
       font-size: 2vh;
     }
-    /* Directional Parameters Container */
-    #directionContainer {
-      width: 80vh;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
-      gap: 2vh;
+    .resultsTable th {
+      background-color: #8da676;
+      color: #ffffff;
     }
-    .direction-box {
+    .resultsTable tr:nth-child(even) {
+      background-color: #eeeeee;
+    }
+    .resultsTable tr:hover {
+      background-color: #dce7c5;
+      transition: 0.3s;
+    }
+    /* When traffic is enabled, display two boxes side by side */
+    #resultsPair {
+      display: flex;
+      gap: 2vw;
+      justify-content: space-between;
+    }
+    .half-width {
+      width: 48%;
+    }
+    .full-width {
+      width: 100%;
+    }
+    /* Parameter Grid Section (2-row x 3-column) */
+    #infoGrid {
+      flex: 1 1 auto;
+      width: 80vw;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, auto);
+      gap: 2vh;
+      margin-bottom: 2vh;
+      overflow: hidden;
+    }
+    .param-box, .direction-box {
       background-color: #f8f5e9;
       border-radius: 2vh;
       padding: 2vh;
-      width: 45%;
       box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-      margin-bottom: 2vh;
     }
-    .direction-box h2 {
+    .param-box h2, .direction-box h2 {
       font-size: 2.5vh;
       color: #8da676;
       margin-bottom: 1vh;
     }
-    .direction-box ul {
+    .param-box ul, .direction-box ul {
       list-style: none;
       padding-left: 1vh;
     }
-    .direction-box li {
+    .param-box li, .direction-box li {
       margin: 0.5vh 0;
       font-size: 2vh;
     }
-    a {
-      margin-top: 2vh;
+    /* Back Link Section */
+    #backSection {
+      flex: 0 0 auto;
+    }
+    #backLink {
       text-decoration: none;
       color: #f8f5e9;
       background-color: #8da676;
       padding: 1.2vh 2.5vh;
       border-radius: 2vh;
-      font-size: 1.5vh;
+      font-size: 1.8vh;
       font-weight: 600;
       transition: background-color 0.3s;
     }
-    a:hover {
+    #backLink:hover {
       background-color: #789563;
     }
+    /* Responsive: allow scrolling on smaller screens */
     @media (max-width: 600px) {
-      h1 {
-        font-size: 6vh;
+      html, body {
+        overflow: auto;
       }
-      #topContainer, #directionContainer {
-        width: 90vh;
+      #mainWrapper {
+        padding: 5vh 0;
+      }
+      #headerContainer h1 {
+        font-size: 5vh;
+      }
+      #scoreComparison {
+        font-size: 4vh;
+        width: 90vw;
+      }
+      #resultsSection, #infoGrid {
+        width: 90vw;
+      }
+      #resultsPair {
         flex-direction: column;
-        align-items: center;
       }
-      .param-box, .direction-box {
-        width: 90%;
+      .results-box, .param-box, .direction-box {
+        width: 100%;
+        margin-bottom: 2vh;
       }
-      .param-box li, .direction-box li {
-        font-size: 4vh;
+      .param-box li, .direction-box li, .resultsTable th, .resultsTable td {
+        font-size: 3vh;
       }
-      a {
-        font-size: 4vh;
+      .score-header {
+        font-size: 3vh;
+      }
+      #backLink {
+        font-size: 3vh;
         padding: 2vh 4vh;
       }
     }
   </style>
 </head>
 <body>
-  <h1>Configuration Details from Run {{ configuration.run_id }} in Session  {{ configuration.session_id }}</h1>
-
-  <!-- Top Containers: Junction Settings and Traffic Light Settings -->
-  <div id="topContainer">
-    <!-- Junction Settings -->
-    <div class="param-box">
-      <h2>Junction Settings</h2>
-      <ul>
-        <li><strong>Lanes:</strong> {{ configuration.lanes }}</li>
-        <li><strong>Left Turn Lane:</strong> {{ "Enabled" if configuration.left_turn_lane else "Disabled" }}</li>
-        <li><strong>Bus Lane:</strong> {{ "Enabled" if configuration.bus_lane else "Disabled" }}</li>
-        <li><strong>Pedestrian Duration (s):</strong> {{ configuration.pedestrian_duration }}</li>
-        <li><strong>Pedestrian Frequency:</strong> {{ configuration.pedestrian_frequency }}</li>
-      </ul>
+  <div id="mainWrapper">
+    <!-- Header Section: Title and (if applicable) Score Difference -->
+    <div id="headerContainer">
+      <h1>Configuration Details from Run {{ configuration.run_id }} in Session {{ configuration.session_id }}</h1>
+      {% if traffic_light_settings.enabled %}
+        <div id="scoreComparison">
+          Overall Score Difference:
+          <span id="scoreDiff">{{ (algorithm_metrics.score - user_metrics.score)|round(2) }}</span>
+        </div>
+      {% endif %}
     </div>
-    <!-- Traffic Light Settings -->
-    <div class="param-box">
-      <h2>Traffic Light Settings</h2>
-      <ul>
-        <li><strong>Enabled:</strong> {{ "Yes" if traffic_light_settings.get("enabled") else "No" }}</li>
-        <li><strong>Sequences per Hour:</strong> {{ traffic_light_settings.get("sequences_per_hour", 0) }}</li>
-        <li><strong>Vertical Main Green (s):</strong> {{ traffic_light_settings.get("vertical_main_green", 0) }}</li>
-        <li><strong>Horizontal Main Green (s):</strong> {{ traffic_light_settings.get("horizontal_main_green", 0) }}</li>
-        <li><strong>Vertical Right Green (s):</strong> {{ traffic_light_settings.get("vertical_right_green", 0) }}</li>
-        <li><strong>Horizontal Right Green (s):</strong> {{ traffic_light_settings.get("horizontal_right_green", 0) }}</li>
-     </ul>
+
+    <!-- Results Section -->
+    <div id="resultsSection">
+      {% if traffic_light_settings.enabled %}
+        <!-- When user traffic is enabled: display both User and Algorithm boxes side by side -->
+        <div id="resultsPair">
+          <div class="results-box half-width">
+            <h2>User Results</h2>
+            <div class="score-header">Overall Score: {{ user_metrics.score|round(2) }}</div>
+            <table class="resultsTable">
+              <thead>
+                <tr>
+                  <th>Direction</th>
+                  <th>AVG Wait (s)</th>
+                  <th>MAX Wait (s)</th>
+                  <th>MAX Queue</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>North</td>
+                  <td>{{ user_metrics.avg_wait_time_n|round|int }}</td>
+                  <td>{{ user_metrics.max_wait_time_n|round|int }}</td>
+                  <td>{{ user_metrics.max_queue_length_n|round|int }}</td>
+                </tr>
+                <tr>
+                  <td>South</td>
+                  <td>{{ user_metrics.avg_wait_time_s|round|int }}</td>
+                  <td>{{ user_metrics.max_wait_time_s|round|int }}</td>
+                  <td>{{ user_metrics.max_queue_length_s|round|int }}</td>
+                </tr>
+                <tr>
+                  <td>East</td>
+                  <td>{{ user_metrics.avg_wait_time_e|round|int }}</td>
+                  <td>{{ user_metrics.max_wait_time_e|round|int }}</td>
+                  <td>{{ user_metrics.max_queue_length_e|round|int }}</td>
+                </tr>
+                <tr>
+                  <td>West</td>
+                  <td>{{ user_metrics.avg_wait_time_w|round|int }}</td>
+                  <td>{{ user_metrics.max_wait_time_w|round|int }}</td>
+                  <td>{{ user_metrics.max_queue_length_w|round|int }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="results-box half-width">
+            <h2>Algorithm Results</h2>
+            <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(2) }}</div>
+            <table class="resultsTable">
+              <thead>
+                <tr>
+                  <th>Direction</th>
+                  <th>AVG Wait (s)</th>
+                  <th>MAX Wait (s)</th>
+                  <th>MAX Queue</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>North</td>
+                  <td>{{ algorithm_metrics.avg_wait_time_n|round|int }}</td>
+                  <td>{{ algorithm_metrics.max_wait_time_n|round|int }}</td>
+                  <td>{{ algorithm_metrics.max_queue_length_n|round|int }}</td>
+                </tr>
+                <tr>
+                  <td>South</td>
+                  <td>{{ algorithm_metrics.avg_wait_time_s|round|int }}</td>
+                  <td>{{ algorithm_metrics.max_wait_time_s|round|int }}</td>
+                  <td>{{ algorithm_metrics.max_queue_length_s|round|int }}</td>
+                </tr>
+                <tr>
+                  <td>East</td>
+                  <td>{{ algorithm_metrics.avg_wait_time_e|round|int }}</td>
+                  <td>{{ algorithm_metrics.max_wait_time_e|round|int }}</td>
+                  <td>{{ algorithm_metrics.max_queue_length_e|round|int }}</td>
+                </tr>
+                <tr>
+                  <td>West</td>
+                  <td>{{ algorithm_metrics.avg_wait_time_w|round|int }}</td>
+                  <td>{{ algorithm_metrics.max_wait_time_w|round|int }}</td>
+                  <td>{{ algorithm_metrics.max_queue_length_w|round|int }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% else %}
+        <!-- When user traffic is not enabled: display only Algorithm Results spanning full width -->
+        <div class="results-box full-width">
+          <h2>Algorithm Results</h2>
+          <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(2) }}</div>
+          <table class="resultsTable">
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>AVG Wait (s)</th>
+                <th>MAX Wait (s)</th>
+                <th>MAX Queue</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>North</td>
+                <td>{{ algorithm_metrics.avg_wait_time_n|round|int }}</td>
+                <td>{{ algorithm_metrics.max_wait_time_n|round|int }}</td>
+                <td>{{ algorithm_metrics.max_queue_length_n|round|int }}</td>
+              </tr>
+              <tr>
+                <td>South</td>
+                <td>{{ algorithm_metrics.avg_wait_time_s|round|int }}</td>
+                <td>{{ algorithm_metrics.max_wait_time_s|round|int }}</td>
+                <td>{{ algorithm_metrics.max_queue_length_s|round|int }}</td>
+              </tr>
+              <tr>
+                <td>East</td>
+                <td>{{ algorithm_metrics.avg_wait_time_e|round|int }}</td>
+                <td>{{ algorithm_metrics.max_wait_time_e|round|int }}</td>
+                <td>{{ algorithm_metrics.max_queue_length_e|round|int }}</td>
+              </tr>
+              <tr>
+                <td>West</td>
+                <td>{{ algorithm_metrics.avg_wait_time_w|round|int }}</td>
+                <td>{{ algorithm_metrics.max_wait_time_w|round|int }}</td>
+                <td>{{ algorithm_metrics.max_queue_length_w|round|int }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Parameter Grid Section -->
+    <div id="infoGrid">
+      <!-- Column 1: Junction & User Traffic Settings -->
+      <div class="param-box" style="grid-column: 1; grid-row: 1;">
+        <h2>Junction Settings</h2>
+        <ul>
+          <li><strong>Lanes:</strong> {{ configuration.lanes }}</li>
+          <li><strong>Pedestrian Duration (s):</strong> {{ configuration.pedestrian_duration }}</li>
+          <li><strong>Pedestrian Frequency:</strong> {{ configuration.pedestrian_frequency }}</li>
+        </ul>
+      </div>
+      <div class="param-box" style="grid-column: 1; grid-row: 2;">
+        <h2>User Traffic Settings</h2>
+        <ul>
+          <li><strong>Enabled:</strong> {{ "Yes" if traffic_light_settings.get("enabled") else "No" }}</li>
+          <li><strong>Sequences per Hour:</strong> {{ traffic_light_settings.get("sequences_per_hour", 0) }}</li>
+          <li><strong>Vertical Main Green (s):</strong> {{ traffic_light_settings.get("vertical_main_green", 0) }}</li>
+          <li><strong>Horizontal Main Green (s):</strong> {{ traffic_light_settings.get("horizontal_main_green", 0) }}</li>
+          <li><strong>Vertical Right Green (s):</strong> {{ traffic_light_settings.get("vertical_right_green", 0) }}</li>
+          <li><strong>Horizontal Right Green (s):</strong> {{ traffic_light_settings.get("horizontal_right_green", 0) }}</li>
+        </ul>
+      </div>
+
+      <!-- Column 2: North & South Parameters -->
+      <div class="direction-box" style="grid-column: 2; grid-row: 1;">
+        <h2>North Parameters</h2>
+        <ul>
+          <li><strong>VPH:</strong> {{ configuration.north_vph }}</li>
+          <li><strong>Forward VPH:</strong> {{ configuration.north_forward_vph }}</li>
+          <li><strong>Left VPH:</strong> {{ configuration.north_left_vph }}</li>
+          <li><strong>Right VPH:</strong> {{ configuration.north_right_vph }}</li>
+        </ul>
+      </div>
+      <div class="direction-box" style="grid-column: 2; grid-row: 2;">
+        <h2>South Parameters</h2>
+        <ul>
+          <li><strong>VPH:</strong> {{ configuration.south_vph }}</li>
+          <li><strong>Forward VPH:</strong> {{ configuration.south_forward_vph }}</li>
+          <li><strong>Left VPH:</strong> {{ configuration.south_left_vph }}</li>
+          <li><strong>Right VPH:</strong> {{ configuration.south_right_vph }}</li>
+        </ul>
+      </div>
+
+      <!-- Column 3: East & West Parameters -->
+      <div class="direction-box" style="grid-column: 3; grid-row: 1;">
+        <h2>East Parameters</h2>
+        <ul>
+          <li><strong>VPH:</strong> {{ configuration.east_vph }}</li>
+          <li><strong>Forward VPH:</strong> {{ configuration.east_forward_vph }}</li>
+          <li><strong>Left VPH:</strong> {{ configuration.east_left_vph }}</li>
+          <li><strong>Right VPH:</strong> {{ configuration.east_right_vph }}</li>
+        </ul>
+      </div>
+      <div class="direction-box" style="grid-column: 3; grid-row: 2;">
+        <h2>West Parameters</h2>
+        <ul>
+          <li><strong>VPH:</strong> {{ configuration.west_vph }}</li>
+          <li><strong>Forward VPH:</strong> {{ configuration.west_forward_vph }}</li>
+          <li><strong>Left VPH:</strong> {{ configuration.west_left_vph }}</li>
+          <li><strong>Right VPH:</strong> {{ configuration.west_right_vph }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Back Link Section -->
+    <div id="backSection">
+      <a id="backLink" href="javascript:history.back()">Back</a>
     </div>
   </div>
-
-  <!-- Directional Parameters Container -->
-  <div id="directionContainer">
-    <!-- North Parameters -->
-    <div class="direction-box">
-      <h2>North Parameters</h2>
-      <ul>
-        <li><strong>VPH:</strong> {{ configuration.north_vph }}</li>
-        <li><strong>Forward VPH:</strong> {{ configuration.north_forward_vph }}</li>
-        <li><strong>Left VPH:</strong> {{ configuration.north_left_vph }}</li>
-        <li><strong>Right VPH:</strong> {{ configuration.north_right_vph }}</li>
-      </ul>
-    </div>
-
-    <!-- South Parameters -->
-    <div class="direction-box">
-      <h2>South Parameters</h2>
-      <ul>
-        <li><strong>VPH:</strong> {{ configuration.south_vph }}</li>
-        <li><strong>Forward VPH:</strong> {{ configuration.south_forward_vph }}</li>
-        <li><strong>Left VPH:</strong> {{ configuration.south_left_vph }}</li>
-        <li><strong>Right VPH:</strong> {{ configuration.south_right_vph }}</li>
-      </ul>
-    </div>
-
-    <!-- East Parameters -->
-    <div class="direction-box">
-      <h2>East Parameters</h2>
-      <ul>
-        <li><strong>VPH:</strong> {{ configuration.east_vph }}</li>
-        <li><strong>Forward VPH:</strong> {{ configuration.east_forward_vph }}</li>
-        <li><strong>Left VPH:</strong> {{ configuration.east_left_vph }}</li>
-        <li><strong>Right VPH:</strong> {{ configuration.east_right_vph }}</li>
-      </ul>
-    </div>
-
-    <!-- West Parameters -->
-    <div class="direction-box">
-      <h2>West Parameters</h2>
-      <ul>
-        <li><strong>VPH:</strong> {{ configuration.west_vph }}</li>
-        <li><strong>Forward VPH:</strong> {{ configuration.west_forward_vph }}</li>
-        <li><strong>Left VPH:</strong> {{ configuration.west_left_vph }}</li>
-        <li><strong>Right VPH:</strong> {{ configuration.west_right_vph }}</li>
-      </ul>
-    </div>
-  </div>
-
-  <a href="javascript:history.back()">Back</a>
 </body>
 </html>

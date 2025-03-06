@@ -1389,39 +1389,38 @@ def get_recent_runs_with_scores(session_id):
 
 @app.route('/junction_details', methods=['GET'])
 def junction_details():
-    # Attempt to get both run_id and session_id from query parameters.
-    run_id = request.args.get('run_id', type=int)
+    # Get run_id and session_id from query parameters.
     session_id = request.args.get('session_id', type=int)
+    run_id = request.args.get('run_id', type=int)
+
+    print(session_id)
 
     # If no run_id is provided, fallback to the latest configuration.
     if not run_id:
         latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
         if latest_config:
             run_id = latest_config.run_id
-            # Optionally, set session_id from the latest configuration if needed.
-            session_id = latest_config.session_id
+            session_id = latest_config.session_id  # Optionally set session_id too.
         else:
             flash('No run ID provided and no configurations exist.')
             return redirect('/session_leaderboard')
 
-    # If session_id is provided, filter by both run_id and session_id;
-    # otherwise, filter only by run_id.
+    # Query configuration based on run_id and session_id.
     if session_id:
         configuration = Configuration.query.filter_by(run_id=run_id, session_id=session_id).first()
     else:
         configuration = Configuration.query.filter_by(run_id=run_id).first()
-
     if not configuration:
         flash('Configuration details not found for the provided run.')
         return redirect('/session_leaderboard')
+    
+    session_id = configuration.session_id
 
-    # Retrieve traffic light settings similarly.
+    # Query traffic settings.
     if session_id:
         tls_obj = TrafficSettings.query.filter_by(run_id=run_id, session_id=session_id).first()
     else:
         tls_obj = TrafficSettings.query.filter_by(run_id=run_id).first()
-
-    # If no traffic settings exist, provide default values.
     if not tls_obj:
         traffic_light_settings = {
             "enabled": False,
@@ -1441,11 +1440,98 @@ def junction_details():
             "horizontal_right_green": tls_obj.horizontal_right_green
         }
 
+    # Query user leaderboard result.
+    user_result = LeaderboardResult.query.filter_by(run_id=run_id, session_id=session_id).first()
+    if user_result:
+        user_metrics = {
+            "avg_wait_time_n": user_result.avg_wait_time_north,
+            "avg_wait_time_s": user_result.avg_wait_time_south,
+            "avg_wait_time_e": user_result.avg_wait_time_east,
+            "avg_wait_time_w": user_result.avg_wait_time_west,
+            "max_wait_time_n": user_result.max_wait_time_north,
+            "max_wait_time_s": user_result.max_wait_time_south,
+            "max_wait_time_e": user_result.max_wait_time_east,
+            "max_wait_time_w": user_result.max_wait_time_west,
+            "max_queue_length_n": user_result.max_queue_length_north,
+            "max_queue_length_s": user_result.max_queue_length_south,
+            "max_queue_length_e": user_result.max_queue_length_east,
+            "max_queue_length_w": user_result.max_queue_length_west,
+        }
+        user_metrics["score"] = compute_score_4directions(
+            user_metrics["avg_wait_time_n"],
+            user_metrics["max_wait_time_n"],
+            user_metrics["max_queue_length_n"],
+            user_metrics["avg_wait_time_s"],
+            user_metrics["max_wait_time_s"],
+            user_metrics["max_queue_length_s"],
+            user_metrics["avg_wait_time_e"],
+            user_metrics["max_wait_time_e"],
+            user_metrics["max_queue_length_e"],
+            user_metrics["avg_wait_time_w"],
+            user_metrics["max_wait_time_w"],
+            user_metrics["max_queue_length_w"]
+        )
+    else:
+        user_metrics = {
+            "avg_wait_time_n": 0, "avg_wait_time_s": 0, "avg_wait_time_e": 0, "avg_wait_time_w": 0,
+            "max_wait_time_n": 0, "max_wait_time_s": 0, "max_wait_time_e": 0, "max_wait_time_w": 0,
+            "max_queue_length_n": 0, "max_queue_length_s": 0, "max_queue_length_e": 0, "max_queue_length_w": 0,
+            "score": 0.0
+        }
+
+    print(session_id)
+    print(run_id)
+
+    # Query algorithm leaderboard result.
+    algo_result = AlgorithmLeaderboardResult.query.filter_by(run_id=run_id, session_id=session_id).first()
+    if algo_result:
+        algorithm_metrics = {
+            "avg_wait_time_n": algo_result.avg_wait_time_north,
+            "avg_wait_time_s": algo_result.avg_wait_time_south,
+            "avg_wait_time_e": algo_result.avg_wait_time_east,
+            "avg_wait_time_w": algo_result.avg_wait_time_west,
+            "max_wait_time_n": algo_result.max_wait_time_north,
+            "max_wait_time_s": algo_result.max_wait_time_south,
+            "max_wait_time_e": algo_result.max_wait_time_east,
+            "max_wait_time_w": algo_result.max_wait_time_west,
+            "max_queue_length_n": algo_result.max_queue_length_north,
+            "max_queue_length_s": algo_result.max_queue_length_south,
+            "max_queue_length_e": algo_result.max_queue_length_east,
+            "max_queue_length_w": algo_result.max_queue_length_west,
+        }
+        algorithm_metrics["score"] = compute_score_4directions(
+            algorithm_metrics["avg_wait_time_n"],
+            algorithm_metrics["max_wait_time_n"],
+            algorithm_metrics["max_queue_length_n"],
+            algorithm_metrics["avg_wait_time_s"],
+            algorithm_metrics["max_wait_time_s"],
+            algorithm_metrics["max_queue_length_s"],
+            algorithm_metrics["avg_wait_time_e"],
+            algorithm_metrics["max_wait_time_e"],
+            algorithm_metrics["max_queue_length_e"],
+            algorithm_metrics["avg_wait_time_w"],
+            algorithm_metrics["max_wait_time_w"],
+            algorithm_metrics["max_queue_length_w"]
+        )
+    else:
+        algorithm_metrics = {
+            "avg_wait_time_n": 0, "avg_wait_time_s": 0, "avg_wait_time_e": 0, "avg_wait_time_w": 0,
+            "max_wait_time_n": 0, "max_wait_time_s": 0, "max_wait_time_e": 0, "max_wait_time_w": 0,
+            "max_queue_length_n": 0, "max_queue_length_s": 0, "max_queue_length_e": 0, "max_queue_length_w": 0,
+            "score": 0.0
+        }
+
+    score_diff = algorithm_metrics["score"] - user_metrics["score"]
+
     return render_template(
         'junction_details.html',
         configuration=configuration,
-        traffic_light_settings=traffic_light_settings
+        traffic_light_settings=traffic_light_settings,
+        user_metrics=user_metrics,
+        algorithm_metrics=algorithm_metrics,
+        score_diff=score_diff
     )
+
 
 @app.route('/search_Algorithm_Runs', methods=['GET'])
 def search_algorithm_runs():

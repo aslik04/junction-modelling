@@ -373,8 +373,6 @@
       <div class="dropdown-content" id="junctionContent">
         <ul>
           <li><strong>Number of Lanes:</strong> {{ junction_settings.lanes }}</li>
-          <li><strong>Left-turn Lane:</strong> {{ "Enabled" if junction_settings.left_turn_lane else "Disabled" }}</li>
-          <li><strong>Bus Lane:</strong> {{ "Enabled" if junction_settings.bus_lane else "Disabled" }}</li>
           <li><strong>Pedestrian Frequency per Hour:</strong> {{ junction_settings.pedestrian_frequency }}</li>
           <li><strong>Pedestrian Duration (seconds):</strong> {{ junction_settings.pedestrian_duration }}</li>
         </ul>

@@ -10,7 +10,7 @@ import csv
 import io
 from io import StringIO
 import requests
-from flask import Flask, flash, request, jsonify, render_template, url_for, redirect, send_from_directory
+from flask import Flask, flash, request, jsonify, render_template, url_for, redirect, send_from_directory, Response
 from models import db, Configuration, LeaderboardResult, Session, TrafficSettings, AlgorithmLeaderboardResult
 from sqlalchemy import inspect
 import json
@@ -1545,6 +1545,52 @@ def error():
 @app.route('/search_Algorithm_Runs', methods=['GET'])
 def search_algorithm_runs():
     return render_template('search_Algorithm_Runs.html')
+
+
+@app.route('/download_metrics_json')
+def download_metrics_json():
+    results = db.session.query(LeaderboardResult, AlgorithmLeaderboardResult).join(
+        AlgorithmLeaderboardResult,
+        LeaderboardResult.run_id == AlgorithmLeaderboardResult.run_id
+    ).all()
+
+    lines = []
+    for ur, ar in results:
+        user_score = compute_score_4directions(
+            ur.avg_wait_time_north, ur.max_wait_time_north, ur.max_queue_length_north,
+            ur.avg_wait_time_south, ur.max_wait_time_south, ur.max_queue_length_south,
+            ur.avg_wait_time_east,  ur.max_wait_time_east,  ur.max_queue_length_east,
+            ur.avg_wait_time_west, ur.max_wait_time_west, ur.max_queue_length_west,
+        )
+        algo_score = compute_score_4directions(
+            ar.avg_wait_time_north, ar.max_wait_time_north, ar.max_queue_length_north,
+            ar.avg_wait_time_south, ar.max_wait_time_south, ar.max_queue_length_south,
+            ar.avg_wait_time_east, ar.max_wait_time_east, ar.max_queue_length_east,
+            ar.avg_wait_time_west, ar.max_wait_time_west, ar.max_queue_length_west,
+        )
+        score = algo_score - user_score
+
+        # If traffic is disabled, skip user_score or set it to None, etc.
+        # For now, we include user_score for demonstration.
+        record = {
+            "run_id": ur.run_id,
+            "session_id": ur.session_id,
+            "user_score": user_score,
+            "algo_score": algo_score,
+            "score_diff": score
+        }
+
+        # Convert the record to JSON and store it as one line.
+        lines.append(json.dumps(record))
+
+    # Join each JSON object with a newline, so each line is a separate record.
+    content = "\n".join(lines)
+
+    return Response(
+        content,
+        mimetype="application/json",
+        headers={"Content-Disposition": "attachment;filename=metrics.json"}
+    )
 
 
 if __name__ == '__main__':

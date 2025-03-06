@@ -84,6 +84,34 @@
         .search-container button:hover {
             background-color: #789563;
         }
+
+        .download-container {
+            text-align: center;
+            margin-top: 20px;
+            width: 90%;
+            max-width: 1400px;
+            display: flex;
+            justify-content: center; 
+            align-items: center;   
+            font-size: 2vh; 
+        }
+
+        .download-container a {
+            text-decoration: none;
+            color: #f8f5e9;
+            background-color: #8da676;
+            padding: 1.2vh 2.5vw;
+            border-radius: 2vw;
+            font-size: 0.5vw;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .download-container a:hover {
+            background-color: #789563;
+        }
+
+
         /* Navigation Container */
         .nav-container {
             width: 90%;
@@ -139,6 +167,10 @@
             
             <button type="submit">Search</button>
         </form>
+    </div>
+
+    <div class="download-container">
+        <a href="{{ url_for('download_metrics_json') }}" style="font-size:2em; text-decoration:none;">⏬ Download all Run IDs ⏬</a>
     </div>
 
     <div class="nav-container">

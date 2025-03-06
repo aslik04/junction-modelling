@@ -143,13 +143,17 @@
     .dropdown-content li {
       margin: 0.5vh 0;
     }
-    /* Navigation Container */
     .nav-container {
-      width: 40vw;
+
+      width: 100%;
       display: flex;
-      justify-content: space-between;
+
+      justify-content: center;
+
+      gap: 2vw;
       margin-top: 2vh;
     }
+
     .res-button {
       background-color: #8da676;
       color: #f8f5e9;
@@ -190,7 +194,7 @@
 </head>
 <body>
   <!-- Header Section -->
-  <div id="resultsHeader">🎉 Results 🎉</div>
+  <div id="resultsHeader">🎉 Results for Run: {{ run_id }} in Session: {{ session_id }}🎉</div>
 
   {% if traffic_light_settings.enabled %}
     <!-- Only show the score difference if user traffic is enabled -->
@@ -397,7 +401,8 @@
   <!-- Navigation Section -->
   <div class="nav-container">
     <a class="res-button" id="backBtn" href="/parameters">🏠 Back to Inputs</a>
-    <a class="res-button" href="/session_leaderboard">📊 See Leaderboards</a>
+    <a class="res-button" id="searchRunsBtn" href="/search_Algorithm_Runs">🔍 Search Algorithm Runs</a>
+    <a class="res-button" href="/session_leaderboard">📊 See User Session Leaderboard</a>
   </div>
 
   <script>

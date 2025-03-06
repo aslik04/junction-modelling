@@ -17,6 +17,8 @@ import json
 
 app = Flask(__name__)
 
+app.secret_key = "Group_33" 
+
 db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'traffic_junction.db')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
@@ -24,6 +26,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+
+global_session_id = 0
 
 with app.app_context():
     """
@@ -405,10 +409,12 @@ def index():
     """
     
     """
+
+    global global_session_id
     
-    session_id = create_session()
+    global_session_id = create_session()
     
-    return render_template('index.html', session_id=session_id)
+    return render_template('index.html', session_id=global_session_id)
 
 @app.route('/index')
 def indexTwo():
@@ -416,9 +422,11 @@ def indexTwo():
     
     """
 
-    session_id = create_session()
+    global global_session_id
+
+    global_session_id = create_session()
     
-    return render_template('index.html', session_id=session_id)
+    return render_template('index.html', session_id=global_session_id)
 
 @app.route('/get_session_run_id', methods=['GET'])
 def get_session_run_id():
@@ -518,6 +526,8 @@ def results():
 
         return render_template(
             'results.html',
+            session_id=session_id,
+            run_id=run_id,
             avg_wait_time_n=avg_wait_time_n,
             avg_wait_time_s=avg_wait_time_s,
             avg_wait_time_e=avg_wait_time_e,
@@ -534,7 +544,7 @@ def results():
             spawn_rates=spawn_rates,
             junction_settings=junction_settings,
             traffic_light_settings=traffic_light_settings,
-            algorithm_metrics=algorithm_metrics,
+            algorithm_metrics=algorithm_metrics
         )
 
     except Exception as e:        
@@ -590,12 +600,9 @@ def parameters():
             data = request.form
             print("📥 Received Form Data:", data)
 
-            # Retrieve or create an active session
-            session = Session.query.filter_by(active=True).first()
-            if not session:
-                session = Session(active=True)
-                db.session.add(session)
-                db.session.commit()
+            session = Session.query.get(global_session_id)
+
+            print(global_session_id)
 
             # Modified safe_int: converts any input to string first
             def safe_int(value):
@@ -897,11 +904,7 @@ def upload():
     # Now run the same processing logic as in your /parameters POST
     try:
         # Find or create a session
-        session_obj = Session.query.filter_by(active=True).first()
-        if not session_obj:
-            session_obj = Session(active=True)
-            db.session.add(session_obj)
-            db.session.commit()
+        session_obj = Session.query.get(global_session_id)
 
         def safe_int(value):
             try:
@@ -1421,30 +1424,42 @@ def get_recent_runs_with_scores(session_id):
 
     return final_list
 
-@app.route('/junction_details')
+@app.route('/junction_details', methods=['GET'])
 def junction_details():
+    # Attempt to get both run_id and session_id from query parameters.
     run_id = request.args.get('run_id', type=int)
+    session_id = request.args.get('session_id', type=int)
 
-    # If no run_id is provided, get the latest run_id
+    # If no run_id is provided, fallback to the latest configuration.
     if not run_id:
         latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
         if latest_config:
             run_id = latest_config.run_id
+            # Optionally, set session_id from the latest configuration if needed.
+            session_id = latest_config.session_id
         else:
             flash('No run ID provided and no configurations exist.')
             return redirect('/session_leaderboard')
 
-    # Retrieve configuration based on run_id
-    configuration = Configuration.query.filter_by(run_id=run_id).first()
+    # If session_id is provided, filter by both run_id and session_id;
+    # otherwise, filter only by run_id.
+    if session_id:
+        configuration = Configuration.query.filter_by(run_id=run_id, session_id=session_id).first()
+    else:
+        configuration = Configuration.query.filter_by(run_id=run_id).first()
+
     if not configuration:
         flash('Configuration details not found for the provided run.')
         return redirect('/session_leaderboard')
 
-    # Retrieve traffic light settings for the run_id
-    traffic_light_settings = TrafficSettings.query.filter_by(run_id=run_id).first()
+    # Retrieve traffic light settings similarly.
+    if session_id:
+        tls_obj = TrafficSettings.query.filter_by(run_id=run_id, session_id=session_id).first()
+    else:
+        tls_obj = TrafficSettings.query.filter_by(run_id=run_id).first()
 
-    # If no traffic settings exist, provide default values
-    if not traffic_light_settings:
+    # If no traffic settings exist, provide default values.
+    if not tls_obj:
         traffic_light_settings = {
             "enabled": False,
             "sequences_per_hour": 0,
@@ -1454,14 +1469,13 @@ def junction_details():
             "horizontal_right_green": 0
         }
     else:
-        # Convert SQLAlchemy object to dictionary (if found)
         traffic_light_settings = {
-            "enabled": traffic_light_settings.enabled,
-            "sequences_per_hour": traffic_light_settings.sequences_per_hour,
-            "vertical_main_green": traffic_light_settings.vertical_main_green,
-            "horizontal_main_green": traffic_light_settings.horizontal_main_green,
-            "vertical_right_green": traffic_light_settings.vertical_right_green,
-            "horizontal_right_green": traffic_light_settings.horizontal_right_green
+            "enabled": tls_obj.enabled,
+            "sequences_per_hour": tls_obj.sequences_per_hour,
+            "vertical_main_green": tls_obj.vertical_main_green,
+            "horizontal_main_green": tls_obj.horizontal_main_green,
+            "vertical_right_green": tls_obj.vertical_right_green,
+            "horizontal_right_green": tls_obj.horizontal_right_green
         }
 
     return render_template(
@@ -1469,6 +1483,10 @@ def junction_details():
         configuration=configuration,
         traffic_light_settings=traffic_light_settings
     )
+
+@app.route('/search_Algorithm_Runs', methods=['GET'])
+def search_algorithm_runs():
+    return render_template('search_Algorithm_Runs.html')
 
 
 if __name__ == '__main__':

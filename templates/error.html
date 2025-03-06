@@ -44,7 +44,7 @@
 
     /* Button styling based on the provided CSS */
     .upload-button {
-      width: 30vh;
+      width: 35vh;
       padding: 1vh 2vh;
       background-color: #f8f5e9;
       color: #a2bf89;
@@ -60,8 +60,8 @@
 </head>
 <body>
   <div class="main-container">
-    <div class="error-message">⚠️ Invalid file uploaded ⚠️</div>
-    <button class="upload-button" onclick="window.location.href='/parameters'">Return to input page</button>
+    <div class="error-message">⚠️ {{ error_message }} ⚠️</div>
+    <button class="upload-button" onclick="window.location.href='javascript:history.back()'">⬅️ Please Go Back</button>
   </div>
 </body>
 </html>

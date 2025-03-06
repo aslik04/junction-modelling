@@ -598,6 +598,18 @@ def parameters():
             data = request.form
             print("📥 Received Form Data:", data)
 
+            required_fields = [
+                'nb_forward', 'nb_left', 'nb_right',
+                'sb_forward', 'sb_left', 'sb_right',
+                'eb_forward', 'eb_left', 'eb_right',
+                'wb_forward', 'wb_left', 'wb_right'
+            ]
+
+            for field in required_fields:
+                if field not in data or not data[field].strip():
+
+                    return redirect(url_for('error', message=f"Missing required field: {field}"))
+
             session = Session.query.get(global_session_id)
 
             print(global_session_id)
@@ -1393,26 +1405,19 @@ def junction_details():
     session_id = request.args.get('session_id', type=int)
     run_id = request.args.get('run_id', type=int)
 
-    print(session_id)
+    if not session_id:
+        return redirect(url_for('error', message="No session ID provided."))
 
-    # If no run_id is provided, fallback to the latest configuration.
     if not run_id:
-        latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
-        if latest_config:
-            run_id = latest_config.run_id
-            session_id = latest_config.session_id  # Optionally set session_id too.
-        else:
-            flash('No run ID provided and no configurations exist.')
-            return redirect('/session_leaderboard')
+        return redirect(url_for('error', message="No run ID provided."))
 
     # Query configuration based on run_id and session_id.
     if session_id:
         configuration = Configuration.query.filter_by(run_id=run_id, session_id=session_id).first()
-    else:
-        configuration = Configuration.query.filter_by(run_id=run_id).first()
+
     if not configuration:
         flash('Configuration details not found for the provided run.')
-        return redirect('/session_leaderboard')
+        return redirect(url_for('error', message=f"Configuration for Run: {str(run_id)} in Session: {str(session_id)} does not exist."))
     
     session_id = configuration.session_id
 
@@ -1479,9 +1484,6 @@ def junction_details():
             "score": 0.0
         }
 
-    print(session_id)
-    print(run_id)
-
     # Query algorithm leaderboard result.
     algo_result = AlgorithmLeaderboardResult.query.filter_by(run_id=run_id, session_id=session_id).first()
     if algo_result:
@@ -1531,6 +1533,13 @@ def junction_details():
         algorithm_metrics=algorithm_metrics,
         score_diff=score_diff
     )
+
+@app.route('/error')
+def error():
+
+    message = request.args.get('message', 'An unknown error occurred. Please try again.')
+
+    return render_template('error.html', error_message=message)
 
 
 @app.route('/search_Algorithm_Runs', methods=['GET'])

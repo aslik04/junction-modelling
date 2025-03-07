@@ -798,6 +798,52 @@
       });
     });
   </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const inputIds = [
+          "nb_forward", "nb_left", "nb_right",
+          "eb_forward", "eb_left", "eb_right",
+          "wb_forward", "wb_left", "wb_right",
+          "sb_forward", "sb_left", "sb_right"
+      ];
+
+      inputIds.forEach(function (id) {
+          const inputField = document.getElementById(id);
+          if (inputField) {
+              // Ensure valid integer values
+              inputField.addEventListener("input", function () {
+                  let value = this.value;
+
+                  // Remove non-numeric characters
+                  value = value.replace(/\D/g, '');
+
+                  // Convert to integer
+                  value = parseInt(value, 10);
+
+                  // Ensure it’s within range
+                  if (isNaN(value) || value < 0) {
+                      value = 0;
+                  } else if (value > 1000) {
+                      value = 1000;
+                  }
+
+                  // Update field value
+                  this.value = value;
+              });
+
+              // Ensure default value of 0 if left empty
+              inputField.addEventListener("blur", function () {
+                  if (this.value.trim() === "") {
+                      this.value = 0;
+                  }
+              });
+          }
+      });
+    });
+  </script>
+
+
 </head>
 <body>
   <div class="main-container">

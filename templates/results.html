@@ -358,10 +358,10 @@
       </h2>
       <div class="dropdown-content" id="configContent">
         <ul>
-          <li><strong>North:</strong> Forward: {{ spawn_rates.north.forward }}, Left: {{ spawn_rates.north.left }}, Right: {{ spawn_rates.north.right }}</li>
-          <li><strong>South:</strong> Forward: {{ spawn_rates.south.forward }}, Left: {{ spawn_rates.south.left }}, Right: {{ spawn_rates.south.right }}</li>
-          <li><strong>East:</strong> Forward: {{ spawn_rates.east.forward }}, Left: {{ spawn_rates.east.left }}, Right: {{ spawn_rates.east.right }}</li>
-          <li><strong>West:</strong> Forward: {{ spawn_rates.west.forward }}, Left: {{ spawn_rates.west.left }}, Right: {{ spawn_rates.west.right }}</li>
+          <li><strong>Northbound:</strong> Forward: {{ spawn_rates.north.forward }}, Left: {{ spawn_rates.north.left }}, Right: {{ spawn_rates.north.right }}</li>
+          <li><strong>Southbound:</strong> Forward: {{ spawn_rates.south.forward }}, Left: {{ spawn_rates.south.left }}, Right: {{ spawn_rates.south.right }}</li>
+          <li><strong>Eastbound:</strong> Forward: {{ spawn_rates.east.forward }}, Left: {{ spawn_rates.east.left }}, Right: {{ spawn_rates.east.right }}</li>
+          <li><strong>Westbound:</strong> Forward: {{ spawn_rates.west.forward }}, Left: {{ spawn_rates.west.left }}, Right: {{ spawn_rates.west.right }}</li>
         </ul>
       </div>
     </div>
@@ -386,11 +386,11 @@
       <div class="dropdown-content" id="trafficContent">
         <ul>
           <li><strong>Enabled:</strong> {{ "Yes" if traffic_light_settings.enabled else "No" }}</li>
-          <li><strong>Sequences per Hour:</strong> {{ traffic_light_settings.sequences_per_hour }}</li>
-          <li><strong>Vertical Main Green (sec):</strong> {{ traffic_light_settings.vertical_main_green }}</li>
-          <li><strong>Horizontal Main Green (sec):</strong> {{ traffic_light_settings.horizontal_main_green }}</li>
-          <li><strong>Vertical Right Green (sec):</strong> {{ traffic_light_settings.vertical_right_green }}</li>
-          <li><strong>Horizontal Right Green (sec):</strong> {{ traffic_light_settings.horizontal_right_green }}</li>
+          <li><strong>Traffic Cycles (per hr):</strong> {{ traffic_light_settings.sequences_per_hour }}</li>
+          <li><strong>N/S Forward Green Light (s):</strong> {{ traffic_light_settings.vertical_main_green }}</li>
+          <li><strong>N/S Right Turn Green Light (s):</strong> {{ traffic_light_settings.vertical_right_green }}</li>
+          <li><strong>E/W Forward Green Light (s):</strong> {{ traffic_light_settings.horizontal_main_green }}</li>
+          <li><strong>E/W Right Turn Green Light (s):</strong> {{ traffic_light_settings.horizontal_right_green }}</li>
         </ul>
       </div>
     </div>

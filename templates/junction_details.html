@@ -210,7 +210,7 @@
       <div class="results-box">
         <h2>User Results</h2>
         <div class="score-header">
-          Overall Score: {{ user_metrics.score|round(2) }}
+          Overall Score: {{ user_metrics.score|round(5) }}
         </div>
         <table class="resultsTable">
           <thead>
@@ -254,7 +254,7 @@
       <div class="results-box">
         <h2>Algorithm Results</h2>
         <div class="score-header">
-          Overall Score: {{ algorithm_metrics.score|round(2) }}
+          Overall Score: {{ algorithm_metrics.score|round(5) }}
         </div>
         <table class="resultsTable">
           <thead>

@@ -178,7 +178,7 @@
                         <td>{{ run.wb_max_wait|round|int }}</td>
                         <td>{{ run.wb_max_queue|round|int }}</td>
                         <!-- Score -->
-                        <td>{{ run.score|round|int }}</td>
+                        <td>{{ run.score|round(5) }}</td>
                     </tr>
                     {% endfor %}
                 {% else %}

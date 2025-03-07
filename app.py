@@ -179,6 +179,8 @@ def get_session_leaderboard(session):
     for result in results:
 
         result.calculated_score = compute_score_4directions(
+            result.run_id,
+            result.session_id,
             result.avg_wait_time_north, result.max_wait_time_north, result.max_queue_length_north,
             result.avg_wait_time_south, result.max_wait_time_south, result.max_queue_length_south,
             result.avg_wait_time_east, result.max_wait_time_east, result.max_queue_length_east,
@@ -1107,6 +1109,8 @@ def simulate():
         )
         
         user_score = compute_score_4directions(
+            run_id,
+            session_id,
             user_metrics["avg_wait_time_n"], user_metrics["max_wait_time_n"], user_metrics["max_queue_length_n"],
             user_metrics["avg_wait_time_s"], user_metrics["max_wait_time_s"], user_metrics["max_queue_length_s"],
             user_metrics["avg_wait_time_e"], user_metrics["max_wait_time_e"], user_metrics["max_queue_length_e"],
@@ -1114,6 +1118,8 @@ def simulate():
         )
         
         default_score = compute_score_4directions(
+            run_id,
+            session_id,
             algorithm_metrics["avg_wait_time_n"], algorithm_metrics["max_wait_time_n"], algorithm_metrics["max_queue_length_n"],
             algorithm_metrics["avg_wait_time_s"], algorithm_metrics["max_wait_time_s"], algorithm_metrics["max_queue_length_s"],
             algorithm_metrics["avg_wait_time_e"], algorithm_metrics["max_wait_time_e"], algorithm_metrics["max_queue_length_e"],
@@ -1205,6 +1211,8 @@ def get_all_time_best_configurations():
 
     for ur, ar in results:
         user_score = compute_score_4directions(
+            ur.run_id,
+            ur.session_id,
             ur.avg_wait_time_north, ur.max_wait_time_north, ur.max_queue_length_north,
             ur.avg_wait_time_south, ur.max_wait_time_south, ur.max_queue_length_south,
             ur.avg_wait_time_east, ur.max_wait_time_east, ur.max_queue_length_east,
@@ -1212,6 +1220,8 @@ def get_all_time_best_configurations():
         )
 
         algorithm_score = compute_score_4directions(
+            ar.run_id,
+            ar.session_id,
             ar.avg_wait_time_north, ar.max_wait_time_north, ar.max_queue_length_north,
             ar.avg_wait_time_south, ar.max_wait_time_south, ar.max_queue_length_south,
             ar.avg_wait_time_east, ar.max_wait_time_east, ar.max_queue_length_east,
@@ -1288,6 +1298,8 @@ def algorithm_session_leaderboard_page():
     processed_runs = []
     for run in raw_runs:
         score = compute_score_4directions(
+            run.run_id,
+            run.session_id,
             run.avg_wait_time_north, run.max_wait_time_north, run.max_queue_length_north,
             run.avg_wait_time_south, run.max_wait_time_south, run.max_queue_length_south,
             run.avg_wait_time_east, run.max_wait_time_east, run.max_queue_length_east,
@@ -1320,6 +1332,8 @@ def simulate_endpoint():
 
 
 def compute_score_4directions(
+    run_id,
+    session_id,
     nb_avg, nb_max, nb_queue,
     sb_avg, sb_max, sb_queue,
     eb_avg, eb_max, eb_queue,
@@ -1329,17 +1343,39 @@ def compute_score_4directions(
     
     """
 
-    nb_direction_score = (nb_avg + nb_max + nb_queue) / 3.0
+    vehicle_input = Configuration.query.filter_by(run_id=run_id, session_id=session_id).first()
 
-    sb_direction_score = (sb_avg + sb_max + sb_queue) / 3.0
+    if not vehicle_input:
+        raise ValueError("Configuration not found for provided run and session ID.")
 
-    eb_direction_score = (eb_avg + eb_max + eb_queue) / 3.0
+    north_total = (vehicle_input.north_forward_vph + 
+                   vehicle_input.north_left_vph + 
+                   vehicle_input.north_right_vph)
 
-    wb_direction_score = (wb_avg + wb_max + wb_queue) / 3.0
+    south_total = (vehicle_input.south_forward_vph + 
+                   vehicle_input.south_left_vph + 
+                   vehicle_input.south_right_vph)
 
-    final_score = nb_direction_score + sb_direction_score + eb_direction_score + wb_direction_score 
+    east_total = (vehicle_input.east_forward_vph + 
+                  vehicle_input.east_left_vph + 
+                  vehicle_input.east_right_vph)
 
-    return (final_score / 4.0)
+    west_total = (vehicle_input.west_forward_vph + 
+                  vehicle_input.west_left_vph + 
+                  vehicle_input.west_right_vph)
+    
+    def directional_score(avg, max_w, queue, volume):
+        weighted_score = (0.5 * avg) + (0.3 * max_w) + (0.2 * queue)
+        return weighted_score / volume
+
+    nb_score = directional_score(nb_avg, nb_max, nb_queue, north_total)
+    sb_score = directional_score(sb_avg, sb_max, sb_queue, south_total)
+    eb_score = directional_score(eb_avg, eb_max, eb_queue, east_total)
+    wb_score = directional_score(wb_avg, wb_max, wb_queue, west_total)
+
+    total_score = nb_score + sb_score + eb_score + wb_score
+
+    return total_score
 
 def get_recent_runs_with_scores(session_id):
     """
@@ -1369,7 +1405,8 @@ def get_recent_runs_with_scores(session_id):
     for ur, ar in zip(leaderboard_results, algorithm_leaderboard_results):
 
         user_final_score = compute_score_4directions(
-
+            ur.run_id,
+            ur.session_id,
             ur.avg_wait_time_north, ur.max_wait_time_north, ur.max_queue_length_north,
             ur.avg_wait_time_south, ur.max_wait_time_south, ur.max_queue_length_south,
             ur.avg_wait_time_east,  ur.max_wait_time_east,  ur.max_queue_length_east,
@@ -1377,7 +1414,8 @@ def get_recent_runs_with_scores(session_id):
         )
 
         algorithm_final_score = compute_score_4directions(
-
+            ar.run_id,
+            ar.session_id,
             ar.avg_wait_time_north, ar.max_wait_time_north, ar.max_queue_length_north,
             ar.avg_wait_time_south, ar.max_wait_time_south, ar.max_queue_length_south,
             ar.avg_wait_time_east,  ar.max_wait_time_east,  ar.max_queue_length_east,
@@ -1485,6 +1523,8 @@ def junction_details():
             "max_queue_length_w": user_result.max_queue_length_west,
         }
         user_metrics["score"] = compute_score_4directions(
+            run_id,
+            session_id,
             user_metrics["avg_wait_time_n"],
             user_metrics["max_wait_time_n"],
             user_metrics["max_queue_length_n"],
@@ -1524,6 +1564,8 @@ def junction_details():
             "max_queue_length_w": algo_result.max_queue_length_west,
         }
         algorithm_metrics["score"] = compute_score_4directions(
+            run_id,
+            session_id,
             algorithm_metrics["avg_wait_time_n"],
             algorithm_metrics["max_wait_time_n"],
             algorithm_metrics["max_queue_length_n"],
@@ -1579,12 +1621,16 @@ def download_metrics_json():
     lines = []
     for ur, ar in results:
         user_score = compute_score_4directions(
+            ur.run_id,
+            ur.session_id,
             ur.avg_wait_time_north, ur.max_wait_time_north, ur.max_queue_length_north,
             ur.avg_wait_time_south, ur.max_wait_time_south, ur.max_queue_length_south,
             ur.avg_wait_time_east,  ur.max_wait_time_east,  ur.max_queue_length_east,
             ur.avg_wait_time_west, ur.max_wait_time_west, ur.max_queue_length_west,
         )
         algo_score = compute_score_4directions(
+            ar.run_id,
+            ar.session_id,
             ar.avg_wait_time_north, ar.max_wait_time_north, ar.max_queue_length_north,
             ar.avg_wait_time_south, ar.max_wait_time_south, ar.max_queue_length_south,
             ar.avg_wait_time_east, ar.max_wait_time_east, ar.max_queue_length_east,

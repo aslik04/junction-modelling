@@ -140,42 +140,34 @@
                     <th>WB Avg Wait (s)</th>
                     <th>WB Max Wait (s)</th>
                     <th>WB Max Queue</th>
-                    <!-- Overall Score -->
-                    <th>Score</th>
+                    <!-- Score Difference -->
+                    <th>Score Diff</th>
                 </tr>
             </thead>
             <tbody>
-                {% for i in range(10) %}
-                    {% if results|length > i %}
-                    <!-- We have an actual result -->
-                    <tr onclick="handleRowClick('{{ results[i].run_id }}', '{{ results[i].session_id }}')">
-                        <td>{{ results[i].session_id }}</td>
-                        <td>{{ results[i].run_id }}</td>
+                {% for result in results %}
+                    <tr onclick="handleRowClick('{{ result.run_id }}', '{{ result.session_id }}')">
+                        <td>{{ result.session_id }}</td>
+                        <td>{{ result.run_id }}</td>
                         <!-- Northbound -->
-                        <td>{{ results[i].avg_wait_time_north|round(2) }}</td>
-                        <td>{{ results[i].max_wait_time_north|round(2) }}</td>
-                        <td>{{ results[i].max_queue_length_north }}</td>
+                        <td>{{ result.avg_wait_time_north|round(2) }}</td>
+                        <td>{{ result.max_wait_time_north|round(2) }}</td>
+                        <td>{{ result.max_queue_length_north }}</td>
                         <!-- Southbound -->
-                        <td>{{ results[i].avg_wait_time_south|round(2) }}</td>
-                        <td>{{ results[i].max_wait_time_south|round(2) }}</td>
-                        <td>{{ results[i].max_queue_length_south }}</td>
+                        <td>{{ result.avg_wait_time_south|round(2) }}</td>
+                        <td>{{ result.max_wait_time_south|round(2) }}</td>
+                        <td>{{ result.max_queue_length_south }}</td>
                         <!-- Eastbound -->
-                        <td>{{ results[i].avg_wait_time_east|round(2) }}</td>
-                        <td>{{ results[i].max_wait_time_east|round(2) }}</td>
-                        <td>{{ results[i].max_queue_length_east }}</td>
+                        <td>{{ result.avg_wait_time_east|round(2) }}</td>
+                        <td>{{ result.max_wait_time_east|round(2) }}</td>
+                        <td>{{ result.max_queue_length_east }}</td>
                         <!-- Westbound -->
-                        <td>{{ results[i].avg_wait_time_west|round(2) }}</td>
-                        <td>{{ results[i].max_wait_time_west|round(2) }}</td>
-                        <td>{{ results[i].max_queue_length_west }}</td>
-                        <!-- Score -->
-                        <td>{{ results[i].score|round(2) }}</td>
+                        <td>{{ result.avg_wait_time_west|round(2) }}</td>
+                        <td>{{ result.max_wait_time_west|round(2) }}</td>
+                        <td>{{ result.max_queue_length_west }}</td>
+                        <!-- Score Difference -->
+                        <td>{{ result.score_difference|round(2) }}</td>
                     </tr>
-                    {% else %}
-                    <!-- If there's no result for this index, show an empty row: -->
-                    <tr>
-                        <td colspan="14"></td>
-                    </tr>
-                    {% endif %}
                 {% endfor %}
             </tbody>            
         </table>
@@ -188,7 +180,6 @@
     </div>
     <script>
         function handleRowClick(runId, sessionId) {
-            // Only redirect if we got a valid runId
             if (runId && sessionId) {
                 window.location.href = "/junction_details?run_id=" + runId + "&session_id=" + sessionId;
             }
@@ -196,14 +187,11 @@
 
         document.getElementById("backBtn").addEventListener("click", async () => {
             console.log("Back button clicked. Stopping FastAPI...");
-
             try {
                 let stopResponse = await fetch('/stop_simulation', { method: 'POST' });
                 let stopData = await stopResponse.json();
-                
                 if (stopResponse.ok) {
                     console.log("✅ FastAPI stopped:", stopData.message);
-                    // Redirect back to the parameters page
                     window.location.href = "/parameters";
                 } else {
                     console.error("❌ Error stopping FastAPI:", stopData.error);

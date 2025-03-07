@@ -12,7 +12,7 @@ from io import StringIO
 import requests
 from flask import Flask, flash, request, jsonify, render_template, url_for, redirect, send_from_directory, Response
 from models import db, Configuration, LeaderboardResult, Session, TrafficSettings, AlgorithmLeaderboardResult
-from sqlalchemy import inspect
+from sqlalchemy import inspect, and_
 import json
 
 app = Flask(__name__)
@@ -1172,6 +1172,8 @@ def leaderboards():
     """
     
     results = get_all_time_best_configurations()
+
+    print(results)
     
     return render_template('leaderboards.html', results=results)
 
@@ -1181,51 +1183,69 @@ def get_all_time_best_configurations():
     
     """
     
-    all_results = db.session.query(LeaderboardResult, AlgorithmLeaderboardResult) \
-        .join(
-            AlgorithmLeaderboardResult,
-            LeaderboardResult.run_id == AlgorithmLeaderboardResult.run_id
-        ) \
-        .join(
-            TrafficSettings,
-            LeaderboardResult.run_id == TrafficSettings.run_id
-        ) \
-        .filter(TrafficSettings.enabled == True) \
-        .all()
+    results = db.session.query(LeaderboardResult, AlgorithmLeaderboardResult) \
+    .join(
+        AlgorithmLeaderboardResult,
+        and_(
+            LeaderboardResult.run_id == AlgorithmLeaderboardResult.run_id,
+            LeaderboardResult.session_id == AlgorithmLeaderboardResult.session_id
+        )
+    ) \
+    .join(
+        TrafficSettings,
+        and_(
+            LeaderboardResult.run_id == TrafficSettings.run_id,
+            LeaderboardResult.session_id == TrafficSettings.session_id
+        )
+    ) \
+    .filter(TrafficSettings.enabled == True) \
+    .all()
 
     results_with_scores = []
-    
-    for ur, ar in all_results:
 
+    for ur, ar in results:
         user_score = compute_score_4directions(
-
             ur.avg_wait_time_north, ur.max_wait_time_north, ur.max_queue_length_north,
-
             ur.avg_wait_time_south, ur.max_wait_time_south, ur.max_queue_length_south,
-
             ur.avg_wait_time_east, ur.max_wait_time_east, ur.max_queue_length_east,
-
-            ur.avg_wait_time_west, ur.max_wait_time_west, ur.max_queue_length_west,
+            ur.avg_wait_time_west, ur.max_wait_time_west, ur.max_queue_length_west
         )
 
         algorithm_score = compute_score_4directions(
-
             ar.avg_wait_time_north, ar.max_wait_time_north, ar.max_queue_length_north,
-
             ar.avg_wait_time_south, ar.max_wait_time_south, ar.max_queue_length_south,
-
             ar.avg_wait_time_east, ar.max_wait_time_east, ar.max_queue_length_east,
-
-            ar.avg_wait_time_west, ar.max_wait_time_west, ar.max_queue_length_west,
+            ar.avg_wait_time_west, ar.max_wait_time_west, ar.max_queue_length_west
         )
 
-        ur.score = algorithm_score - user_score
+        score_difference = algorithm_score - user_score
 
-        results_with_scores.append(ur)
-    
-    results_with_scores.sort(key=lambda x: x.score, reverse=True)
-    
-    return results_with_scores[:10]
+        result_data = {
+            "run_id": ur.run_id,
+            "session_id": ur.session_id,
+            "user_score": user_score,
+            "algorithm_score": algorithm_score,
+            "score_difference": score_difference,
+            "avg_wait_time_north": ur.avg_wait_time_north,
+            "max_wait_time_north": ur.max_wait_time_north,
+            "max_queue_length_north": ur.max_queue_length_north,
+            "avg_wait_time_south": ur.avg_wait_time_south,
+            "max_wait_time_south": ur.max_wait_time_south,
+            "max_queue_length_south": ur.max_queue_length_south,
+            "avg_wait_time_east": ur.avg_wait_time_east,
+            "max_wait_time_east": ur.max_wait_time_east,
+            "max_queue_length_east": ur.max_queue_length_east,
+            "avg_wait_time_west": ur.avg_wait_time_west,
+            "max_wait_time_west": ur.max_wait_time_west,
+            "max_queue_length_west": ur.max_queue_length_west,
+        }
+
+        results_with_scores.append(result_data)
+
+    results_with_scores.sort(key=lambda x: x["score_difference"], reverse=True)
+
+    return results_with_scores
+
 
 @app.route('/session_leaderboard')
 def session_leaderboard_page():
@@ -1240,6 +1260,8 @@ def session_leaderboard_page():
         session_id = active_session.id if active_session else None
     
     runs = get_recent_runs_with_scores(session_id) if session_id else []
+
+    print(get_all_time_best_configurations())
     
     return render_template('session_leaderboard.html', runs=runs, session_id=session_id)
 
@@ -1591,6 +1613,13 @@ def download_metrics_json():
         mimetype="application/json",
         headers={"Content-Disposition": "attachment;filename=metrics.json"}
     )
+
+@app.route('/loading')
+def loading():
+    """
+
+    """
+    return render_template('loading.html')
 
 
 if __name__ == '__main__':

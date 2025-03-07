@@ -476,6 +476,7 @@
     // This script listens for changes to the lanes slider and stores its value in local storage.
     document.addEventListener('DOMContentLoaded', function () {
       const lanesSlider = document.getElementById("lanes");
+      localStorage.clear()
       lanesSlider.addEventListener("input", function() {
         localStorage.setItem("numOfLanes", this.value);
       });

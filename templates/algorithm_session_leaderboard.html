@@ -186,7 +186,7 @@
 
     <!-- Bottom Nav Buttons with emojis on both sides -->
     <div class="nav-container">
-        <a class="nav-button" href="/index">❌ End Session</a>
+        <a class="nav-button" id="endBtn" href="/index">❌ End Session</a>
         <a class="res-button" id="searchRunsBtn" href="/search_Algorithm_Runs">🔍 Search Algorithm Runs</a>
         <a class="nav-button" id="backBtn" href="/parameters">✅ Continue Session (Back to Inputs)</a>
     </div>
@@ -209,6 +209,25 @@
                     console.log("✅ FastAPI stopped:", stopData.message);
                     // Redirect back to the parameters page
                     window.location.href = "/parameters";
+                } else {
+                    console.error("❌ Error stopping FastAPI:", stopData.error);
+                }
+            } catch (error) {
+                console.error("❌ Error sending stop request:", error);
+            }
+        });
+
+        document.getElementById("endBtn").addEventListener("click", async () => {
+            console.log("Back button clicked. Stopping FastAPI...");
+
+            try {
+                let stopResponse = await fetch('/stop_simulation', { method: 'POST' });
+                let stopData = await stopResponse.json();
+                
+                if (stopResponse.ok) {
+                    console.log("✅ FastAPI stopped:", stopData.message);
+                    // Redirect back to the parameters page
+                    window.location.href = "/index";
                 } else {
                     console.error("❌ Error stopping FastAPI:", stopData.error);
                 }

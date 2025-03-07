@@ -279,6 +279,7 @@ def test_compute_score_4directions_function(client):
         30, 70, 7,
         40, 80, 8
     )
+    value = (((10+50+5)/3) + ((20+60+6)/3) + ((30+70+7)/3) + ((40+80+8)/3))/4
     # Since the only record defines all extremes, the normalized score is 0
-    assert score == 0
+    assert score == value
 

@@ -122,6 +122,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>Session ID</th>
                     <th>Run ID</th>
                     <!-- Northbound -->
                     <th>NB Avg Wait (s)</th>
@@ -147,7 +148,8 @@
                 {% for i in range(10) %}
                     {% if results|length > i %}
                     <!-- We have an actual result -->
-                    <tr onclick="handleRowClick('{{ results[i].run_id }}')">
+                    <tr onclick="handleRowClick('{{ results[i].run_id }}', '{{ results[i].session_id }}')">
+                        <td>{{ results[i].session_id }}</td>
                         <td>{{ results[i].run_id }}</td>
                         <!-- Northbound -->
                         <td>{{ results[i].avg_wait_time_north|round(2) }}</td>
@@ -185,10 +187,10 @@
         <a class="nav-button" id="session" href="/session_leaderboard">Session Leaderboard</a>
     </div>
     <script>
-        function handleRowClick(runId) {
+        function handleRowClick(runId, sessionId) {
             // Only redirect if we got a valid runId
-            if (runId) {
-                window.location.href = "/junction_details?run_id=" + runId;
+            if (runId && sessionId) {
+                window.location.href = "/junction_details?run_id=" + runId + "&session_id=" + sessionId;
             }
         }
 

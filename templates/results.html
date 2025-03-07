@@ -373,8 +373,8 @@
       <div class="dropdown-content" id="junctionContent">
         <ul>
           <li><strong>Number of Lanes:</strong> {{ junction_settings.lanes }}</li>
-          <li><strong>Pedestrian Frequency per Hour:</strong> {{ junction_settings.pedestrian_frequency }}</li>
-          <li><strong>Pedestrian Duration (seconds):</strong> {{ junction_settings.pedestrian_duration }}</li>
+          <li><strong>Pedestrian Events (per hr):</strong> {{ junction_settings.pedestrian_frequency }}</li>
+          <li><strong>Duration of Pedestrian Event (mins):</strong> {{ junction_settings.pedestrian_duration }}</li>
         </ul>
       </div>
     </div>
@@ -387,10 +387,10 @@
         <ul>
           <li><strong>Enabled:</strong> {{ "Yes" if traffic_light_settings.enabled else "No" }}</li>
           <li><strong>Traffic Cycles (per hr):</strong> {{ traffic_light_settings.sequences_per_hour }}</li>
-          <li><strong>N/S Forward Green Light (s):</strong> {{ traffic_light_settings.vertical_main_green }}</li>
-          <li><strong>N/S Right Turn Green Light (s):</strong> {{ traffic_light_settings.vertical_right_green }}</li>
-          <li><strong>E/W Forward Green Light (s):</strong> {{ traffic_light_settings.horizontal_main_green }}</li>
-          <li><strong>E/W Right Turn Green Light (s):</strong> {{ traffic_light_settings.horizontal_right_green }}</li>
+          <li><strong>N/S Forward and Left Green Light (mins):</strong> {{ traffic_light_settings.vertical_main_green }}</li>
+          <li><strong>N/S Right Turn Green Light (mins):</strong> {{ traffic_light_settings.vertical_right_green }}</li>
+          <li><strong>E/W Forward and Left Green Light (mins):</strong> {{ traffic_light_settings.horizontal_main_green }}</li>
+          <li><strong>E/W Right Turn Green Light (mins):</strong> {{ traffic_light_settings.horizontal_right_green }}</li>
         </ul>
       </div>
     </div>

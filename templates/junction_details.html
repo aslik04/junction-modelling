@@ -183,10 +183,27 @@
 
   <!-- Score Comparison & Results (mirrors results page) -->
   {% if user_metrics and algorithm_metrics %}
+  {% if traffic_light_settings.enabled %}
+    <!-- Only show the score difference if user traffic is enabled -->
     <div id="scoreComparison">
-      Overall Score Difference:
-      <span id="scoreDiff">{{ (algorithm_metrics.score - user_metrics.score)|round(2) }}</span>
+      Overall Score Difference: 
+      <span id="scoreDiff"></span>
     </div>
+  {% endif %}
+
+    <script>
+      // Parse the score values (ensure they are numeric)
+      const algorithmScore = parseFloat("{{ algorithm_metrics.score }}");
+      const userScore = parseFloat("{{ user_metrics.score }}");
+      const scoreSpan = document.getElementById('scoreDiff');
+      if(scoreSpan) {
+        // Calculate the difference
+        const diff = algorithmScore - userScore;
+        // Update the text and set its color based on the value
+        scoreSpan.textContent = diff;
+        scoreSpan.style.color = diff >= 0 ? 'green' : 'red';
+      }
+    </script>
 
     <div id="resultsPairContainer">
       <!-- User Results Box -->
@@ -286,8 +303,8 @@
       <h2>Junction Settings</h2>
       <ul>
         <li><strong>Lanes:</strong> {{ configuration.lanes }}</li>
-        <li><strong>Pedestrian Duration (s):</strong> {{ configuration.pedestrian_duration }}</li>
-        <li><strong>Pedestrian Frequency:</strong> {{ configuration.pedestrian_frequency }}</li>
+        <li><strong>Pedestrian Events (per hr):</strong> {{ configuration.pedestrian_frequency }}</li>
+        <li><strong>Duration of Pedestrian Event (mins):</strong> {{ configuration.pedestrian_duration }}</li>
       </ul>
     </div>
 
@@ -296,10 +313,10 @@
       <ul>
         <li><strong>Enabled:</strong> {{ "Yes" if traffic_light_settings.get("enabled") else "No" }}</li>
         <li><strong>Traffic Cycles (per hr):</strong> {{ traffic_light_settings.get("sequences_per_hour", 0) }}</li>
-        <li><strong>N/S Forward Green Light (s):</strong> {{ traffic_light_settings.get("vertical_main_green", 0) }}</li>
-        <li><strong>N/S Right Turn Green Light (s):</strong> {{ traffic_light_settings.get("vertical_right_green", 0) }}</li>
-        <li><strong>E/W Forward Green Light (s):</strong> {{ traffic_light_settings.get("horizontal_main_green", 0) }}</li>
-        <li><strong>E/W Right Turn Green Light (s):</strong> {{ traffic_light_settings.get("horizontal_right_green", 0) }}</li>
+        <li><strong>N/S Forward and Left Green Light (mins):</strong> {{ traffic_light_settings.get("vertical_main_green", 0) }}</li>
+        <li><strong>N/S Right Turn Green Light (mins):</strong> {{ traffic_light_settings.get("vertical_right_green", 0) }}</li>
+        <li><strong>E/W Forward and Left Green Light (mins):</strong> {{ traffic_light_settings.get("horizontal_main_green", 0) }}</li>
+        <li><strong>E/W Right Turn Green Light (mins):</strong> {{ traffic_light_settings.get("horizontal_right_green", 0) }}</li>
       </ul>
     </div>
 

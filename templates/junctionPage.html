@@ -277,6 +277,62 @@
 
 
     document.getElementById("endBtn").addEventListener("click", async () => {
+        // Create a full-screen overlay that covers the entire page
+        let overlay = document.createElement("div");
+        overlay.id = "loadingOverlay";
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100vw";
+        overlay.style.height = "100vh";
+        overlay.style.backgroundColor = "#f8f5e9";  // Cream background
+        overlay.style.display = "flex";
+        overlay.style.flexDirection = "column";
+        overlay.style.justifyContent = "center";
+        overlay.style.alignItems = "center";
+        overlay.style.zIndex = "9999";  // Ensure it's on top
+
+        overlay.innerHTML = `
+          <div style="text-align: center;">
+            <div style="
+                font-size: 4rem;
+                animation: bounce 1s infinite;
+              ">
+              ⏳
+            </div>
+            <div style="
+                font-size: 2rem;
+                margin-bottom: 10px;
+                color: #8da676;
+              ">
+              Processing results...
+            </div>
+            <div style="
+                border: 8px solid #f3f3f3;
+                border-top: 8px solid #8da676;
+                border-radius: 50%;
+                width: 60px;
+                height: 60px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto;
+              ">
+            </div>
+            <style>
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+              @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
+              }
+            </style>
+          </div>
+        `;
+
+        // Append the overlay to the body
+        document.body.appendChild(overlay);
+
         console.log("End button clicked. Stopping simulation...");
 
         try {
@@ -294,8 +350,7 @@
                 return;
             }
 
-            // Redirect to the loading page instead of results directly
-            window.location.href = `/loading?session_id=${data.session_id}&run_id=${data.run_id}`;
+            window.location.href = `/results?session_id=${data.session_id}&run_id=${data.run_id}`;
 
         } catch (error) {
             console.error("❌ Error sending stop request:", error);

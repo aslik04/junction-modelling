@@ -541,10 +541,10 @@ async def run_fast_simulation():
 
     await asyncio.sleep(duration)
 
-    user_avg_wait_time_n = total_wait_time_n / wait_count_n if wait_count_n > 0 else 0
-    user_avg_wait_time_s = total_wait_time_s / wait_count_s if wait_count_s > 0 else 0
-    user_avg_wait_time_e = total_wait_time_e / wait_count_e if wait_count_e > 0 else 0
-    user_avg_wait_time_w = total_wait_time_w / wait_count_w if wait_count_w > 0 else 0
+    user_avg_wait_time_n = total_wait_time_n / wait_count_n if wait_count_n > 0 else total_wait_time_n
+    user_avg_wait_time_s = total_wait_time_s / wait_count_s if wait_count_s > 0 else total_wait_time_s
+    user_avg_wait_time_e = total_wait_time_e / wait_count_e if wait_count_e > 0 else total_wait_time_e
+    user_avg_wait_time_w = total_wait_time_w / wait_count_w if wait_count_w > 0 else total_wait_time_w
 
     user_results = {
         "max_wait_time_n": max_wait_time_n, 
@@ -580,10 +580,10 @@ async def run_fast_simulation():
 
     await asyncio.sleep(duration)
 
-    def_avg_wait_time_n = total_wait_time_n / wait_count_n if wait_count_n > 0 else 0
-    def_avg_wait_time_s = total_wait_time_s / wait_count_s if wait_count_s > 0 else 0
-    def_avg_wait_time_e = total_wait_time_e / wait_count_e if wait_count_e > 0 else 0
-    def_avg_wait_time_w = total_wait_time_w / wait_count_w if wait_count_w > 0 else 0
+    def_avg_wait_time_n = total_wait_time_n / wait_count_n if wait_count_n > 0 else total_wait_time_n
+    def_avg_wait_time_s = total_wait_time_s / wait_count_s if wait_count_s > 0 else total_wait_time_s
+    def_avg_wait_time_e = total_wait_time_e / wait_count_e if wait_count_e > 0 else total_wait_time_e
+    def_avg_wait_time_w = total_wait_time_w / wait_count_w if wait_count_w > 0 else total_wait_time_w
 
     default_results = {
         "max_wait_time_n": max_wait_time_n, 

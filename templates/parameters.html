@@ -354,6 +354,40 @@
         if (fileInput.files.length) {
           // Set the flag to indicate we're using file data
           fileUploadUsed = true;
+
+          // Step 3: Create a full-screen overlay that displays Building simulation logic.
+          let overlay = document.createElement("div");
+          overlay.id = "buildingSimOverlay";
+          overlay.style.position = "fixed";
+          overlay.style.top = "0";
+          overlay.style.left = "0";
+          overlay.style.width = "100vw";
+          overlay.style.height = "100vh";
+          overlay.style.backgroundColor = "#f8f5e9";
+          overlay.style.display = "flex";
+          overlay.style.flexDirection = "column";
+          overlay.style.justifyContent = "center";
+          overlay.style.alignItems = "center";
+          overlay.style.zIndex = "9999"; // Ensure it covers everything
+      
+          overlay.innerHTML = `
+            <div style="font-size: 4rem; animation: bounce 1s infinite;">🏗️</div>
+            <div style="font-size: 2rem; margin-bottom: 10px; color: #8da676;">Building simulation...</div>
+            <div style="border: 8px solid #f3f3f3; border-top: 8px solid #8da676; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite;"></div>
+            <style>
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+              @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
+              }
+            </style>
+          `;
+
+          document.body.appendChild(overlay);
+
           const formData = new FormData();
           // Append the first file (or loop if handling multiple files)
           formData.append('file', fileInput.files[0]);
@@ -389,6 +423,40 @@
         dropZone.style.backgroundColor = '#f8f5e9';
       });
       dropZone.addEventListener('drop', (e) => {
+
+        // Step 3: Create a full-screen overlay that displays Building simulation logic.
+        let overlay = document.createElement("div");
+        overlay.id = "buildingSimOverlay";
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100vw";
+        overlay.style.height = "100vh";
+        overlay.style.backgroundColor = "#f8f5e9";
+        overlay.style.display = "flex";
+        overlay.style.flexDirection = "column";
+        overlay.style.justifyContent = "center";
+        overlay.style.alignItems = "center";
+        overlay.style.zIndex = "9999"; // Ensure it covers everything
+    
+        overlay.innerHTML = `
+          <div style="font-size: 4rem; animation: bounce 1s infinite;">🏗️</div>
+          <div style="font-size: 2rem; margin-bottom: 10px; color: #8da676;">Building simulation...</div>
+          <div style="border: 8px solid #f3f3f3; border-top: 8px solid #8da676; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite;"></div>
+          <style>
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            @keyframes bounce {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+          </style>
+        `;
+
+        document.body.appendChild(overlay);
+
         e.preventDefault();
         dropZone.style.backgroundColor = '#f8f5e9';
         if (e.dataTransfer.files.length) {
@@ -418,6 +486,40 @@
       // When the Start button is clicked, check if a file upload was used.
       // If not, copy the manual form values into the hidden form and submit it.
       document.getElementById("startButton").addEventListener("click", async function () {
+
+        // Step 3: Create a full-screen overlay that displays Building simulation logic.
+        let overlay = document.createElement("div");
+        overlay.id = "buildingSimOverlay";
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100vw";
+        overlay.style.height = "100vh";
+        overlay.style.backgroundColor = "#f8f5e9";
+        overlay.style.display = "flex";
+        overlay.style.flexDirection = "column";
+        overlay.style.justifyContent = "center";
+        overlay.style.alignItems = "center";
+        overlay.style.zIndex = "9999"; // Ensure it covers everything
+    
+        overlay.innerHTML = `
+          <div style="font-size: 4rem; animation: bounce 1s infinite;">🏗️</div>
+          <div style="font-size: 2rem; margin-bottom: 10px; color: #8da676;">Building simulation...</div>
+          <div style="border: 8px solid #f3f3f3; border-top: 8px solid #8da676; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite;"></div>
+          <style>
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+            @keyframes bounce {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+          </style>
+        `;
+
+        document.body.appendChild(overlay);
+
         // If a file upload was used, skip manual submission.
         if (fileUploadUsed) {
           console.log("File upload detected; using file data only. Manual parameters will be ignored.");

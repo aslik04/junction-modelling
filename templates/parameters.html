@@ -313,6 +313,53 @@
         font-size: 3vh;
       }
     }
+
+    /* Tutorial Popup and Button styles */
+    #tutorial-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: green;
+      color: white;
+      text-align: center;
+      line-height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    
+    #tutorial-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 45%;
+      height: 45%;
+      background-color: #fff;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      z-index: 1001;
+      overflow-y: auto;
+    }
+    
+    #tutorial-popup-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    
+    #tutorial-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+    }
   </style>
 
   <script>
@@ -1182,5 +1229,117 @@
 
     </div>
   </div>
+
+  <!-- Tutorial Popup and Button -->
+  <div id="tutorial-popup">
+    <div id="tutorial-popup-content">
+      <span id="tutorial-close">&times;</span>
+      <h2>Input Parameters</h2>
+      <br>
+      <h3>Vehicle Settings</h3>
+      <p>Here you can enter your input parameters for the rate of traffic flow leaving the given arm of the junction (in vehicles per hour). For example, North: Forward 100, Turning Left 100, Turning Right 100, means that 300 vehicles are arriving at the Northbound arm per hour: 100 vehicles will continue straight forward, 100 will turn left and exit and 100 vehicles will turn right and exit. </p>
+      <br>
+      <h3>Junction Settings</h3>
+      <p>Here you can select the number of lanes you want on each arm of the junction. It’s the same for each arm!</p>
+      <br>
+      <p>The pedestrian event box lets you input how many times you want pedestrians to cross the junction (per hour). The maximum is 15.</p>
+      <br>
+      <p>The duration box lets you input how long (in minutes) you want pedestrians to cross the junction for, per event. The maximum is 5 minutes.</p>
+      <br>
+      <h3>Traffic Light Settings</h3>
+      <p>Normally the traffic lights will run according to a priority-based, dynamic algorithm, created by the development team. In this algorithm, the time that traffic lights are set to green for, on a junction arm, is based on the length of vehicle queues.</p>
+      <br>
+      <p>ie) A longer vehicle queue means green lights will subsequently stay on for longer.</p>
+      <br>
+      <p>When you enable traffic light settings, you are now manually in control of how often the traffic lights turn green.</p>
+      <br>
+      <h4>Manual Mode</h4>
+      <p>The "Full Traffic Cycles (per hour)"" input is how many full cycles the traffic lights go through every simulated hour. A full cycle: Red -> Amber -> Green -> Amber -> Red -> Green (Right turn light) -> Red (Right turn light).</p>
+      <br>
+      <h5>Northbound/Southbound Green Lights</h5>
+      <p>Input how many seconds you want the green light to stay on for.</p>
+      <p>The first box is for the green light controlling the forward and left turn exits.</p>
+      <p>The second box is for the green light controlling the right turn exit.</p>
+      <br>
+      <h5>Eastbound/Westbound Green Lights</h5>
+      <p>These inputs work identically to the northbound/southbound lights.</p>
+      <br>
+      <hr>
+      <br>
+      <h2>Upload a file</h2>
+      <p>You can write your parameters in a JSON file and upload them from your local drive, to begin your simulation quickly! You don’t even have to click the ‘Start’ button!</p>
+      <br>
+      <p>Make sure your file is formatted as below:</p>
+      <br>
+      <pre><code>{
+        "vehicle_settings": {
+          "north": {
+            "forward": 123,
+            "turning_left": 123,
+            "turning_right": 123
+          },
+          "east": {
+            "forward": 345,
+            "turning_left": 345,
+            "turning_right": 345
+          },
+          "south": {
+            "forward": 567,
+            "turning_left": 567,
+            "turning_right": 567
+          },
+          "west": {
+            "forward": 789,
+            "turning_left": 789,
+            "turning_right": 789
+          }
+        },
+        "junction_settings": {
+          "number_of_lanes": 3,
+          "left_turn_lane": true,
+          "bus_lane": false,
+          "pedestrian_frequency": 3,
+          "pedestrian_duration": 4
+        },
+        "traffic_light_settings": {
+          "enabled": false,
+          "traffic_cycles": 4,
+          "vertical_sequence": {
+            "main_green_length": 2,
+            "right_green_length": 3
+          },
+          "horizontal_sequence": {
+            "main_green_length": 3,
+            "right_green_length": null
+          }
+        }
+      }</code></pre>
+      <br>
+    </div>
+  </div>
+  <div id="tutorial-button">?</div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const tutorialButton = document.getElementById('tutorial-button');
+      const tutorialPopup = document.getElementById('tutorial-popup');
+      const tutorialClose = document.getElementById('tutorial-close');
+      
+      tutorialButton.addEventListener('click', function() {
+        tutorialPopup.style.display = 'block';
+      });
+      
+      tutorialClose.addEventListener('click', function() {
+        tutorialPopup.style.display = 'none';
+      });
+      
+      // Close the popup when clicking outside of the content area
+      tutorialPopup.addEventListener('click', function(e) {
+        if(e.target === tutorialPopup) {
+          tutorialPopup.style.display = 'none';
+        }
+      });
+    });
+  </script>
 </body>
 </html>

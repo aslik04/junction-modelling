@@ -17,7 +17,6 @@ for quick strategy comparison. Configuration options include lane count, spawn r
 and simulation speed. Connects to a frontend on port 8000.
 """
 
-
 import asyncio
 import json
 import random

@@ -114,6 +114,49 @@
                 padding: 2vh 4vw;
             }
         }
+        /* Tutorial Popup and Button styles */
+        #tutorial-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: green;
+            color: white;
+            text-align: center;
+            line-height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        #tutorial-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 45%;
+            height: 45%;
+            background-color: #fff;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+        #tutorial-popup-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        #tutorial-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -207,11 +250,9 @@
 
         document.getElementById("backBtn").addEventListener("click", async () => {
             console.log("Back button clicked. Stopping FastAPI...");
-
             try {
                 let stopResponse = await fetch('/stop_simulation', { method: 'POST' });
                 let stopData = await stopResponse.json();
-                
                 if (stopResponse.ok) {
                     console.log("✅ FastAPI stopped:", stopData.message);
                     // Redirect back to the parameters page
@@ -222,6 +263,73 @@
             } catch (error) {
                 console.error("❌ Error sending stop request:", error);
             }
+        });
+        
+        document.getElementById("endBtn").addEventListener("click", async () => {
+            console.log("Back button clicked. Stopping FastAPI...");
+            try {
+                let stopResponse = await fetch('/stop_simulation', { method: 'POST' });
+                let stopData = await stopResponse.json();
+                if (stopResponse.ok) {
+                    console.log("✅ FastAPI stopped:", stopData.message);
+                    // Redirect back to the index page
+                    window.location.href = "/index";
+                } else {
+                    console.error("❌ Error stopping FastAPI:", stopData.error);
+                }
+            } catch (error) {
+                console.error("❌ Error sending stop request:", error);
+            }
+        });
+    </script>
+    
+    <!-- Tutorial Popup and Button -->
+    <div id="tutorial-popup">
+        <div id="tutorial-popup-content">
+            <span id="tutorial-close">&times;</span>
+            <h2>User Session Leaderboard</h2>
+            <br>
+            <p>This is the User Session Leaderboard!</p>
+            <br>
+            <p>Here you can find the most efficient run you've tested so far this session and your 9 most recent runs, in case you want to jump back to rerun them!</p>
+            <br>
+            <p>The table shows you how your junction configuration scored, on all its arms, for:</p>
+            <p>  - Average Wait Time (in seconds)</p>
+            <p>  - Maximum Wait Time (in seconds)</p>
+            <p>  - Maximum Vehicle Queue length</p>
+            <br>
+            <p>Where NB means Northbound, SB means Southbound, EB means Eastbound and WB means Westbound</p>
+            <br>
+            <hr>
+            <br>
+            <h2>What next?</h2>
+            <br>
+            <p>Tap on any of the rows to see the junction parameters you selected for that run. Make a note of it, so you can reproduce that run again if you want!</p>
+            <br>
+        </div>
+    </div>
+    <div id="tutorial-button">?</div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tutorialButton = document.getElementById('tutorial-button');
+            const tutorialPopup = document.getElementById('tutorial-popup');
+            const tutorialClose = document.getElementById('tutorial-close');
+            
+            tutorialButton.addEventListener('click', function() {
+                tutorialPopup.style.display = 'block';
+            });
+            
+            tutorialClose.addEventListener('click', function() {
+                tutorialPopup.style.display = 'none';
+            });
+            
+            // Close the popup when clicking outside of the content area
+            tutorialPopup.addEventListener('click', function(e) {
+                if(e.target === tutorialPopup) {
+                    tutorialPopup.style.display = 'none';
+                }
+            });
         });
     </script>
 </body>

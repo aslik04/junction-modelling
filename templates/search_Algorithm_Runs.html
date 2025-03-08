@@ -84,7 +84,6 @@
         .search-container button:hover {
             background-color: #789563;
         }
-
         .download-container {
             text-align: center;
             margin-top: 20px;
@@ -95,7 +94,6 @@
             align-items: center;   
             font-size: 2vh; 
         }
-
         .download-container a {
             text-decoration: none;
             color: #f8f5e9;
@@ -106,12 +104,9 @@
             font-weight: 600;
             transition: background-color 0.3s;
         }
-
         .download-container a:hover {
             background-color: #789563;
         }
-
-
         /* Navigation Container */
         .nav-container {
             width: 90%;
@@ -147,6 +142,52 @@
                 font-size: 3vw;
                 padding: 2vh 4vw;
             }
+        }
+        /* Tutorial Popup and Button styles */
+        #tutorial-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: green;
+            color: white;
+            text-align: center;
+            line-height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        #tutorial-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 45%;
+            height: 45%;
+            background-color: #fff;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+        
+        #tutorial-popup-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #tutorial-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -211,7 +252,7 @@
                 
                 if (stopResponse.ok) {
                     console.log("✅ FastAPI stopped:", stopData.message);
-                    // Redirect back to the parameters page
+                    // Redirect back to the index page
                     window.location.href = "/index";
                 } else {
                     console.error("❌ Error stopping FastAPI:", stopData.error);
@@ -220,6 +261,42 @@
                 console.error("❌ Error sending stop request:", error);
             }
         });
-    </script>    
+    </script>
+    
+    <!-- Tutorial Popup and Button -->
+    <div id="tutorial-popup">
+        <div id="tutorial-popup-content">
+            <span id="tutorial-close">&times;</span>
+            <h2>Search Algorithm Runs</h2>
+            <br>
+            <p>Using the session ID and run ID, search up a run and all its details and results will be displayed.</p>
+            <br>
+            <p>'Download Run ID' lets you download the session ID, run ID, overall scores and score differences of all past runs. So if you remember achieving a certain score but can't remember what your parameter inputs were, you can find the session ID and run ID from the downloaded file. Then you can search up that old run!</p>
+        </div>
+    </div>
+    <div id="tutorial-button">?</div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tutorialButton = document.getElementById('tutorial-button');
+            const tutorialPopup = document.getElementById('tutorial-popup');
+            const tutorialClose = document.getElementById('tutorial-close');
+            
+            tutorialButton.addEventListener('click', function() {
+                tutorialPopup.style.display = 'block';
+            });
+            
+            tutorialClose.addEventListener('click', function() {
+                tutorialPopup.style.display = 'none';
+            });
+            
+            // Close the popup when clicking outside of the content area
+            tutorialPopup.addEventListener('click', function(e) {
+                if(e.target === tutorialPopup) {
+                    tutorialPopup.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

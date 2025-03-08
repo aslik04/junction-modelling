@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Results</title>
@@ -11,19 +12,24 @@
       font-style: normal;
       font-weight: 400;
     }
+
     /* Reset & Base Styles */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    html, body {
+
+    html,
+    body {
       width: 100%;
       height: 100%;
       overflow-x: hidden;
     }
+
     body {
-      background-color: #a2bf89; /* Green background */
+      background-color: #a2bf89;
+      /* Green background */
       font-family: 'SF Pro', sans-serif;
       font-weight: 400;
       color: #6b6b6b;
@@ -32,6 +38,7 @@
       align-items: center;
       padding: 2vh 0;
     }
+
     /* Header Section */
     #resultsHeader {
       font-size: 5vh;
@@ -39,6 +46,7 @@
       font-weight: 600;
       margin-bottom: 1.5vh;
     }
+
     /* Difference Box (only shown when traffic settings are enabled) */
     #scoreComparison {
       width: 80vw;
@@ -49,9 +57,10 @@
       font-size: 3vh;
       font-weight: bold;
       color: #6b6b6b;
-      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
       background-color: #f8f5e9;
     }
+
     /* Big Results Container: Two side-by-side boxes */
     #resultsPairContainer {
       width: 80vw;
@@ -60,48 +69,59 @@
       gap: 2vw;
       margin-bottom: 3vh;
     }
+
     .results-box {
       background-color: #f8f5e9;
       border-radius: 2vh;
       padding: 2vh;
-      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
       width: 48%;
     }
+
     /* Full width override for single container */
     .full-width {
       width: 100%;
     }
+
     .results-box h2 {
       font-size: 3vh;
       color: #8da676;
       margin-bottom: 1vh;
     }
+
     .score-header {
       font-size: 2.5vh;
       margin-bottom: 1vh;
       color: #6b6b6b;
     }
+
     .resultsTable {
       width: 100%;
       border-collapse: collapse;
       margin: 0 auto;
     }
-    .resultsTable th, .resultsTable td {
+
+    .resultsTable th,
+    .resultsTable td {
       padding: 1vh;
       text-align: center;
       font-size: 2vh;
     }
+
     .resultsTable th {
       background-color: #8da676;
       color: #ffffff;
     }
+
     .resultsTable tr:nth-child(even) {
       background-color: #eeeeee;
     }
+
     .resultsTable tr:hover {
       background-color: #dce7c5;
       transition: 0.3s;
     }
+
     /* Parameters Container: 3 boxes side by side (expanding independently) */
     #paramsContainer {
       width: 80vw;
@@ -110,13 +130,15 @@
       align-items: flex-start;
       gap: 2vw;
     }
+
     .param-box {
       background-color: #f8f5e9;
       border-radius: 2vh;
       padding: 2vh;
       width: 30%;
-      box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
     }
+
     .param-box h2 {
       color: #8da676;
       font-size: 2.5vh;
@@ -125,31 +147,33 @@
       align-items: center;
       cursor: pointer;
     }
+
     .param-box h2 span.symbol {
       margin-right: 0.5em;
       font-size: 2.5vh;
       font-weight: bold;
     }
+
     .dropdown-content {
       display: none;
       margin-top: 1vh;
       text-align: left;
       font-size: 2vh;
     }
+
     .dropdown-content ul {
       list-style: none;
       padding-left: 1vw;
     }
+
     .dropdown-content li {
       margin: 0.5vh 0;
     }
-    .nav-container {
 
+    .nav-container {
       width: 100%;
       display: flex;
-
       justify-content: center;
-
       gap: 2vw;
       margin-top: 2vh;
     }
@@ -167,49 +191,106 @@
       text-decoration: none;
       text-align: center;
     }
+
     .res-button:hover {
       background-color: #789563;
     }
+
     /* Responsive adjustments */
     @media (max-width: 600px) {
       #resultsHeader {
         font-size: 6vw;
       }
-      #scoreComparison, #resultsPairContainer, #paramsContainer {
+
+      #scoreComparison,
+      #resultsPairContainer,
+      #paramsContainer {
         width: 90vw;
       }
+
       #resultsPairContainer {
         flex-direction: column;
         align-items: center;
       }
-      .results-box, .param-box {
+
+      .results-box,
+      .param-box {
         width: 90%;
       }
+
       .res-button {
         font-size: 4vw;
         padding: 2vh 4vw;
       }
     }
+
+    /* Tutorial Popup and Button styles */
+    #tutorial-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: green;
+      color: white;
+      text-align: center;
+      line-height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
+    #tutorial-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 45%;
+      height: 45%;
+      background-color: #fff;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      z-index: 1001;
+      overflow-y: auto;
+    }
+
+    #tutorial-popup-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    #tutorial-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+    }
   </style>
 </head>
+
 <body>
   <!-- Header Section -->
   <div id="resultsHeader">🎉 Results for Run: {{ run_id }} in Session: {{ session_id }}🎉</div>
 
   {% if traffic_light_settings.enabled %}
-    <!-- Only show the score difference if user traffic is enabled -->
-    <div id="scoreComparison">
-      Overall Score Difference: 
-      <span id="scoreDiff"></span>
-    </div>
+  <!-- Only show the score difference if user traffic is enabled -->
+  <div id="scoreComparison">
+    Overall Score Difference:
+    <span id="scoreDiff"></span>
+  </div>
   {% endif %}
-  
+
   <script>
     // Parse the score values (ensure they are numeric)
     const algorithmScore = parseFloat("{{ algorithm_metrics.score }}");
     const userScore = parseFloat("{{ score }}");
     const scoreSpan = document.getElementById('scoreDiff');
-    if(scoreSpan) {
+    if (scoreSpan) {
       // Calculate the difference
       const diff = (algorithmScore - userScore).toFixed(5);
       // Update the text and set its color based on the value
@@ -217,135 +298,135 @@
       scoreSpan.style.color = diff >= 0 ? 'green' : 'red';
     }
   </script>
-  
+
   <!-- Big Results Container -->
   <div id="resultsPairContainer">
     {% if traffic_light_settings.enabled %}
-      <!-- When user traffic is enabled, display both boxes side by side -->
-      <!-- User Results Box -->
-      <div class="results-box" id="userResultsBox">
-        <h2>User Results</h2>
-        <div class="score-header">Overall Score: {{ score|round(3) }}</div>
-        <table class="resultsTable">
-          <thead>
-            <tr>
-              <th>Direction</th>
-              <th>AVG Wait (s)</th>
-              <th>MAX Wait (s)</th>
-              <th>MAX Queue</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>North</td>
-              <td>{{ avg_wait_time_n|round|int }}</td>
-              <td>{{ max_wait_time_n|round|int }}</td>
-              <td>{{ max_queue_length_n|round|int }}</td>
-            </tr>
-            <tr>
-              <td>South</td>
-              <td>{{ avg_wait_time_s|round|int }}</td>
-              <td>{{ max_wait_time_s|round|int }}</td>
-              <td>{{ max_queue_length_s|round|int }}</td>
-            </tr>
-            <tr>
-              <td>East</td>
-              <td>{{ avg_wait_time_e|round|int }}</td>
-              <td>{{ max_wait_time_e|round|int }}</td>
-              <td>{{ max_queue_length_e|round|int }}</td>
-            </tr>
-            <tr>
-              <td>West</td>
-              <td>{{ avg_wait_time_w|round|int }}</td>
-              <td>{{ max_wait_time_w|round|int }}</td>
-              <td>{{ max_queue_length_w|round|int }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- Algorithm Results Box -->
-      <div class="results-box" id="algoResultsBox">
-        <h2>Algorithm Results</h2>
-        <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(3) }}</div>
-        <table class="resultsTable">
-          <thead>
-            <tr>
-              <th>Direction</th>
-              <th>AVG Wait (s)</th>
-              <th>MAX Wait (s)</th>
-              <th>MAX Queue</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>North</td>
-              <td>{{ algorithm_metrics.avg_wait_time_n|round|int }}</td>
-              <td>{{ algorithm_metrics.max_wait_time_n|round|int }}</td>
-              <td>{{ algorithm_metrics.max_queue_length_n|round|int }}</td>
-            </tr>
-            <tr>
-              <td>South</td>
-              <td>{{ algorithm_metrics.avg_wait_time_s|round|int }}</td>
-              <td>{{ algorithm_metrics.max_wait_time_s|round|int }}</td>
-              <td>{{ algorithm_metrics.max_queue_length_s|round|int }}</td>
-            </tr>
-            <tr>
-              <td>East</td>
-              <td>{{ algorithm_metrics.avg_wait_time_e|round|int }}</td>
-              <td>{{ algorithm_metrics.max_wait_time_e|round|int }}</td>
-              <td>{{ algorithm_metrics.max_queue_length_e|round|int }}</td>
-            </tr>
-            <tr>
-              <td>West</td>
-              <td>{{ algorithm_metrics.avg_wait_time_w|round|int }}</td>
-              <td>{{ algorithm_metrics.max_wait_time_w|round|int }}</td>
-              <td>{{ algorithm_metrics.max_queue_length_w|round|int }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- When user traffic is enabled, display both boxes side by side -->
+    <!-- User Results Box -->
+    <div class="results-box" id="userResultsBox">
+      <h2>User Results</h2>
+      <div class="score-header">Overall Score: {{ score|round(3) }}</div>
+      <table class="resultsTable">
+        <thead>
+          <tr>
+            <th>Direction</th>
+            <th>AVG Wait (s)</th>
+            <th>MAX Wait (s)</th>
+            <th>MAX Queue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>North</td>
+            <td>{{ avg_wait_time_n|round|int }}</td>
+            <td>{{ max_wait_time_n|round|int }}</td>
+            <td>{{ max_queue_length_n|round|int }}</td>
+          </tr>
+          <tr>
+            <td>South</td>
+            <td>{{ avg_wait_time_s|round|int }}</td>
+            <td>{{ max_wait_time_s|round|int }}</td>
+            <td>{{ max_queue_length_s|round|int }}</td>
+          </tr>
+          <tr>
+            <td>East</td>
+            <td>{{ avg_wait_time_e|round|int }}</td>
+            <td>{{ max_wait_time_e|round|int }}</td>
+            <td>{{ max_queue_length_e|round|int }}</td>
+          </tr>
+          <tr>
+            <td>West</td>
+            <td>{{ avg_wait_time_w|round|int }}</td>
+            <td>{{ max_wait_time_w|round|int }}</td>
+            <td>{{ max_queue_length_w|round|int }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Algorithm Results Box -->
+    <div class="results-box" id="algoResultsBox">
+      <h2>Algorithm Results</h2>
+      <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(3) }}</div>
+      <table class="resultsTable">
+        <thead>
+          <tr>
+            <th>Direction</th>
+            <th>AVG Wait (s)</th>
+            <th>MAX Wait (s)</th>
+            <th>MAX Queue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>North</td>
+            <td>{{ algorithm_metrics.avg_wait_time_n|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_n|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_n|round|int }}</td>
+          </tr>
+          <tr>
+            <td>South</td>
+            <td>{{ algorithm_metrics.avg_wait_time_s|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_s|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_s|round|int }}</td>
+          </tr>
+          <tr>
+            <td>East</td>
+            <td>{{ algorithm_metrics.avg_wait_time_e|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_e|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_e|round|int }}</td>
+          </tr>
+          <tr>
+            <td>West</td>
+            <td>{{ algorithm_metrics.avg_wait_time_w|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_w|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_w|round|int }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     {% else %}
-      <!-- When user traffic is not enabled, only display the algorithm box spanning full width -->
-      <div class="results-box full-width" id="algoResultsBox">
-        <h2>Algorithm Results</h2>
-        <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(3) }}</div>
-        <table class="resultsTable">
-          <thead>
-            <tr>
-              <th>Direction</th>
-              <th>AVG Wait (s)</th>
-              <th>MAX Wait (s)</th>
-              <th>MAX Queue</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>North</td>
-              <td>{{ algorithm_metrics.avg_wait_time_n|round|int }}</td>
-              <td>{{ algorithm_metrics.max_wait_time_n|round|int }}</td>
-              <td>{{ algorithm_metrics.max_queue_length_n|round|int }}</td>
-            </tr>
-            <tr>
-              <td>South</td>
-              <td>{{ algorithm_metrics.avg_wait_time_s|round|int }}</td>
-              <td>{{ algorithm_metrics.max_wait_time_s|round|int }}</td>
-              <td>{{ algorithm_metrics.max_queue_length_s|round|int }}</td>
-            </tr>
-            <tr>
-              <td>East</td>
-              <td>{{ algorithm_metrics.avg_wait_time_e|round|int }}</td>
-              <td>{{ algorithm_metrics.max_wait_time_e|round|int }}</td>
-              <td>{{ algorithm_metrics.max_queue_length_e|round|int }}</td>
-            </tr>
-            <tr>
-              <td>West</td>
-              <td>{{ algorithm_metrics.avg_wait_time_w|round|int }}</td>
-              <td>{{ algorithm_metrics.max_wait_time_w|round|int }}</td>
-              <td>{{ algorithm_metrics.max_queue_length_w|round|int }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- When user traffic is not enabled, only display the algorithm box spanning full width -->
+    <div class="results-box full-width" id="algoResultsBox">
+      <h2>Algorithm Results</h2>
+      <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(3) }}</div>
+      <table class="resultsTable">
+        <thead>
+          <tr>
+            <th>Direction</th>
+            <th>AVG Wait (s)</th>
+            <th>MAX Wait (s)</th>
+            <th>MAX Queue</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>North</td>
+            <td>{{ algorithm_metrics.avg_wait_time_n|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_n|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_n|round|int }}</td>
+          </tr>
+          <tr>
+            <td>South</td>
+            <td>{{ algorithm_metrics.avg_wait_time_s|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_s|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_s|round|int }}</td>
+          </tr>
+          <tr>
+            <td>East</td>
+            <td>{{ algorithm_metrics.avg_wait_time_e|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_e|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_e|round|int }}</td>
+          </tr>
+          <tr>
+            <td>West</td>
+            <td>{{ algorithm_metrics.avg_wait_time_w|round|int }}</td>
+            <td>{{ algorithm_metrics.max_wait_time_w|round|int }}</td>
+            <td>{{ algorithm_metrics.max_queue_length_w|round|int }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     {% endif %}
   </div>
 
@@ -354,14 +435,18 @@
     <!-- Configurable Parameters -->
     <div class="param-box config-box">
       <h2 id="configHeading" class="dropdown-heading" data-target="configContent">
-        <span class="symbol">—</span> Vehicle Settings 
+        <span class="symbol">—</span> Vehicle Settings
       </h2>
       <div class="dropdown-content" id="configContent">
         <ul>
-          <li><strong>Northbound:</strong> Forward: {{ spawn_rates.north.forward }}, Left: {{ spawn_rates.north.left }}, Right: {{ spawn_rates.north.right }}</li>
-          <li><strong>Southbound:</strong> Forward: {{ spawn_rates.south.forward }}, Left: {{ spawn_rates.south.left }}, Right: {{ spawn_rates.south.right }}</li>
-          <li><strong>Eastbound:</strong> Forward: {{ spawn_rates.east.forward }}, Left: {{ spawn_rates.east.left }}, Right: {{ spawn_rates.east.right }}</li>
-          <li><strong>Westbound:</strong> Forward: {{ spawn_rates.west.forward }}, Left: {{ spawn_rates.west.left }}, Right: {{ spawn_rates.west.right }}</li>
+          <li><strong>Northbound:</strong> Forward: {{ spawn_rates.north.forward }}, Left: {{ spawn_rates.north.left }},
+            Right: {{ spawn_rates.north.right }}</li>
+          <li><strong>Southbound:</strong> Forward: {{ spawn_rates.south.forward }}, Left: {{ spawn_rates.south.left }},
+            Right: {{ spawn_rates.south.right }}</li>
+          <li><strong>Eastbound:</strong> Forward: {{ spawn_rates.east.forward }}, Left: {{ spawn_rates.east.left }},
+            Right: {{ spawn_rates.east.right }}</li>
+          <li><strong>Westbound:</strong> Forward: {{ spawn_rates.west.forward }}, Left: {{ spawn_rates.west.left }},
+            Right: {{ spawn_rates.west.right }}</li>
         </ul>
       </div>
     </div>
@@ -387,10 +472,13 @@
         <ul>
           <li><strong>Enabled:</strong> {{ "Yes" if traffic_light_settings.enabled else "No" }}</li>
           <li><strong>Traffic Cycles (per hr):</strong> {{ traffic_light_settings.sequences_per_hour }}</li>
-          <li><strong>N/S Forward and Left Green Light (mins):</strong> {{ traffic_light_settings.vertical_main_green }}</li>
+          <li><strong>N/S Forward and Left Green Light (mins):</strong> {{ traffic_light_settings.vertical_main_green }}
+          </li>
           <li><strong>N/S Right Turn Green Light (mins):</strong> {{ traffic_light_settings.vertical_right_green }}</li>
-          <li><strong>E/W Forward and Left Green Light (mins):</strong> {{ traffic_light_settings.horizontal_main_green }}</li>
-          <li><strong>E/W Right Turn Green Light (mins):</strong> {{ traffic_light_settings.horizontal_right_green }}</li>
+          <li><strong>E/W Forward and Left Green Light (mins):</strong> {{ traffic_light_settings.horizontal_main_green
+            }}</li>
+          <li><strong>E/W Right Turn Green Light (mins):</strong> {{ traffic_light_settings.horizontal_right_green }}
+          </li>
         </ul>
       </div>
     </div>
@@ -416,7 +504,7 @@
         div.style.height = maxHeight + "px";
       });
     }
-    
+
     // Toggle function for a given heading and its target content
     function toggleDropdown(headingId, contentId) {
       const heading = document.getElementById(headingId);
@@ -433,37 +521,102 @@
     }
 
     document.getElementById("backBtn").addEventListener("click", async () => {
-        console.log("Back button clicked. Stopping FastAPI...");
+      console.log("Back button clicked. Stopping FastAPI...");
 
-        try {
-            let stopResponse = await fetch('/stop_simulation', { method: 'POST' });
-            let stopData = await stopResponse.json();
-            
-            if (stopResponse.ok) {
-                console.log("✅ FastAPI stopped:", stopData.message);
-                // Redirect back to the parameters page
-                window.location.href = "/parameters";
-            } else {
-                console.error("❌ Error stopping FastAPI:", stopData.error);
-            }
-        } catch (error) {
-            console.error("❌ Error sending stop request:", error);
+      try {
+        let stopResponse = await fetch('/stop_simulation', { method: 'POST' });
+        let stopData = await stopResponse.json();
+
+        if (stopResponse.ok) {
+          console.log("✅ FastAPI stopped:", stopData.message);
+          // Redirect back to the parameters page
+          window.location.href = "/parameters";
+        } else {
+          console.error("❌ Error stopping FastAPI:", stopData.error);
         }
+      } catch (error) {
+        console.error("❌ Error sending stop request:", error);
+      }
     });
-    
+
     // Attach event listeners for all dropdown headings
-    document.getElementById("configHeading").addEventListener("click", function() {
+    document.getElementById("configHeading").addEventListener("click", function () {
       toggleDropdown("configHeading", "configContent");
     });
-    document.getElementById("junctionHeading").addEventListener("click", function() {
+    document.getElementById("junctionHeading").addEventListener("click", function () {
       toggleDropdown("junctionHeading", "junctionContent");
     });
-    document.getElementById("trafficHeading").addEventListener("click", function() {
+    document.getElementById("trafficHeading").addEventListener("click", function () {
       toggleDropdown("trafficHeading", "trafficContent");
     });
-    document.getElementById("defaultTrafficHeading").addEventListener("click", function() {
+    document.getElementById("defaultTrafficHeading").addEventListener("click", function () {
       toggleDropdown("defaultTrafficHeading", "defaultTrafficContent");
     });
-  </script>   
+  </script>
+
+  <!-- Tutorial Popup and Button -->
+  <div id="tutorial-popup">
+    <div id="tutorial-popup-content">
+      <span id="tutorial-close">&times;</span>
+      <h2>Results</h2>
+      <br>
+      <h3>If User Traffic Light Settings are disabled:</h3>
+      <p>Here are your results!</p>
+      <p>Your overall score lets you know how efficient your junction is; the lower the better!</p>
+      <br>
+      <p>It's calculated with the formulas:</p>
+      <p>Direction score = (AVG wait time * 0.5) + (Max wait time * 0.3) + (Max Queue * 0.2)</p>
+      <p>Normal Direction score = Direction score/ Direction traffic volume</p>
+      <p>Final Score = Normal North score + Normal South score + Normal East score + Normal West score</p>
+      <br>
+      <p>The table displays your junction configuration's performance results, across its arms, for:</p>
+      <p> - Average Wait Time (in seconds)</p>
+      <p> - Maximum Wait Time (in seconds)</p>
+      <p> - Maximum Vehicle Queue length</p>
+      <br>
+      <h3>If User Traffic Light Settings are enabled:</h3>
+      <p>The overall score difference is the difference between the efficiency score achieved by the junction with the default priority-based algorithm, and the efficiency
+        score achieved, with the user's traffic settings. See which one performed better!</p>
+      <br>
+      <p>The 2 tables display your junction configuration's performance results, across its arms, when following the 2 different algorithms.</p>
+      <br>
+      <p>You can check your junction configuration settings using the dropdowns!</p>
+      <br>
+      <hr>
+      <br>
+      <h3>What next?</h3>
+      <p>Click the 'Search Algorithm Runs' button if you would like to find the score and junction configuration of any past test run!</p>
+      <br>
+      <p>Click the 'Algorithm Session Leaderboard' button if you want to see details from the last 10 runs that used the priority-based traffic algorithm.</p>
+      <br>
+      <p>Click the 'User Session Leaderboard' button if you want to see the last 9 runs that you have carried out using your own traffic settings and the best performing one, of this current session.</p>
+      <br>
+    </div>
+  </div>
+  <div id="tutorial-button">?</div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const tutorialButton = document.getElementById('tutorial-button');
+      const tutorialPopup = document.getElementById('tutorial-popup');
+      const tutorialClose = document.getElementById('tutorial-close');
+
+      tutorialButton.addEventListener('click', function () {
+        tutorialPopup.style.display = 'block';
+      });
+
+      tutorialClose.addEventListener('click', function () {
+        tutorialPopup.style.display = 'none';
+      });
+
+      // Close the popup when clicking outside of the content area
+      tutorialPopup.addEventListener('click', function (e) {
+        if (e.target === tutorialPopup) {
+          tutorialPopup.style.display = 'none';
+        }
+      });
+    });
+  </script>
 </body>
+
 </html>

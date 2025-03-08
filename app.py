@@ -460,14 +460,20 @@ def results():
     """
     
     try:
-        session_id = global_session_id
+        session_id = request.args.get('session_id', type=int)
+
+        if not session_id:
+            if global_session_id == 0:
+                return jsonify({"error": "Missing session_id"}), 400   
+            else:             
+                session_id = global_session_id
 
         print(session_id)
 
         run_id = request.args.get('run_id', type=int)
 
-        if not session_id or not run_id:
-            return jsonify({"error": "Missing session_id or run_id"}), 400
+        if not run_id:
+            return jsonify({"error": "Missing run_id"}), 400
 
         with app.test_request_context(
                 '/simulate', 
@@ -551,6 +557,209 @@ def results():
         print(f"❌ Error: {e}")
         return jsonify({'error': str(e)}), 400
     
+@app.route('/back_to_results')
+def back_to_results():
+    """
+    
+    """
+    
+    try:
+
+        latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
+        if latest_config:
+            run_id = latest_config.run_id
+            session_id = latest_config.session_id
+        else:
+            return jsonify({"error": "Missing run_id"}), 400
+
+        configuration = Configuration.query.filter_by(session_id=session_id).first()
+
+        if not configuration:
+            flash('Configuration details not found for the provided run.')
+            return redirect(url_for('error', message=f"Configuration for Run: {str(run_id)} in Session: {str(session_id)} does not exist."))
+        
+        junction_settings = {
+            "lanes": configuration.lanes,
+            "left_turn_lane": configuration.left_turn_lane,
+            "pedestrian_duration": configuration.pedestrian_duration,
+            "pedestrian_frequency": configuration.pedestrian_frequency
+        }
+
+        spawn_rates = {
+            "north": {
+                "forward": configuration.north_forward_vph,
+                "left": configuration.north_left_vph,
+                "right": configuration.north_right_vph
+            },
+            "south": {
+                "forward": configuration.south_forward_vph,
+                "left": configuration.south_left_vph,
+                "right": configuration.south_right_vph
+            },
+            "east": {
+                "forward": configuration.east_forward_vph,
+                "left": configuration.east_left_vph,
+                "right": configuration.east_right_vph
+            },
+            "west": {
+                "forward": configuration.west_forward_vph,
+                "left": configuration.west_left_vph,
+                "right": configuration.west_right_vph
+            }
+        }
+
+        traffic_light_settings = {
+            "enabled": False,
+            "sequences_per_hour": 0,
+            "vertical_main_green": 0,
+            "horizontal_main_green": 0,
+            "vertical_right_green": 0,
+            "horizontal_right_green": 0
+        }
+        avg_wait_time_n = avg_wait_time_s = avg_wait_time_e = avg_wait_time_w = 0
+        max_wait_time_n = max_wait_time_s = max_wait_time_e = max_wait_time_w = 0
+        max_queue_length_n = max_queue_length_s = max_queue_length_e = max_queue_length_w = 0
+        score = 0.0
+
+        tls_obj = (
+            TrafficSettings.query
+            .filter_by(run_id=run_id)
+            .order_by(TrafficSettings.id.desc())
+            .first()
+        )
+
+        if not tls_obj:
+            traffic_light_settings = {
+                "enabled": False,
+                "sequences_per_hour": 0,
+                "vertical_main_green": 0,
+                "horizontal_main_green": 0,
+                "vertical_right_green": 0,
+                "horizontal_right_green": 0
+            }
+        else:
+            traffic_light_settings = {
+                "enabled": tls_obj.enabled,
+                "sequences_per_hour": tls_obj.sequences_per_hour,
+                "vertical_main_green": tls_obj.vertical_main_green,
+                "horizontal_main_green": tls_obj.horizontal_main_green,
+                "vertical_right_green": tls_obj.vertical_right_green,
+                "horizontal_right_green": tls_obj.horizontal_right_green
+            }
+
+        user_result = LeaderboardResult.query.filter_by(run_id=run_id, session_id=session_id).first()
+        if user_result:
+            avg_wait_time_n=user_result.avg_wait_time_north
+            avg_wait_time_s=user_result.avg_wait_time_south
+            avg_wait_time_e=user_result.avg_wait_time_east
+            avg_wait_time_w=user_result.avg_wait_time_west
+            max_wait_time_n=user_result.max_wait_time_north
+            max_wait_time_s=user_result.max_wait_time_south
+            max_wait_time_e=user_result.max_wait_time_east
+            max_wait_time_w=user_result.max_wait_time_west
+            max_queue_length_n=user_result.max_queue_length_north
+            max_queue_length_s=user_result.max_queue_length_south
+            max_queue_length_e=user_result.max_queue_length_east
+            max_queue_length_w=user_result.max_queue_length_west
+
+            score = compute_score_4directions(
+                run_id,
+                session_id,
+                user_result.avg_wait_time_north,
+                user_result.max_wait_time_north,
+                user_result.max_queue_length_north,
+                user_result.avg_wait_time_south,
+                user_result.max_wait_time_south,
+                user_result.max_queue_length_south,
+                user_result.avg_wait_time_east,
+                user_result.max_wait_time_east,
+                user_result.max_queue_length_east,
+                user_result.avg_wait_time_west,
+                user_result.max_wait_time_west,
+                user_result.max_queue_length_west
+            )
+        else:
+            avg_wait_time_n = 0
+            avg_wait_time_s = 0
+            avg_wait_time_e = 0
+            avg_wait_time_w = 0
+            max_wait_time_n = 0
+            max_wait_time_s = 0
+            max_wait_time_e = 0
+            max_wait_time_w = 0
+            max_queue_length_n = 0
+            max_queue_length_s = 0
+            max_queue_length_e = 0
+            max_queue_length_w = 0
+            score = 0.0
+
+        # Query algorithm leaderboard result.
+        algo_result = AlgorithmLeaderboardResult.query.filter_by(run_id=run_id, session_id=session_id).first()
+        if algo_result:
+            algorithm_metrics = {
+                "avg_wait_time_n": algo_result.avg_wait_time_north,
+                "avg_wait_time_s": algo_result.avg_wait_time_south,
+                "avg_wait_time_e": algo_result.avg_wait_time_east,
+                "avg_wait_time_w": algo_result.avg_wait_time_west,
+                "max_wait_time_n": algo_result.max_wait_time_north,
+                "max_wait_time_s": algo_result.max_wait_time_south,
+                "max_wait_time_e": algo_result.max_wait_time_east,
+                "max_wait_time_w": algo_result.max_wait_time_west,
+                "max_queue_length_n": algo_result.max_queue_length_north,
+                "max_queue_length_s": algo_result.max_queue_length_south,
+                "max_queue_length_e": algo_result.max_queue_length_east,
+                "max_queue_length_w": algo_result.max_queue_length_west,
+            }
+            algorithm_metrics["score"] = compute_score_4directions(
+                run_id,
+                session_id,
+                algorithm_metrics["avg_wait_time_n"],
+                algorithm_metrics["max_wait_time_n"],
+                algorithm_metrics["max_queue_length_n"],
+                algorithm_metrics["avg_wait_time_s"],
+                algorithm_metrics["max_wait_time_s"],
+                algorithm_metrics["max_queue_length_s"],
+                algorithm_metrics["avg_wait_time_e"],
+                algorithm_metrics["max_wait_time_e"],
+                algorithm_metrics["max_queue_length_e"],
+                algorithm_metrics["avg_wait_time_w"],
+                algorithm_metrics["max_wait_time_w"],
+                algorithm_metrics["max_queue_length_w"]
+            )
+        else:
+            algorithm_metrics = {
+                "avg_wait_time_n": 0, "avg_wait_time_s": 0, "avg_wait_time_e": 0, "avg_wait_time_w": 0,
+                "max_wait_time_n": 0, "max_wait_time_s": 0, "max_wait_time_e": 0, "max_wait_time_w": 0,
+                "max_queue_length_n": 0, "max_queue_length_s": 0, "max_queue_length_e": 0, "max_queue_length_w": 0,
+                "score": 0.0
+            }        
+
+        return render_template(
+            'results.html',
+            session_id=session_id,
+            run_id=run_id,
+            avg_wait_time_n=avg_wait_time_n,
+            avg_wait_time_s=avg_wait_time_s,
+            avg_wait_time_e=avg_wait_time_e,
+            avg_wait_time_w=avg_wait_time_w,
+            max_wait_time_n=max_wait_time_n,
+            max_wait_time_s=max_wait_time_s,
+            max_wait_time_e=max_wait_time_e,
+            max_wait_time_w=max_wait_time_w,
+            max_queue_length_n=max_queue_length_n,
+            max_queue_length_s=max_queue_length_s,
+            max_queue_length_e=max_queue_length_e,
+            max_queue_length_w=max_queue_length_w,
+            score=score,
+            spawn_rates=spawn_rates,
+            junction_settings=junction_settings,
+            traffic_light_settings=traffic_light_settings,
+            algorithm_metrics=algorithm_metrics
+        )
+
+    except Exception as e:        
+        print(f"❌ Error: {e}")
+        return jsonify({'error': str(e)}), 400    
 
 def get_latest_traffic_light_settings():
     """
@@ -1365,7 +1574,11 @@ def compute_score_4directions(
                   vehicle_input.west_right_vph)
     
     def directional_score(avg, max_w, queue, volume):
+        if volume == 0:
+            return 0
+
         weighted_score = (0.5 * avg) + (0.3 * max_w) + (0.2 * queue)
+
         return weighted_score / volume
 
     nb_score = directional_score(nb_avg, nb_max, nb_queue, north_total)

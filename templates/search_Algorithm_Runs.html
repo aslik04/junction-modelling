@@ -169,12 +169,10 @@
         </form>
     </div>
 
-    <div class="download-container">
-        <a href="{{ url_for('download_metrics_json') }}" style="font-size:2em; text-decoration:none;">⏬ Download all Run IDs ⏬</a>
-    </div>
-
     <div class="nav-container">
         <a class="nav-button" id="endBtn" href="/index">❌ End Session</a>
+        <a class="res-button" id="results" href="/back_to_results">🎉 Back to Results</a>
+        <a href="{{ url_for('download_metrics_json') }}">⏬ Download all Run IDs ⏬</a>
         <a class="nav-button" id="backBtn" href="/parameters">✅ Continue Session (Back to Inputs)</a>
     </div>
     <script>

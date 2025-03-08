@@ -7,13 +7,6 @@
     "id": "32a121c3-250e-41e8-918f-b6b23d863401",
     "name": "junc sim test random inputs",
     "commands": [{
-      "id": "cmd-while",
-      "comment": "Begin infinite loop",
-      "command": "while",
-      "target": "true",
-      "targets": [],
-      "value": ""
-    }, {
       "id": "cmd-open",
       "comment": "",
       "command": "open",
@@ -42,12 +35,12 @@
       ],
       "value": ""
     }, {
-      "id": "cmd-waitForNbForward",
-      "comment": "",
-      "command": "waitForElementPresent",
-      "target": "id=nb_forward",
+      "id": "cmd-while",
+      "comment": "Begin infinite loop",
+      "command": "while",
+      "target": "true",
       "targets": [],
-      "value": "5000"
+      "value": ""
     }, {
       "id": "cmd-exec-random-nb_forward",
       "comment": "Generate random number for nb_forward",
@@ -275,10 +268,45 @@
       "targets": [],
       "value": "${randomWbRight}"
     }, {
+      "id": "b3b3fc34-6d6f-4fd5-9f54-6c689bccdca3",
+      "comment": "Generate random number for pedestrian frequency",
+      "command": "executeScript",
+      "target": "return Math.floor(Math.random()*5);",
+      "targets": [],
+      "value": "randomLanes"
+    }, {
+      "id": "0b8327ce-6fc1-4c2d-b7e3-2cf503c04c0c",
+      "comment": "",
+      "command": "type",
+      "target": "id=lanes",
+      "targets": [
+        ["id=lanes", "id"],
+        ["name=lanes", "name"],
+        ["css=#lanes", "css:finder"],
+        ["xpath=//input[@id='lanes']", "xpath:attributes"],
+        ["xpath=//form[@id='parameterForm']/div/div[2]/div/input", "xpath:idRelative"],
+        ["xpath=//div/input", "xpath:position"]
+      ],
+      "value": "${randomLanes}"
+    }, {
+      "id": "5e5eccbb-5131-4982-83f7-6ddf33b8c216",
+      "comment": "",
+      "command": "click",
+      "target": "id=lanes",
+      "targets": [
+        ["id=lanes", "id"],
+        ["name=lanes", "name"],
+        ["css=#lanes", "css:finder"],
+        ["xpath=//input[@id='lanes']", "xpath:attributes"],
+        ["xpath=//form[@id='parameterForm']/div/div[2]/div/input", "xpath:idRelative"],
+        ["xpath=//div/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
       "id": "cmd-exec-random-ped_freq",
       "comment": "Generate random number for pedestrian frequency",
       "command": "executeScript",
-      "target": "return Math.floor(Math.random()*10);",
+      "target": "return Math.floor(Math.random()*5);",
       "targets": [],
       "value": "randomPedFreq"
     }, {
@@ -292,7 +320,7 @@
       "id": "cmd-exec-random-ped_dur",
       "comment": "Generate random number for pedestrian duration",
       "command": "executeScript",
-      "target": "return Math.floor(Math.random()*10);",
+      "target": "return Math.floor(Math.random() * 26) * 0.2;",
       "targets": [],
       "value": "randomPedDur"
     }, {
@@ -302,6 +330,27 @@
       "target": "id=pedestrian-duration",
       "targets": [],
       "value": "${randomPedDur}"
+    }, {
+      "id": "19678730-97d5-4b7b-9add-142bef587a02",
+      "comment": "",
+      "command": "click",
+      "target": "id=traffic-light-enable",
+      "targets": [
+        ["id=traffic-light-enable", "id"],
+        ["name=traffic-light-enable", "name"],
+        ["css=#traffic-light-enable", "css:finder"],
+        ["xpath=//input[@id='traffic-light-enable']", "xpath:attributes"],
+        ["xpath=//form[@id='parameterForm']/div/div[3]/div/input", "xpath:idRelative"],
+        ["xpath=//div[3]/div/input", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "484fcc32-5945-4a87-905a-ad38ffc62366",
+      "comment": "Generate random number for tl_sequences",
+      "command": "executeScript",
+      "target": "return Math.floor(Math.random()*5);",
+      "targets": [],
+      "value": "randomTlSequences"
     }, {
       "id": "1ecf960e-2405-43fe-b2ce-bf22cc7fd407",
       "comment": "",
@@ -329,7 +378,14 @@
         ["xpath=//form[@id='parameterForm']/div/div[3]/ul/li/input", "xpath:idRelative"],
         ["xpath=//div[3]/ul/li/input", "xpath:position"]
       ],
-      "value": "5"
+      "value": "${randomTlSequences}"
+    }, {
+      "id": "e50028a5-c1f3-43d5-aa73-2a2f4ea46fea",
+      "comment": "Generate random number for traffic sequence lengths",
+      "command": "executeScript",
+      "target": "var breaks = []; for (var i = 0; i < 3; i++) {     breaks.push(Math.floor(Math.random() * 61)); } breaks.sort(function(a,b){ return a - b; });  var v_main = breaks[0]; var v_right = breaks[1] - breaks[0]; var h_main = breaks[2] - breaks[1]; var h_right = 60 - breaks[2];  return [v_main, v_right, h_main, h_right];",
+      "targets": [],
+      "value": "trafficArray"
     }, {
       "id": "e2e38eb7-b2a3-4541-abfe-06aead3b5ab5",
       "comment": "",
@@ -368,7 +424,21 @@
         ["xpath=//form[@id='parameterForm']/div/div[3]/div[3]/ul/li/input", "xpath:idRelative"],
         ["xpath=//div[3]/div[3]/ul/li/input", "xpath:position"]
       ],
-      "value": "15"
+      "value": "${trafficArray[0]}"
+    }, {
+      "id": "c9530654-eb87-4a08-b1d9-349793d57d77",
+      "comment": "",
+      "command": "click",
+      "target": "id=tl_vright",
+      "targets": [
+        ["id=tl_hright", "id"],
+        ["name=tl_hright", "name"],
+        ["css=#tl_hright", "css:finder"],
+        ["xpath=//input[@id='tl_hright']", "xpath:attributes"],
+        ["xpath=//form[@id='parameterForm']/div/div[3]/div[5]/ul/li[2]/input", "xpath:idRelative"],
+        ["xpath=//div[5]/ul/li[2]/input", "xpath:position"]
+      ],
+      "value": ""
     }, {
       "id": "ad4ad756-438f-446f-a820-78dc4506425e",
       "comment": "",
@@ -382,7 +452,7 @@
         ["xpath=//form[@id='parameterForm']/div/div[3]/div[3]/ul/li[2]/input", "xpath:idRelative"],
         ["xpath=//div[3]/ul/li[2]/input", "xpath:position"]
       ],
-      "value": "15"
+      "value": "${trafficArray[1]}"
     }, {
       "id": "84000624-634d-4e5e-b28d-a314bc9d5946",
       "comment": "",
@@ -421,7 +491,7 @@
         ["xpath=//form[@id='parameterForm']/div/div[3]/div[5]/ul/li/input", "xpath:idRelative"],
         ["xpath=//div[5]/ul/li/input", "xpath:position"]
       ],
-      "value": "15"
+      "value": "${trafficArray[2]}"
     }, {
       "id": "f4f8fdad-9b77-4c56-b376-873d3e388c4b",
       "comment": "",
@@ -437,26 +507,19 @@
       ],
       "value": ""
     }, {
-      "id": "4fcbde78-3fc2-4d74-9fcf-62d86123c518",
+      "id": "369b5728-5e86-4de7-bf06-f38ae68ef3b5",
       "comment": "",
-      "command": "close",
-      "target": "",
-      "targets": [],
-      "value": ""
-    }, {
-      "id": "d7824168-d9ef-4a23-b2aa-a77af0a0459b",
-      "comment": "",
-      "command": "click",
-      "target": "id=traffic-light-enable",
+      "command": "type",
+      "target": "id=tl_hright",
       "targets": [
-        ["id=traffic-light-enable", "id"],
-        ["name=traffic-light-enable", "name"],
-        ["css=#traffic-light-enable", "css:finder"],
-        ["xpath=//input[@id='traffic-light-enable']", "xpath:attributes"],
-        ["xpath=//form[@id='parameterForm']/div/div[3]/div/input", "xpath:idRelative"],
-        ["xpath=//div[3]/div/input", "xpath:position"]
+        ["id=tl_hmain", "id"],
+        ["name=tl_hmain", "name"],
+        ["css=#tl_hmain", "css:finder"],
+        ["xpath=//input[@id='tl_hmain']", "xpath:attributes"],
+        ["xpath=//form[@id='parameterForm']/div/div[3]/div[5]/ul/li/input", "xpath:idRelative"],
+        ["xpath=//div[5]/ul/li/input", "xpath:position"]
       ],
-      "value": ""
+      "value": "${trafficArray[3]}"
     }, {
       "id": "cmd-click-start",
       "comment": "",
@@ -490,6 +553,55 @@
       "targets": [
         ["id=backBtn", "id"]
       ],
+      "value": ""
+    }, {
+      "id": "6ff79999-11db-43c2-83f9-6a0b0ab8592a",
+      "comment": "",
+      "command": "executeScript",
+      "target": "return Math.random() < 0.5;",
+      "targets": [],
+      "value": "shouldClose"
+    }, {
+      "id": "1b9b92d5-b8fa-4054-a28b-9a62bdcf881c",
+      "comment": "",
+      "command": "if",
+      "target": "${shouldClose} == true",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "901dab54-8f99-4d27-b65e-091948482193",
+      "comment": "",
+      "command": "open",
+      "target": "http://127.0.0.1:5000/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "6a20ac8d-8cb7-4687-8358-f9cf5770481d",
+      "comment": "",
+      "command": "setWindowSize",
+      "target": "654x672",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "bba088be-72fb-4307-9d8a-e820fa28e146",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Begin",
+      "targets": [
+        ["linkText=Begin", "linkText"],
+        ["css=.button", "css:finder"],
+        ["xpath=//a[contains(text(),'Begin')]", "xpath:link"],
+        ["xpath=//a[contains(@href, '/parameters')]", "xpath:href"],
+        ["xpath=//a", "xpath:position"],
+        ["xpath=//a[contains(.,'Begin')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "67ef2482-875c-4499-a7f5-b2a163e5a96a",
+      "comment": "",
+      "command": "end",
+      "target": "",
+      "targets": [],
       "value": ""
     }, {
       "id": "cmd-end-while",

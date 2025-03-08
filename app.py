@@ -460,7 +460,7 @@ def results():
     """
     
     try:
-        session_id = request.args.get('session_id', type=int)
+        session_id = global_session_id
 
         print(session_id)
 

@@ -25,7 +25,7 @@ class Car:
         """
         Initializes a Car object with its movement attributes and position based on the junction data.
         
-        Args:
+        Parameters:
             direction (Direction): The initial direction of the car (NORTH, EAST, SOUTH, WEST).
             lane (int): The lane in which the car is positioned (wot change from this).
             speed (float): The speed of the car (constant for all cars).

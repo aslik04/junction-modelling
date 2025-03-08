@@ -1,5 +1,7 @@
 """
-
+This module contains the logic for configuring traffic light sequence lengths based on client-provided inputs.
+It allows clients to fine-tune traffic signal timings, providing an alternative to the adaptive algorithm
+by enabling the discovery of potentially improved traffic light configurations tailored to specific conditions.
 """
 
 import json
@@ -9,20 +11,28 @@ from .enums import Direction, TrafficLightSignal
 
 class TrafficLightController:
     """
-    
+    Controls and manages traffic light states and sequences at a junction.
+    Handles main traffic signals, right turn signals, and pedestrian crossings.
+    Provides methods for updating settings, broadcasting states, and calculating timing cycles.
     """
     
     def __init__(self):
         """
-        
+        Initializes a new TrafficLightController instance.
+        Sets up initial state for traffic light sequences and timings.
+        Includes default states for main traffic lights, right turn signals, and pedestrian crossings.
+        All lights start in red/off state by default.
         """
 
         self.simulationSpeedMultiplier = 1.0
 
         self.use_default_traffic_settings = False
 
+        # Data about spawn rates, lanes etc
         self.vehicle_data = None
+        # Data about the clients chosen pedestrian data 
         self.junction_settings = None
+        # Data about the clients chosen traffic settings
         self.traffic_settings = None
 
         self.trafficLightStates: Dict[str, Dict[str, bool]] = {
@@ -46,6 +56,7 @@ class TrafficLightController:
             Direction.WEST.value:  {TrafficLightSignal.OFF.value: True, TrafficLightSignal.ON.value: False},
         }
 
+        # Store of clients chosen traffic light sequence lengths
         self.VERTICAL_SEQUENCE_LENGTH = 0
         self.HORIZONTAL_SEQUENCE_LENGTH = 0
         self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH = 0
@@ -68,7 +79,8 @@ class TrafficLightController:
 
     def update_traffic_settings(self, traffic_settings: Dict[str, Any], use_default: bool = False) -> None:
         """
-        
+        If Client decides to enable user traffic settings, we need to retrieve that configuration
+        and store it, so that we can rrun this data as a traffic loop.
         """
 
         self.traffic_settings = traffic_settings
@@ -92,14 +104,18 @@ class TrafficLightController:
 
     def update_vehicle_data(self, vehicle_data: Dict[str, Any]) -> None:
         """
-        
+        Updates vehicle data. 
+        Takes a dictionary of vehicle data as input and stores it in the controller.
+        This data can be used to inform traffic light timing decisions.
         """
 
         self.vehicle_data = vehicle_data
         
     def update_junction_settings(self, junction_settings: Dict[str, Any]) -> None:
         """
-        
+        Updates junction settings and pedestrian data.
+        Takes a dictionary of junction settings as input and updates internal configuration.
+        After updating settings, retrieves and sets new pedestrian frequency and duration values.
         """
 
         self.junction_settings = junction_settings
@@ -112,7 +128,7 @@ class TrafficLightController:
 
     def get_pedestrian_data(self) -> tuple:
         """
-        
+        Retrieve the clients chosen pedestrian configurations.
         """
 
         pedestrian_frequency = pedestrian_duration = 0
@@ -127,7 +143,8 @@ class TrafficLightController:
 
     def updateDerivedStates(self) -> None:
         """
-        
+        Ensures all lights turn off when a pedestrian light comes on, 
+        stopping all cars for safety of pedestrian walking
         """
 
         if any(self.pedestrianLightStates[d.value]["on"] for d in Direction):
@@ -144,7 +161,9 @@ class TrafficLightController:
 
     async def _broadcast_state(self) -> None:
         """
-        
+        Broadcasts the current traffic light states to connected clients.
+        Updates derived states and sends a JSON message containing all light states
+        through the registered broadcast callback if one exists.
         """
 
         self.updateDerivedStates()
@@ -164,7 +183,7 @@ class TrafficLightController:
 
     def get_cycle_times(self) -> tuple:
         """
-        
+        Returns the total time it takes for a vertical or horizonal sequence to complete
         """
 
         verticalCycleTime = (5 * self.gap) + self.VERTICAL_SEQUENCE_LENGTH + self.VERTICAL_RIGHT_TURN_SEQUENCE_LENGTH
@@ -175,7 +194,8 @@ class TrafficLightController:
 
     def get_max_gaps_per_minute(self) -> float:
         """
-        
+        Retrives the max amount of Pedestrian events 
+        we can fit in one hour based on clients traffic configurations.
         """
         
         verticalCycleTime, horizontalCycleTime = self.get_cycle_times()

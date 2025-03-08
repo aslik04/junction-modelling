@@ -14,7 +14,7 @@ def move_forward(car: Car) -> None:
     """
     Moves the car forward in its current direction by its speed.
     
-    Args:
+    Parameters:
         car (Car): The car to be moved.
     """
 
@@ -35,7 +35,7 @@ def move_left_turn(car: Car) -> None:
     """
     Handles a left turn for the car at an intersection, changing direction upon completion.
     
-    Args:
+    Parameters:
         car (Car): The car executing the left turn.
     """
 
@@ -97,7 +97,7 @@ def move_right_turn(car: Car) -> None:
     """
     Handles a right turn for the car using an incremental turn approach for smoother movement in the simulation.
     
-    Args:
+    Parameters:
         car (Car): The car executing the right turn.
     """
 
@@ -171,7 +171,7 @@ def update_vehicle(car: Car, traffic_lights: dict, right_turn_lights: dict, all_
     Ensures that vehicles stop at stop lines if necessary
     Adds the vehicle to the vehicle queue for simulation logic
     
-    Args:
+    Parameters:
         car (Car): The car to update.
         traffic_lights (dict): Dictionary containing traffic light states.
         right_turn_lights (dict): Dictionary containing right turn signal states.

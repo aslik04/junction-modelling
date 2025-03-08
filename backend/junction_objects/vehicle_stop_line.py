@@ -12,7 +12,7 @@ def get_stop_line(car: Car) -> float:
     Determines the stop line position for a given car based on its direction 
     along with a width of the stop line.
     
-    Args:
+    Parameters:
         car (Car): The car for which to calculate the stop line position.
     
     Returns:
@@ -45,7 +45,7 @@ def can_pass_stop_line(car: Car) -> bool:
     """
     Checks if a car can pass the stop line based on its direction and speed.
     
-    Args:
+    Parameters:
         car (Car): The car to check.
     
     Returns:
@@ -73,7 +73,7 @@ def stop_at_stop_line(car: Car) -> None:
     """
     Adjusts a car's position to stop at the stop line on the simulation.
     
-    Args:
+    Parameters:
         car (Car): The car to adjust.
     """
 
@@ -92,7 +92,7 @@ def has_crossed_line(car: Car) -> bool:
     """
     Determines whether a car has crossed the stop line.
     
-    Args:
+    Parameters:
         car (Car): The car to check.
     
     Returns:
@@ -121,7 +121,7 @@ def queue_vehicle(car: Car, all_cars: list) -> None:
     Manages vehicle queuing by ensuring a car maintains proper distance
     (same distance for all vehicles)from the vehicle ahead.
     
-    Args:
+    Parameters:
         car (Car): The car to be queued.
         all_cars (list): A list of all cars in the simulation.
     """

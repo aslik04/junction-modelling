@@ -1577,7 +1577,7 @@ def compute_score_4directions(
         if volume == 0:
             return 0
 
-        weighted_score = (0.5 * avg) + (0.3 * max_w) + (0.2 * queue)
+        weighted_score = (0.45 * avg) + (0.2 * max_w) + (0.35 * queue)
 
         return weighted_score / volume
 

@@ -65,7 +65,7 @@
         th, td {
             padding: 1.2vh;
             text-align: center;
-            font-size: 1.2vw;
+            font-size: 1.1vw;
         }
         th {
             background-color: #8da676;
@@ -183,8 +183,11 @@
                     <th>WB Avg Wait (s)</th>
                     <th>WB Max Wait (s)</th>
                     <th>WB Max Queue</th>
+                    <!-- User and Algorithm Score -->
+                    <th>Algorithm Score</th>
+                    <th>User Score</th>
                     <!-- Score Difference -->
-                    <th>Score Diff</th>
+                    <th>Overall Score Difference</th>
                 </tr>
             </thead>
             <tbody>
@@ -208,6 +211,8 @@
                         <td>{{ result.avg_wait_time_west|round(2) }}</td>
                         <td>{{ result.max_wait_time_west|round(2) }}</td>
                         <td>{{ result.max_queue_length_west }}</td>
+                        <td>{{ result.algorithm_score|round(5) }}</td>
+                        <td>{{ result.user_score|round(5) }}</td>
                         <!-- Score Difference -->
                         <td>{{ result.score_difference|round(5) }}</td>
                     </tr>

@@ -1656,6 +1656,9 @@ def get_recent_runs_with_scores(session_id):
             "wb_max_wait": ur.max_wait_time_west,
             "wb_max_queue": ur.max_queue_length_west,
 
+            "user_score": user_final_score,
+            "algorithm_score": algorithm_final_score,
+
             "score": final_score
         })
 

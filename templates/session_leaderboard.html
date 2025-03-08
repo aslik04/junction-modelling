@@ -188,8 +188,11 @@
                     <th>WB Avg Wait (s)</th>
                     <th>WB Max Wait (s)</th>
                     <th>WB Max Queue</th>
+                    <!-- User and Algorithm Score -->
+                    <th>Algorithm Score</th>
+                    <th>User Score</th>
                     <!-- Overall Score -->
-                    <th>Score Difference</th>
+                    <th>Overall Score Difference</th>
                 </tr>
             </thead>
             <tbody>
@@ -220,6 +223,8 @@
                         <td>{{ run.wb_avg_wait|round|int }}</td>
                         <td>{{ run.wb_max_wait|round|int }}</td>
                         <td>{{ run.wb_max_queue|round|int }}</td>
+                        <td>{{ run.algorithm_score|round(5) }}</td>
+                        <td>{{ run.user_score|round(5) }}</td>
                         <!-- Score -->
                         <td>{{ run.score|round(5) }}</td>
                     </tr>

@@ -459,47 +459,60 @@ async def update_car_loop():
                 c.spawn_time = simulationTime
             if not hasattr(c, 'wait_recorded'):
                 c.wait_recorded = False
+            if not hasattr(c, 'prev_wait_time'):
+                c.prev_wait_time = 0
 
-            if not c.wait_recorded:
-                if c.inital_direction == "north":
+            if c.inital_direction == "north":
+                if not c.wait_recorded:
+                    wait_count_n += 1
+                    c.wait_recorded = True
+                if not has_crossed_line(c):
+                    wait_time = simulationTime - c.spawn_time
+                    if wait_time > max_wait_time_n:
+                        max_wait_time_n = wait_time
+                    total_wait_time_n -= c.prev_wait_time
+                    total_wait_time_n += wait_time
                     north_waiting_count += 1
-                    if has_crossed_line(c):
-                        wait_time = simulationTime - c.spawn_time
-                        if wait_time > max_wait_time_n:
-                            max_wait_time_n = wait_time
-                        total_wait_time_n += wait_time
-                        wait_count_n += 1
-                        c.wait_recorded = True
+                c.prev_wait_time = wait_time
 
-                elif c.inital_direction == "south":
+            elif c.inital_direction == "south":
+                if not c.wait_recorded:
+                    wait_count_s += 1
+                    c.wait_recorded = True
+                if not has_crossed_line(c):
+                    wait_time = simulationTime - c.spawn_time
+                    if wait_time > max_wait_time_s:
+                        max_wait_time_s = wait_time
+                    total_wait_time_s -= c.prev_wait_time
+                    total_wait_time_s += wait_time
                     south_waiting_count += 1
-                    if has_crossed_line(c):
-                        wait_time = simulationTime - c.spawn_time
-                        if wait_time > max_wait_time_s:
-                            max_wait_time_s = wait_time
-                        total_wait_time_s += wait_time
-                        wait_count_s += 1
-                        c.wait_recorded = True
+                c.prev_wait_time = wait_time
 
-                elif c.inital_direction == "east":
+            elif c.inital_direction == "east":
+                if not c.wait_recorded:
+                    wait_count_e += 1
+                    c.wait_recorded = True
+                if not has_crossed_line(c):
+                    wait_time = simulationTime - c.spawn_time
+                    if wait_time > max_wait_time_e:
+                        max_wait_time_e = wait_time
+                    total_wait_time_e -= c.prev_wait_time
+                    total_wait_time_e += wait_time
                     east_waiting_count += 1
-                    if has_crossed_line(c):
-                        wait_time = simulationTime - c.spawn_time
-                        if wait_time > max_wait_time_e:
-                            max_wait_time_e = wait_time
-                        total_wait_time_e += wait_time
-                        wait_count_e += 1
-                        c.wait_recorded = True
+                c.prev_wait_time = wait_time
 
-                elif c.inital_direction == "west":
+            elif c.inital_direction == "west":
+                if not c.wait_recorded:
+                    wait_count_w += 1
+                    c.wait_recorded = True
+                if not has_crossed_line(c):
+                    wait_time = simulationTime - c.spawn_time
+                    if wait_time > max_wait_time_w:
+                        max_wait_time_w = wait_time
+                    total_wait_time_w -= c.prev_wait_time
+                    total_wait_time_w += wait_time
                     west_waiting_count += 1
-                    if has_crossed_line(c):
-                        wait_time = simulationTime - c.spawn_time
-                        if wait_time > max_wait_time_w:
-                            max_wait_time_w = wait_time
-                        total_wait_time_w += wait_time
-                        wait_count_w += 1
-                        c.wait_recorded = True
+                c.prev_wait_time = wait_time
 
         max_queue_length_n = max(max_queue_length_n, north_waiting_count)
         max_queue_length_s = max(max_queue_length_s, south_waiting_count)

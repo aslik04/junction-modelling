@@ -1,41 +1,41 @@
 {
   "vehicle_settings": {
     "north": {
-      "forward": 182,
-      "turning_left": 154,
-      "turning_right": 148
+      "forward": 90,
+      "turning_left": 32,
+      "turning_right": 10
     },
     "east": {
-      "forward": 178,
-      "turning_left": 159,
-      "turning_right": 163
+      "forward": 85,
+      "turning_left": 63,
+      "turning_right": 35
     },
     "south": {
-      "forward": 188,
-      "turning_left": 166,
-      "turning_right": 152
+      "forward": 15,
+      "turning_left": 8,
+      "turning_right": 9
     },
     "west": {
-      "forward": 176,
-      "turning_left": 161,
-      "turning_right": 157
+      "forward": 49,
+      "turning_left": 62,
+      "turning_right": 31
     }
   },
   "junction_settings": {
-    "number_of_lanes": 2,
-    "pedestrian_frequency": 2,
-    "pedestrian_duration": 4
+    "number_of_lanes": 4,
+    "pedestrian_frequency": 3,
+    "pedestrian_duration": 3
   },
   "traffic_light_settings": {
     "enabled": true,
     "traffic_cycles": 4,
     "vertical_sequence": {
-      "main_green_length": 32,
-      "right_green_length": 26
+      "main_green_length": 15,
+      "right_green_length": 10
     },
     "horizontal_sequence": {
-      "main_green_length": 31,
-      "right_green_length": 25
+      "main_green_length": 25,
+      "right_green_length": 10
     }
   }
 }

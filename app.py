@@ -1254,7 +1254,7 @@ def get_all_time_best_configurations():
 
     results_with_scores.sort(key=lambda x: x["score_difference"], reverse=True)
 
-    return results_with_scores
+    return results_with_scores[:10]
 
 
 @app.route('/session_leaderboard')

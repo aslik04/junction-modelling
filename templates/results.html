@@ -225,7 +225,7 @@
       <!-- User Results Box -->
       <div class="results-box" id="userResultsBox">
         <h2>User Results</h2>
-        <div class="score-header">Overall Score: {{ score|round(5) }}</div>
+        <div class="score-header">Overall Score: {{ score|round(3) }}</div>
         <table class="resultsTable">
           <thead>
             <tr>
@@ -266,7 +266,7 @@
       <!-- Algorithm Results Box -->
       <div class="results-box" id="algoResultsBox">
         <h2>Algorithm Results</h2>
-        <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(5) }}</div>
+        <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(3) }}</div>
         <table class="resultsTable">
           <thead>
             <tr>
@@ -308,7 +308,7 @@
       <!-- When user traffic is not enabled, only display the algorithm box spanning full width -->
       <div class="results-box full-width" id="algoResultsBox">
         <h2>Algorithm Results</h2>
-        <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(5) }}</div>
+        <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(3) }}</div>
         <table class="resultsTable">
           <thead>
             <tr>

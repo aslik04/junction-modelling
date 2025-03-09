@@ -7,10 +7,8 @@
 </head>
 <body>
   <div class="main-container">
-    <!-- Top: Time Simulated -->
     <div id="timeSimulated">Time Simulated: 0h 0m</div>
 
-    <!-- Middle row: [Back] [Junction Container] [End] -->
     <div class="junction-row">
       <button class="sim-button" id="backBtn" onclick="window.location.href='/parameters';">Back</button>
       <div id="junctionContainer">
@@ -19,7 +17,6 @@
       <button class="sim-button" id="endBtn">End</button>
     </div>
 
-    <!-- Bottom: Speed container with label & slider -->
     <div class="speed-container">
       <div id="speedLabel">Simulation Speed (1)</div>
       <div id="sliderBox">
@@ -40,7 +37,6 @@
     </div>
   </div>
 
-  <!-- Load main.js to animate the junction -->
   <script type="module" src="../frontend/main.js"></script>
   <script src="{{ url_for('static', filename='js/junctionPage.js') }}"></script>
 </body>

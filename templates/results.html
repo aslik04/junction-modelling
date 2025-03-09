@@ -12,32 +12,24 @@
   <div id="resultsHeader">🎉 Results for Run: {{ run_id }} in Session: {{ session_id }}🎉</div>
 
   {% if traffic_light_settings.enabled %}
-  <!-- Only show the score difference if user traffic is enabled -->
   <div id="scoreComparison">
     Overall Score Difference:
     <span id="scoreDiff"></span>
   </div>
   {% endif %}
-  <!-- Needed to include as it wasnt working in results.js -->
   <script>
-    // Parse the score values (ensure they are numeric)
     const algorithmScore = parseFloat("{{ algorithm_metrics.score }}");
     const userScore = parseFloat("{{ score }}");
     const scoreSpan = document.getElementById('scoreDiff');
     if (scoreSpan) {
-      // Calculate the difference
       const diff = (algorithmScore - userScore).toFixed(3);
-      // Update the text and set its color based on the value
       scoreSpan.textContent = diff;
       scoreSpan.style.color = diff >= 0 ? 'green' : 'red';
     }
   </script>
 
-  <!-- Big Results Container -->
   <div id="resultsPairContainer">
     {% if traffic_light_settings.enabled %}
-    <!-- When user traffic is enabled, display both boxes side by side -->
-    <!-- User Results Box -->
     <div class="results-box" id="userResultsBox">
       <h2>User Results</h2>
       <div id="user_score" class="score-header">Overall Score: {{ score|round(3) }}</div>
@@ -78,7 +70,6 @@
         </tbody>
       </table>
     </div>
-    <!-- Algorithm Results Box -->
     <div class="results-box" id="algoResultsBox">
       <h2>Algorithm Results</h2>
       <div id="algo_score" class="score-header">Overall Score: {{ algorithm_metrics.score|round(3) }}</div>
@@ -120,7 +111,6 @@
       </table>
     </div>
     {% else %}
-    <!-- When user traffic is not enabled, only display the algorithm box spanning full width -->
     <div class="results-box full-width" id="algoResultsBox">
       <h2>Algorithm Results</h2>
       <div class="score-header">Overall Score: {{ algorithm_metrics.score|round(3) }}</div>
@@ -164,9 +154,7 @@
     {% endif %}
   </div>
 
-  <!-- Parameters Container -->
   <div id="paramsContainer">
-    <!-- Configurable Parameters -->
     <div class="param-box config-box">
       <h2 id="configHeading" class="dropdown-heading" data-target="configContent">
         <span class="symbol">—</span> Vehicle Settings
@@ -184,7 +172,6 @@
         </ul>
       </div>
     </div>
-    <!-- Junction Settings -->
     <div class="param-box junction-box">
       <h2 id="junctionHeading" class="dropdown-heading" data-target="junctionContent">
         <span class="symbol">—</span> Junction Settings
@@ -197,7 +184,6 @@
         </ul>
       </div>
     </div>
-    <!-- Traffic Light Settings -->
     <div class="param-box traffic-box">
       <h2 id="trafficHeading" class="dropdown-heading" data-target="trafficContent">
         <span class="symbol">—</span> Traffic Light Settings
@@ -218,7 +204,6 @@
     </div>
   </div>
 
-  <!-- Navigation Section -->
   <div class="nav-container">
     <a class="res-button" id="backBtn" href="/parameters">🏠 Back to Inputs</a>
     <a class="res-button" id="searchRunsBtn" href="/search_Algorithm_Runs">🔍 Search Algorithm Runs</a>
@@ -226,9 +211,6 @@
     <a class="res-button" href="/session_leaderboard">📊 See User Session Leaderboard</a>
   </div>
 
-
-
-  <!-- Tutorial Popup and Button -->
   <div id="tutorial-popup">
     <div id="tutorial-popup-content">
       <span id="tutorial-close">&times;</span>
@@ -281,8 +263,6 @@
         tutorialClose.addEventListener('click', function() {
             tutorialPopup.style.display = 'none';
         });
-        
-        // Close the popup when clicking outside of the content area
         tutorialPopup.addEventListener('click', function(e) {
             if(e.target === tutorialPopup) {
                 tutorialPopup.style.display = 'none';

@@ -260,7 +260,6 @@ async def run_adaptive_traffic_loop(controller, cars: list, gap: float = 0.005) 
     Right Turn Management:
     - Processes dedicated right turn phases for both vertical and horizontal approaches
     - Activates when vehicles are queued for right turns
-    - Maintains fixed duration (3.0s) for right turn phases
     
     Pedestrian Crossing System:
     - Implements probabilistic pedestrian event generation
@@ -281,14 +280,15 @@ async def run_adaptive_traffic_loop(controller, cars: list, gap: float = 0.005) 
     max_green = 20
     k = 2.0
     transition_time = gap_time = gap
-    right_turn_duration = 3.0
     smoothing_alpha = 0.1
     smoothed_vertical = min_green
     smoothed_horizontal = min_green
+    smoothed_vertical_right = min_green
+    smoothed_horizontal_right = min_green
     loop = asyncio.get_event_loop()
-    minute_start = loop.time()
-    events_this_minute = 0
-    gaps_this_minute = 0
+
+    print(controller.pedestrianPerMinute)
+    print(controller.pedestrianDuration)
     
     while True:
         sim_speed = controller.simulationSpeedMultiplier
@@ -300,12 +300,10 @@ async def run_adaptive_traffic_loop(controller, cars: list, gap: float = 0.005) 
         desired_horizontal = nonlinear_green(horizontal_count, min_green, max_green, k) if horizontal_count > 0 else 0
         smoothed_vertical = (1 - smoothing_alpha) * smoothed_vertical + smoothing_alpha * desired_vertical
         smoothed_horizontal = (1 - smoothing_alpha) * smoothed_horizontal + smoothing_alpha * desired_horizontal
-        now = loop.time()
-        
-        if now - minute_start >= 60:
-            minute_start = now
-            events_this_minute = 0
-            gaps_this_minute = 0
+        desired_vertical_right = nonlinear_green(vertical_right_count, min_green, max_green, k) if vertical_right_count > 0 else 0
+        desired_horizontal_right = nonlinear_green(horizontal_right_count, min_green, max_green, k) if horizontal_right_count > 0 else 0
+        smoothed_vertical_right = (1 - smoothing_alpha) * smoothed_vertical_right + smoothing_alpha * desired_vertical_right  
+        smoothed_horizontal_right = (1 - smoothing_alpha) * smoothed_horizontal_right + smoothing_alpha * desired_horizontal_right
         
         if smoothed_vertical > 0:
         
@@ -321,7 +319,7 @@ async def run_adaptive_traffic_loop(controller, cars: list, gap: float = 0.005) 
         
         if vertical_right_count > 0:
         
-            await run_right_turn_phase(controller, ["north", "south"], right_turn_duration, sim_speed, transition_time)
+            await run_right_turn_phase(controller, ["north", "south"], smoothed_vertical_right, sim_speed, transition_time)
         
         else:
         
@@ -341,28 +339,18 @@ async def run_adaptive_traffic_loop(controller, cars: list, gap: float = 0.005) 
         
         if horizontal_right_count > 0:
         
-            await run_right_turn_phase(controller, ["east", "west"], right_turn_duration, sim_speed, transition_time)
+            await run_right_turn_phase(controller, ["east", "west"], smoothed_horizontal_right, sim_speed, transition_time)
         
         else:
         
             await asyncio.sleep(gap_time / sim_speed)
         
-        gaps_this_minute += 2
-        now = loop.time()
-        
-        if now - minute_start >= 60:
-        
-            minute_start = now
-            events_this_minute = 0
-            gaps_this_minute = 0
-        
-        remaining_gaps = (2 * 60) - gaps_this_minute
-        remaining_events = controller.pedestrianPerMinute - events_this_minute
-        p_gap = (remaining_events / remaining_gaps) if remaining_gaps > 0 else 0
+        p_gap = controller.pedestrianPerMinute / 10.0
+
+        p_gap = min(p_gap, 1.0)
         
         if random.random() < p_gap:
-        
             await run_pedestrian_event(controller)
-            events_this_minute += 1
+
         
         await asyncio.sleep(gap_time / sim_speed)

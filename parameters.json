@@ -23,15 +23,15 @@
   },
   "junction_settings": {
     "number_of_lanes": 4,
-    "pedestrian_frequency": 3,
-    "pedestrian_duration": 3
+    "pedestrian_frequency": 9,
+    "pedestrian_duration": 5
   },
   "traffic_light_settings": {
     "enabled": true,
     "traffic_cycles": 4,
     "vertical_sequence": {
-      "main_green_length": 15,
-      "right_green_length": 10
+      "main_green_length": 0,
+      "right_green_length": 0
     },
     "horizontal_sequence": {
       "main_green_length": 25,

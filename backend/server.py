@@ -887,18 +887,26 @@ async def on_startup():
     global simulation_running, default_traffic_loop_task
     simulation_running = True
 
-    if trafficLightSettings and trafficLightSettings.get("traffic-light-enable", False):
-        # Use dynamic traffic light timing if enabled in settings
-        default_traffic_loop_task = asyncio.create_task(run_traffic_loop(traffic_light_logic))
-
-    else:
-        # Otherwise use adaptive traffic light control
-        default_traffic_loop_task = asyncio.create_task(run_adaptive_traffic_loop(traffic_light_logic, cars, 1.0))
+    default_traffic_loop_task = asyncio.create_task(run_traffic_loop_wrapper())
 
     # Start core simulation loops
     asyncio.create_task(spawn_car_loop())
     asyncio.create_task(update_car_loop())
     asyncio.create_task(update_simulation_time())
+
+async def run_traffic_loop_wrapper():
+    # Wait until the clients chosen traffic settings are either enabled or disabled
+    while not trafficLightSettings:
+        await asyncio.sleep(0.1)  
+    
+    # Once users chosen settings are available, start the proper traffic loop
+    if trafficLightSettings.get("traffic-light-enable", False):
+        print("using user")
+        await run_traffic_loop(traffic_light_logic)
+    else:
+        print("using algo")
+        await run_adaptive_traffic_loop(traffic_light_logic, cars, 1.0)
+
 
 if __name__ == "__main__":
     # Start the FastAPI server on host 0.0.0.0 (all available network interfaces) and port 8000

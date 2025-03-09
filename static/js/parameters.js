@@ -266,6 +266,7 @@
     });
     document.addEventListener('DOMContentLoaded', function () {
       const pedestrianDurationInput = document.getElementById("pedestrian-duration");
+      localStorage.clear()
       // Check if a value exists in localStorage
       const storedDuration = localStorage.getItem("pedestrianDuration");
       if (storedDuration !== null) {

@@ -10,8 +10,8 @@ function equalizeDropdownHeights() {
     });
     }
 
-    // Toggle function for a given heading and its target content
-    function toggleDropdown(headingId, contentId) {
+// Toggle function for a given heading and its target content
+function toggleDropdown(headingId, contentId) {
     const heading = document.getElementById(headingId);
     const content = document.getElementById(contentId);
     if (content.style.display === "block") {
@@ -23,9 +23,9 @@ function equalizeDropdownHeights() {
         heading.querySelector('.symbol').textContent = "|";
     }
     equalizeDropdownHeights();
-    }
+}
 
-    document.getElementById("backBtn").addEventListener("click", async () => {
+document.getElementById("backBtn").addEventListener("click", async () => {
     console.log("Back button clicked. Stopping FastAPI...");
 
     try {
@@ -42,40 +42,40 @@ function equalizeDropdownHeights() {
     } catch (error) {
         console.error("❌ Error sending stop request:", error);
     }
-    });
+});
 
-    // Attach event listeners for all dropdown headings
-    document.getElementById("configHeading").addEventListener("click", function () {
+// Attach event listeners for all dropdown headings
+document.getElementById("configHeading").addEventListener("click", function () {
     toggleDropdown("configHeading", "configContent");
-    });
-    document.getElementById("junctionHeading").addEventListener("click", function () {
+});
+document.getElementById("junctionHeading").addEventListener("click", function () {
     toggleDropdown("junctionHeading", "junctionContent");
-    });
-    document.getElementById("trafficHeading").addEventListener("click", function () {
+});
+document.getElementById("trafficHeading").addEventListener("click", function () {
     toggleDropdown("trafficHeading", "trafficContent");
-    });
-    document.getElementById("defaultTrafficHeading").addEventListener("click", function () {
+});
+document.getElementById("defaultTrafficHeading").addEventListener("click", function () {
     toggleDropdown("defaultTrafficHeading", "defaultTrafficContent");
-    });
+});
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
     const tutorialButton = document.getElementById('tutorial-button');
     const tutorialPopup = document.getElementById('tutorial-popup');
     const tutorialClose = document.getElementById('tutorial-close');
-
-    tutorialButton.addEventListener('click', function () {
+    
+    tutorialButton.addEventListener('click', function() {
         tutorialPopup.style.display = 'block';
     });
-
-    tutorialClose.addEventListener('click', function () {
+    
+    tutorialClose.addEventListener('click', function() {
         tutorialPopup.style.display = 'none';
     });
-
+    
     // Close the popup when clicking outside of the content area
-    tutorialPopup.addEventListener('click', function (e) {
-        if (e.target === tutorialPopup) {
-        tutorialPopup.style.display = 'none';
+    tutorialPopup.addEventListener('click', function(e) {
+        if(e.target === tutorialPopup) {
+            tutorialPopup.style.display = 'none';
         }
     });
-    });
+});
 

@@ -1,9 +1,3 @@
-// Redirect to the configuration details page when row is clicked
-function handleRowClick(row) {
-    const runId = row.getElementsByTagName("td")[1].innerText;
-    window.location.href = "/junction_details?run_id=" + runId + "&session_id={{session_id}}";
-}
-
 document.getElementById("backBtn").addEventListener("click", async () => {
     console.log("Back button clicked. Stopping FastAPI...");
     try {
@@ -14,10 +8,10 @@ document.getElementById("backBtn").addEventListener("click", async () => {
             // Redirect back to the parameters page
             window.location.href = "/parameters";
         } else {
-            console.error("❌ Error stopping FastAPI:", stopData.error);
+            console.error("Error stopping FastAPI:", stopData.error);
         }
     } catch (error) {
-        console.error("❌ Error sending stop request:", error);
+        console.error("Error sending stop request:", error);
     }
 });
 
@@ -31,10 +25,10 @@ document.getElementById("endBtn").addEventListener("click", async () => {
             // Redirect back to the index page
             window.location.href = "/index";
         } else {
-            console.error("❌ Error stopping FastAPI:", stopData.error);
+            console.error("Error stopping FastAPI:", stopData.error);
         }
     } catch (error) {
-        console.error("❌ Error sending stop request:", error);
+        console.error("Error sending stop request:", error);
     }
 });
 

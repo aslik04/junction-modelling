@@ -99,5 +99,11 @@
     </div>
     <div id="tutorial-button">?</div>
     <script src="{{ url_for('static', filename='js/algorithm_session_leaderboard.js') }}"></script>
+    <script>
+        function handleRowClick(row) {
+            const runId = row.getElementsByTagName("td")[1].innerText;
+            window.location.href = "/junction_details?run_id=" + runId + "&session_id={{session_id}}"
+        }
+    </script>
 </body>
 </html>

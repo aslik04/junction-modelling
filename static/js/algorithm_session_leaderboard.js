@@ -1,9 +1,3 @@
-// Redirect to the configuration details page when row is clicked
-function handleRowClick(row) {
-    const runId = row.getElementsByTagName("td")[1].innerText;
-    window.location.href = "/junction_details?run_id=" + runId + "&session_id={{session_id}}";
-}
-
 document.getElementById("backBtn").addEventListener("click", async () => {
     console.log("Back button clicked. Stopping FastAPI...");
 

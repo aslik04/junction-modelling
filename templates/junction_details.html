@@ -80,9 +80,9 @@
           </tbody>
         </table>
       </div>
-      {% else %}
+      {% endif %}
       <!-- Algorithm Results Box -->
-      <div class="results-box full-width">
+      <div class="results-box {% if not traffic_light_settings.enabled %}full-width{% endif %}">
         <h2>Algorithm Results</h2>
         <div class="score-header">
           Overall Score: {{ algorithm_metrics.score|round(5) }}
@@ -124,7 +124,6 @@
           </tbody>
         </table>
       </div>
-      {% endif %}
     </div>
   {% endif %}
 

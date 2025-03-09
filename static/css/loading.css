@@ -1,0 +1,40 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f8f5e9;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.loading-text {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #8da676;
+}
+.loading-emoji {
+    font-size: 4rem;
+    animation: bounce 1s infinite;
+}
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #8da676;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}

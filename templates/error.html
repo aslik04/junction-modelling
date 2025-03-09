@@ -4,59 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Invalid File Uploaded</title>
-  <style>
-    /* Load SF Pro font at normal weight */
-    @font-face {
-        font-family: 'SF Pro';
-        src: url("{{ url_for('static', filename='fonts/SF-Pro.ttf') }}") format('truetype');
-        font-style: normal;
-    }
-
-    /* Style applied to the whole page */
-    body {
-      background-color: #a2bf89; /* Green background */
-      font-family: 'SF Pro', sans-serif;
-      font-weight: 400; /* Normal weight everywhere */
-      color: #f8f5e9;
-      display: flex;
-      flex-direction: column;
-      justify-content: center; /* Center vertically */
-      align-items: center; /* Center horizontally */
-      height: 100vh;
-      margin: 0;
-    }
-
-    /* Main container to manage vertical space */
-    .main-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-
-    /* Large error message styling */
-    .error-message {
-      font-size: 4rem; /* Adjust as needed for "large" text */
-      margin-bottom: 2rem;
-    }
-
-    /* Button styling based on the provided CSS */
-    .upload-button {
-      width: 35vh;
-      padding: 1vh 2vh;
-      background-color: #f8f5e9;
-      color: #a2bf89;
-      border: none;
-      border-radius: 6vh;
-      cursor: pointer;
-      font-size: 3vh;
-      margin: 3vh auto 0; /* Centering the button */
-      display: block;
-      font-weight: bold;
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/error.css') }}">
 </head>
 <body>
   <div class="main-container">

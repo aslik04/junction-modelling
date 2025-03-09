@@ -63,6 +63,10 @@ h1 {
   width: 48%;
 }
 
+.full-width {
+  width: 100%;
+}
+
 .results-box h2 {
   font-size: 2.5vh;
   color: #8da676;

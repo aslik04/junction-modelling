@@ -36,6 +36,7 @@
 
 
     <div id="resultsPairContainer">
+      {% if traffic_light_settings.enabled %}
       <!-- User Results Box -->
       <div class="results-box">
         <h2>User Results</h2>
@@ -79,9 +80,9 @@
           </tbody>
         </table>
       </div>
-
+      {% else %}
       <!-- Algorithm Results Box -->
-      <div class="results-box">
+      <div class="results-box full-width">
         <h2>Algorithm Results</h2>
         <div class="score-header">
           Overall Score: {{ algorithm_metrics.score|round(5) }}
@@ -123,6 +124,7 @@
           </tbody>
         </table>
       </div>
+      {% endif %}
     </div>
   {% endif %}
 

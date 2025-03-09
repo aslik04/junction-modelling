@@ -1,4 +1,3 @@
-/* Load SF Pro font at normal weight */
 @font-face {
     font-family: 'SF Pro';
     src: url("{{ url_for('static', filename='fonts/SF-Pro.ttf') }}") format('truetype');
@@ -6,7 +5,6 @@
     font-weight: 400;
 }
 
-/* Reset & base styles */
 * {
     margin: 0;
     padding: 0;
@@ -17,80 +15,70 @@ html,
 body {
     width: 100%;
     height: 100%;
-    /* Allow vertical scroll so we can see Start button when dropdowns expand */
     overflow-x: hidden;
     overflow-y: auto;
 }
 
 body {
-    background-color: #a2bf89; /* Green background */
+    background-color: #a2bf89;
     font-family: 'SF Pro', sans-serif;
-    font-weight: 400; /* Normal weight everywhere */
+    font-weight: 400;
     color: #6b6b6b;
     display: flex;
     flex-direction: column;
 }
 
-/* Main container to manage vertical space */
 .main-container {
-    flex: 1; /* Take remaining vertical space */
+    flex: 1;
     display: flex;
     flex-direction: column;
 }
 
-/* Header: left-aligned heading with top margin */
 .header {
-    margin: 4vh 5vh 0 5vh; /* 4vh top, 5vh sides, 0 bottom */
+    margin: 4vh 5vh 0 5vh;
 }
 
 .header h1 {
     color: #f8f5e9;
     font-size: 4vh;
-    text-align: left; /* left-aligned */
+    text-align: left;
 }
 
-/* Content area for top row + bottom box */
 .content {
-    /* Make all outer margins and gaps consistent */
-    margin: 4vh 5vh; 
+    margin: 4vh 5vh;
     display: flex;
     flex-direction: column;
-    gap: 2vh; /* vertical gap between top row & bottom box */
+    gap: 2vh;
     flex: 1;
 }
 
-/* Top row: three side-by-side boxes, same size */
 .top-row {
     display: flex;
-    gap: 2vh; /* uniform gap */
-    align-items: stretch; /* ensure equal height boxes */
-    flex: 1; /* let top row grow in height */
+    gap: 2vh;
+    align-items: stretch;
+    flex: 1;
 }
 
-/* Boxes (all top boxes + bottom) */
 .box,
 .bottom-box {
     background-color: #f8f5e9;
-    border-radius: 1.2vh; /* more rounding */
+    border-radius: 1.2vh;
     padding: 2vh;
     display: flex;
     flex-direction: column;
 }
 
-/* Let each top box flex equally */
 .box {
-    flex: 1; 
-    min-height: 0; /* let flex container control the height */
+    flex: 1;
+    min-height: 0;
 }
 
-/* Titles inside the boxes */
 .box h2 {
     color: #8da676;
     font-size: 2vh;
     margin-bottom: 2vh;
 }
 
-/* Dropdown headings */
 .dropdown-heading {
     cursor: pointer;
     font-weight: 400;
@@ -107,7 +95,6 @@ body {
     font-weight: bold;
 }
 
-/* Drop-down content hidden by default */
 .dropdown-content {
     display: none;
     margin-left: 1vh;
@@ -140,7 +127,6 @@ body {
     border-radius: 4px;
 }
 
-/* Traffic Light Settings list */
 .traffic-light-settings {
     list-style: none;
     padding: 0;
@@ -155,16 +141,14 @@ body {
     width: 100%;
 }
 
-/* Ensure all labels have the same width so text aligns */
 .traffic-light-settings li label {
-    flex: 0 0 20vh; /* Set a fixed width for labels */
+    flex: 0 0 20vh;
     text-align: left;
     font-size: 1.5vh;
 }
 
-/* Ensure all input fields have the same width */
 .traffic-light-settings li input {
-    flex: 0 0 5vh; /* Set a fixed width for all input fields */
+    flex: 0 0 5vh;
     padding: 0.5vh 1vh;
     font-size: 1.25vh;
     border: 1px solid #ccc;
@@ -172,13 +156,11 @@ body {
     text-align: center;
 }
 
-/* Force a width on all number inputs in traffic-light-settings-sub */
 .traffic-light-settings li input[type="number"] {
-    width: 7vh; /* or 80px, or whatever you prefer */
-    max-width: 8em; /* optional max width if you want to cap it */
+    width: 7vh;
+    max-width: 8em;
 }
 
-/* Slider container (Number of lanes) */
 .slider-container {
     margin: 2vh 0;
 }
@@ -194,7 +176,6 @@ body {
     width: 80%;
 }
 
-/* Numbers below the slider */
 .slider-values {
     display: flex;
     justify-content: space-between;
@@ -206,7 +187,6 @@ body {
     font-size: 1.25vh;
 }
 
-/* Checkbox container */
 .checkbox-container {
     display: flex;
     align-items: center;
@@ -218,21 +198,18 @@ body {
     font-size: 1.5vh;
 }
 
-/* Disabled input styling */
 input:disabled {
     background-color: #ddd;
     color: #888;
 }
 
-/* Bottom box (spans full width) */
 .bottom-box {
-    flex: 0.4; /* ~40% of the leftover space in content */
+    flex: 0.4;
     align-items: center;
     justify-content: center;
     text-align: center;
 }
 
-/* Drag-and-drop area inside the bottom box */
 .drag-drop-box {
     border: 2px dashed #8da676;
     border-radius: 1vh;
@@ -249,12 +226,10 @@ input:disabled {
     margin: 1vh 0;
 }
 
-/* Hide the file input (custom UI) */
 #file-input {
     display: none;
 }
 
-/* Upload button style */
 .upload-button {
     margin-top: 3vh;
     width: 30vh;
@@ -266,8 +241,8 @@ input:disabled {
     cursor: pointer;
     font-size: 3vh;
     border-radius: 6vh;
-    margin: 3vh auto 0; /* Centering the button */
-    display: block; /* Ensure proper centering */
+    margin: 3vh auto 0;
+    display: block;
     font-weight: bold;
 }
 
@@ -275,40 +250,46 @@ input:disabled {
     background-color: #789563;
 }
 
-/* Responsive text sizing fallback for smaller screens */
 @media (max-width: 600px) {
     .header h1 {
-    font-size: 6vh;
+        font-size: 6vh;
     }
+
     .dropdown-heading span.symbol {
-    font-size: 4vh;
+        font-size: 4vh;
     }
+
     .dropdown-heading {
-    font-size: 3vh;
+        font-size: 3vh;
     }
+
     .dropdown-content li label {
-    flex: 0 0 30vh;
+        flex: 0 0 30vh;
     }
+
     .dropdown-content li input[type="text"] {
-    font-size: 3vh;
+        font-size: 3vh;
     }
+
     .traffic-light-settings li label {
-    flex: 0 0 30vh;
+        flex: 0 0 30vh;
     }
+
     .traffic-light-settings li input[type="number"] {
-    font-size: 3vh;
+        font-size: 3vh;
     }
+
     .slider-container label,
     .slider-values span,
     .checkbox-container label {
-    font-size: 3vh;
+        font-size: 3vh;
     }
+
     .drag-drop-box p {
-    font-size: 3vh;
+        font-size: 3vh;
     }
 }
 
-/* Tutorial Popup and Button styles */
 #tutorial-button {
     position: fixed;
     bottom: 20px;

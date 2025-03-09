@@ -1,25 +1,22 @@
-/* Load SF Pro font at normal weight */
 @font-face {
-    font-family: 'SF Pro';
-    src: url("{{ url_for('static', filename='fonts/SF-Pro.ttf') }}") format('truetype');
-    font-style: normal;
+  font-family: 'SF Pro';
+  src: url("{{ url_for('static', filename='fonts/SF-Pro.ttf') }}") format('truetype');
+  font-style: normal;
 }
 
-/* Style applied to the whole page */
 body {
-  background-color: #a2bf89; /* Green background */
+  background-color: #a2bf89;
   font-family: 'SF Pro', sans-serif;
-  font-weight: 400; /* Normal weight everywhere */
+  font-weight: 400;
   color: #f8f5e9;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center vertically */
-  align-items: center; /* Center horizontally */
+  justify-content: center;
+  align-items: center;
   height: 100vh;
   margin: 0;
 }
 
-/* Main container to manage vertical space */
 .main-container {
   flex: 1;
   display: flex;
@@ -29,13 +26,11 @@ body {
   text-align: center;
 }
 
-/* Large error message styling */
 .error-message {
-  font-size: 4rem; /* Adjust as needed for "large" text */
+  font-size: 4rem;
   margin-bottom: 2rem;
 }
 
-/* Button styling based on the provided CSS */
 .upload-button {
   width: 35vh;
   padding: 1vh 2vh;
@@ -45,7 +40,7 @@ body {
   border-radius: 6vh;
   cursor: pointer;
   font-size: 3vh;
-  margin: 3vh auto 0; /* Centering the button */
+  margin: 3vh auto 0;
   display: block;
   font-weight: bold;
 }

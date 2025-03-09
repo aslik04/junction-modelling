@@ -1,23 +1,25 @@
-/* Load SF Pro font (same as leaderboards.html) */
 @font-face {
     font-family: 'SF Pro';
     src: url("{{ url_for('static', filename='fonts/SF-Pro.ttf') }}") format('truetype');
     font-style: normal;
     font-weight: 400;
 }
-/* Reset & Base Styles */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
-html, body {
+
+html,
+body {
     width: 100%;
     height: 100%;
     overflow: hidden;
 }
+
 body {
-    background-color: #a2bf89; /* Match the green background */
+    background-color: #a2bf89;
     font-family: 'SF Pro', sans-serif;
     color: #6b6b6b;
     display: flex;
@@ -25,56 +27,62 @@ body {
     align-items: center;
     padding: 5vh 0;
 }
-/* Header */
+
 .header {
     width: 90%;
     text-align: center;
     margin-bottom: 4vh;
 }
+
 .header h1 {
     font-size: 3vw;
     color: #f8f5e9;
     font-weight: 600;
 }
-/* Leaderboard Container */
+
 .leaderboard-container {
     background-color: #f8f5e9;
     border-radius: 1.2vw;
     padding: 2vh 3vh;
     width: 90%;
-    max-width: 1400px; /* Widened for more columns */
+    max-width: 1400px;
     text-align: center;
     box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
 }
-/* Leaderboard Table */
+
 table {
     width: 100%;
     border-collapse: collapse;
     border-radius: 1.2vw;
     overflow: hidden;
 }
-th, td {
+
+th,
+td {
     padding: 1.2vh;
     text-align: center;
     font-size: 1.2vw;
 }
+
 th {
     background-color: #8da676;
     color: white;
     font-weight: bold;
 }
+
 tr:nth-child(even) {
     background-color: #f1f1f1;
 }
+
 tr:hover {
     background-color: #dce7c5;
     transition: 0.3s;
 }
-/* Make table rows clickable */
+
 tbody tr {
     cursor: pointer;
 }
-/* Navigation Container */
+
 .nav-container {
     width: 90%;
     max-width: 1400px;
@@ -82,6 +90,7 @@ tbody tr {
     display: flex;
     justify-content: space-between;
 }
+
 .nav-container a {
     text-decoration: none;
     color: #f8f5e9;
@@ -92,23 +101,27 @@ tbody tr {
     font-weight: 600;
     transition: background-color 0.3s;
 }
+
 .nav-container a:hover {
     background-color: #789563;
 }
-/* Responsive Design */
+
 @media (max-width: 600px) {
     .header h1 {
         font-size: 6vw;
     }
-    th, td {
+
+    th,
+    td {
         font-size: 4vw;
     }
+
     .nav-container a {
         font-size: 3vw;
         padding: 2vh 4vw;
     }
 }
-/* Tutorial Popup and Button styles */
+
 #tutorial-button {
     position: fixed;
     bottom: 20px;
@@ -124,6 +137,7 @@ tbody tr {
     cursor: pointer;
     z-index: 1000;
 }
+
 #tutorial-popup {
     display: none;
     position: fixed;
@@ -139,11 +153,13 @@ tbody tr {
     z-index: 1001;
     overflow-y: auto;
 }
+
 #tutorial-popup-content {
     position: relative;
     width: 100%;
     height: 100%;
 }
+
 #tutorial-close {
     position: absolute;
     top: 10px;

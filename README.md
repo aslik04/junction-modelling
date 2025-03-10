@@ -1,212 +1,358 @@
-Here is a comprehensive and carefully designed `README.md` file, extensively leveraging all your project files, codebase insights, and provided documentation.
-
----
-
 ```markdown
 # 🚦 Junction Traffic Simulation System
 
----
+A comprehensive software solution for modeling and analyzing traffic flow efficiency at a single, four-arm junction. Developed under a simulated commercial project brief for local government transport management, this system enables robust testing and comparison of junction configurations to optimize traffic flow, minimize congestion, and reduce emissions.
 
+---
 ## Table of Contents
-- [Introduction](#introduction)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Algorithm Details](#dynamic-traffic-light-algorithm)
-- [Leaderboards and Analytics](#leaderboard-and-results-analysis)
-- [File Upload & Download](#data-inputoutput)
-- [Error Handling](#error-handling)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact Information](#contact-information)
+
+1. [Introduction](#introduction)
+2. [Features](#features)
+3. [Project Structure](#project-structure)
+4. [Installation & Setup](#installation--setup)
+5. [Usage](#usage)
+6. [Key Components & Code Overview](#key-components--code-overview)
+   - [Backend (Flask + FastAPI)](#backend-flask--fastapi)
+   - [Database (SQLite + SQLAlchemy)](#database-sqlite--sqlalchemy)
+   - [Frontend (HTML/CSS/JS)](#frontend-htmlcssjs)
+   - [Adaptive vs. Manual Traffic Lights](#adaptive-vs-manual-traffic-lights)
+   - [Leaderboard and Session Tracking](#leaderboard-and-session-tracking)
+7. [Traffic Simulation Algorithm](#traffic-simulation-algorithm)
+8. [Scoring Methodology](#scoring-methodology)
+9. [Running the Tests](#running-the-tests)
+10. [Error Handling & Troubleshooting](#error-handling--troubleshooting)
+11. [Future Extensions](#future-extensions)
+12. [License & Acknowledgments](#license--acknowledgments)
 
 ---
 
-## 🛣️ Introduction
-The **Junction Traffic Simulation System** is a web-based software solution designed to simulate and analyze traffic efficiency at a single four-way junction. Developed to meet a simulated commercial brief provided by Dorset Software Services for local government transport management, this system enables rigorous testing and comparison of junction configurations to optimize traffic flow, minimize congestion, and reduce emissions.
+## Introduction
+
+The **Junction Traffic Simulation System** simulates vehicle flow and calculates efficiency metrics (average wait, maximum wait, queue lengths, etc.) for a single four-way junction. It can run under either:
+- **Adaptive (dynamic) traffic lights**: Lights adjust based on real-time queue lengths.
+- **Manual (user-defined) traffic lights**: Users specify green durations and cycles directly.
+
+The system:
+- Accepts input parameters (vehicles per hour, pedestrian events, lanes).
+- Produces metrics to evaluate and compare different junction configurations.
+- Stores results in a local SQLite database for easy retrieval, leaderboard comparisons, and historical analysis.
 
 ---
 
-## 🌟 Features
-### Adaptive Traffic Light Algorithm
-- **Real-time Queue Analysis**: Adjusts green durations dynamically based on real-time traffic queue lengths, enhancing junction throughput.
-- **Exponential Smoothing:** Ensures stable and gradual transitions between signal durations.
+## Features
 
-### Manual Traffic Configuration
-- User-defined sequences allow stakeholders to explore alternative timings and strategies beyond adaptive defaults.
+1. **Adaptive Traffic Light Algorithm**  
+   - Dynamically adjusts green durations based on real-time queue lengths.
 
-### Real-time and Accelerated Simulations
-- Supports real-time visualization for intuitive understanding and rapid simulations (up to 10x speed) for swift strategic assessments.
+2. **Manual Traffic Light Configurations**  
+   - Users can override the adaptive approach to specify custom green durations.
 
-### Comprehensive Analytical Reporting
-- Quantitative metrics: Average wait times, maximum queue lengths, and maximum wait times.
-- Efficiency scores calculated for direct comparison between various configurations.
+3. **Real-time Simulation & Visualization**  
+   - A fast backend simulation with optional real-time front-end updates (via WebSockets).
+
+4. **Pedestrian Modeling**  
+   - Puffin crossing logic that halts all vehicle traffic during pedestrian events.
+
+5. **Session & Leaderboard Tracking**  
+   - Compares user-defined vs. adaptive runs.  
+   - Session leaderboard highlights the best configuration for the active session.  
+   - Algorithm leaderboard tracks the most recent runs of the adaptive algorithm.  
+   - All-time leaderboard stores top-performing user-defined configurations.
+
+6. **Scoring & Analytics**  
+   - Weighted scoring formula that combines average wait, max wait, and max queue length.  
+   - Optionally compare user-run results directly against the adaptive approach.
+
+7. **File Upload Support**  
+   - Accepts JSON or CSV for quickly loading traffic parameters, reducing manual setup.
+
+8. **Extensive Testing**  
+   - `pytest` coverage for controllers, back-end logic, simulation methods, and the Flask app itself.
 
 ---
 
-## 🚗 Features
-- **Interactive Parameters Input**: Comprehensive control over traffic and pedestrian parameters.
-- **Comparative Leaderboards**: Tracks performance of manual and adaptive traffic algorithms across sessions.
-- **Downloadable Data:** Easily export historical runs in JSON and CSV formats.
-- **Tutorial System:** Embedded contextual tutorials accessible from all main pages.
-- **Responsive Design:** Automatically adjusts simulation visuals to browser size for seamless viewing.
+## Project Structure
 
----
+Below is a high-level summary. Certain folders may contain additional files not listed here.
 
-## 🛠️ Installation
-
-### Requirements:
-- Python (3.10+)
-- Node.js
-- Dependencies listed in [requirements.txt](requirements.txt).
-
-### Quick Installation:
-```bash
-git clone https://github.com/your-repo/junction-simulation.git
-cd junction-simulation
-python -m venv env
-source env/bin/activate
-pip install -r requirements.txt
-uvicorn server:app --reload
 ```
-
-Access the application at `http://127.0.0.1:8000`.
-
----
-
-## 🖥️ Usage
-1. **Set Simulation Parameters**
-   - Configure junction lanes, vehicle traffic rates, and pedestrian crossings.
-
-2. **Start Simulation**
-   - Visualize traffic flow and junction operation in real-time.
-   - Adjust speed dynamically to observe detailed interactions.
-
-3. **Analyze Results**
-   - Review comprehensive metrics such as wait times and queue lengths.
-   - Compare manual and adaptive algorithms clearly side-by-side.
-
-4. **Evaluate and Refine**
-   - Utilize leaderboards and historical data for performance benchmarking.
-
----
-
-## 📂 Project Structure
-```
-junction-simulation/
+junction-traffic-simulation/
+├── backend/
+│   ├── server.py                  # FastAPI server for real-time updates & WebSockets
+│   ├── ...
+│   └── tests/                     # Contains Python test files for backend (pytest)
 ├── static/
-│   ├── css/                # Styling for UI components
-│   └── js/                 # Frontend logic (visualization, tutorials, etc.)
-├── templates/              # HTML pages
-│   ├── index.html
-│   ├── parameters.html
-│   ├── junctionPage.html
-│   ├── results.html
-│   ├── leaderboards.html
-│   ├── algorithm_session_leaderboard.html
-│   ├── session_leaderboard.html
-│   └── junction_details.html
-├── junction_objects/       # Backend objects for junction simulation
-│   ├── adaptive_controller.py
-│   ├── traffic_light_controller.py
-│   ├── vehicle.py
-│   ├── vehicle_movement.py
-│   └── vehicle_stop_line.py
-├── tests/                  # Unit tests
-├── server.py               # Backend (FastAPI) server
-├── app.py                  # Main application logic
-├── README.md               # Documentation
-└── requirements.txt        # Project dependencies
+│   ├── css/                       # CSS files for styling
+│   ├── js/                        # Frontend JavaScript modules for traffic lights, canvas, etc.
+│   ├── images/                    # Image assets (car sprites, logos, etc.)
+│   └── ...
+├── templates/
+│   ├── index.html                 # Landing page
+│   ├── parameters.html            # Parameter input page
+│   ├── junctionPage.html          # Real-time simulation page
+│   ├── results.html               # Results display page
+│   ├── leaderboards.html          # All-time leaderboards
+│   ├── session_leaderboard.html   # Leaderboard for user’s session
+│   ├── algorithm_session_leaderboard.html   # Leaderboard for adaptive algorithm runs
+│   ├── search_Algorithm_Runs.html # Search runs by session/run ID
+│   └── error.html                 # Error/exception page
+├── tests/
+│   ├── test_*.py                  # Additional test files (integration, etc.)
+├── app.py                         # Main Flask application (HTTP routes, DB, etc.)
+├── models.py                      # SQLAlchemy models (Configuration, Session, LeaderboardResult, etc.)
+├── requirements.txt               # Python dependencies
+├── README.md                      # This documentation
+├── pytest.ini                     # Pytest configuration
+└── ...
 ```
 
 ---
 
-## 🔄 Traffic Simulation Algorithm
-The adaptive algorithm optimizes green light durations using:
-- Real-time queue measurements.
-- Non-linear green duration calculations to balance immediate queue reduction and stable junction throughput.
-- Independent handling of right-turning vehicles.
-- Probabilistically timed pedestrian crossings based on configurable parameters.
+## Installation & Setup
+
+**Requirements**:
+- Python 3.10+  
+- Node.js (optional for advanced front-end builds)  
+- A modern web browser  
+
+1. **Clone or Download** this repository:
+
+   ```bash
+   git clone https://github.com/your-org/junction-traffic-simulation.git
+   cd junction-traffic-simulation
+   ```
+
+2. **Create and activate a Python virtual environment** (recommended):
+
+   ```bash
+   python -m venv env
+   source env/bin/activate      # on Unix-based systems
+   # or
+   env\Scripts\activate         # on Windows
+   ```
+
+3. **Install Python dependencies**:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Initialize the database**:  
+   Run the app once (or see the “Usage” section for actual steps) to create the `traffic_junction.db` SQLite database.
 
 ---
 
-## 📊 Leaderboard and Results Analysis
-Leaderboards are computed using:
+## Usage
 
-- **Score Difference Calculation**:  
-  \[
-  \text{Score Difference} = \text{Algorithm Score} - \text{User Score}
-  \]
+1. **Start the Flask/ FastAPI server**:
 
-- **User Session Leaderboard:** Highlights best-performing user configuration based on efficiency comparisons.
-- **Algorithm Session Leaderboard:** Tracks adaptive algorithm performance, allowing direct comparison.
-- **Top 10 All-Time Leaderboard:** Persistent tracking of the most effective configurations historically.
+   ```bash
+   python app.py
+   # The server starts both the Flask app and can spin up the FastAPI subprocess.
+   ```
 
----
+2. **Visit** `http://127.0.0.1:5000` in your web browser.  
+   - **Landing Page**: Click **“Begin”** to create a new session ID and proceed to the **Parameters** input page.
 
-## 📥 Data Input and Output
-### Input
-- **Manual Input**: Direct entry of vehicle flow, lane numbers, and traffic signals.
-- **JSON/CSV Upload:** For efficient handling of predefined traffic configurations.
+3. **Set up Parameters** in `parameters.html`:  
+   - Vehicle rates (forward/left/right turning), lanes, pedestrian frequency, and duration.  
+   - Optionally enable custom traffic light configurations.  
+   - **Upload** a JSON or CSV file instead of manual entries if desired.
 
-### Output
-- Clearly structured results including comprehensive directional performance metrics.
-- Easily downloadable JSON/CSV reports for offline analysis.
+4. **Run Simulation**:  
+   - **Start**: Submits your configuration; you’ll be redirected to the **Junction Simulation** page.  
+   - **Junction Simulation** page provides a real-time or accelerated simulation.  
+     - Speed slider (0.5x to 5x).  
+     - **Back**: Cancels the run and returns to parameters (no result is stored).  
+     - **End**: Officially ends the simulation and automatically processes the final results (both user-defined and adaptive runs).  
 
----
+5. **Analyze Results** in `results.html`:  
+   - Compares your user-run metrics vs. the adaptive-run metrics.  
+   - Provides wait times, queue lengths, and an overall efficiency score.  
+   - Shows difference in scoring if you used your custom traffic lights.
 
-## ❗ Error Handling
-- Clear, informative messages guide users through correcting input issues or recovering from unexpected errors.
-- User-friendly navigation to recover easily from errors.
-
----
-
-## 🚩 Tutorial Pop-ups
-Integrated tutorials provide intuitive, context-sensitive guidance, improving user onboarding and system learnability:
-- Accessible via a universally placed question mark icon (`?`) across all pages.
-- Detailed explanations of features, inputs, and navigation tips.
-
----
-
-## 📐 Dynamic Resizing
-Responsive resizing ensures optimal viewing and interaction:
-- Dynamically adjusts the simulation canvas and UI elements proportionally according to browser window size.
+6. **Leaderboards** & **Search**:  
+   - **Session Leaderboard**: Best run + last 9 runs of the current session.  
+   - **Algorithm Session Leaderboard**: Last 10 runs by the adaptive approach.  
+   - **Leaderboards**: All-time user top 10.  
+   - **Search**: Look up older runs by session ID and run ID.
 
 ---
 
-## ✅ Client Requirements Met
-- Dynamic real-time traffic light adaptations for enhanced traffic efficiency.
-- Transparent analysis and benchmarking tools.
-- Configurable parameter inputs for accurate junction modeling.
-- Effective user interaction design and responsive feedback mechanisms.
-- Persistent, comprehensive data tracking for iterative refinement.
+## Key Components & Code Overview
+
+### Backend (Flask + FastAPI)
+
+- **`app.py`**:  
+  - Main Flask application that handles HTTP routes (e.g., `/parameters`, `/results`, `/leaderboards`).  
+  - Spawns the **FastAPI** subprocess (`backend/server.py`) for real-time WebSocket updates.  
+  - Manages session creation, saving configurations, and orchestrating final metrics calculations.
+
+- **`backend/server.py`**:  
+  - FastAPI server responsible for WebSocket connections on `/ws`.  
+  - Broadcasts real-time simulation data to any connected clients.
+
+### Database (SQLite + SQLAlchemy)
+
+- **`models.py`** defines DB tables:  
+  - **`Session`**: Tracks each user session.  
+  - **`Configuration`**: Stores input parameters for each run.  
+  - **`TrafficSettings`**: If user-defined traffic lights are enabled, records those durations.  
+  - **`LeaderboardResult`** / **`AlgorithmLeaderboardResult`**: Stores performance metrics (avg/max wait, queue length) for each run.
+
+- The default DB file is `traffic_junction.db`.  
+- On first run, Flask will create all tables automatically under `db.create_all()`.
+
+### Frontend (HTML/CSS/JS)
+
+- **HTML Templates** in `templates/`:
+  - `index.html`, `parameters.html`, `junctionPage.html`, `results.html`, `leaderboards.html`, etc.
+- **JavaScript** in `static/js/`:
+  - `main.js`, `junction.js`, `trafficLights.js`, `pedestrianManager.js`, etc.
+  - Real-time updates via WebSockets at `ws://localhost:8000/ws`.  
+  - Canvas rendering for junction layout, lane lines, puffin crossings, etc.
+- **CSS** in `static/css/`:
+  - Provides styling for each page (e.g., `results.css`, `leaderboards.css`).
+
+### Adaptive vs. Manual Traffic Lights
+
+- By default, the system uses an **adaptive approach** that calculates green phases using exponential smoothing of real-time queue lengths.  
+- If **manual** mode is enabled, the user specifies:
+  - Traffic cycles per hour (how often signals cycle).
+  - Green durations for forward/left and right-turn phases (North/South, East/West).  
+- The simulator runs **both**:
+  - The manual configuration (if enabled).
+  - The adaptive approach (always).
+
+### Leaderboard and Session Tracking
+
+- **Leaderboards** store results from previous runs in the DB.  
+  - **Session Leaderboard**: You can see your best run of the current session plus the last 9.  
+  - **Algorithm Leaderboard**: Tracks the 10 most recent adaptive runs.  
+  - **User Top 10**: All-time best user-defined configurations.  
+- **Session** ends when you click **End Session** or re-launch the application, but the data persists in the DB for searching or future reference.
 
 ---
 
-## 🙌 Contributing
-Contributions to the Junction Traffic Simulation System are welcome! Please follow the process below:
-1. Fork the repository.
-2. Create a feature branch (`feature/your-feature`).
-3. Commit your enhancements clearly and descriptively.
-4. Submit a Pull Request with detailed descriptions.
+## Traffic Simulation Algorithm
+
+1. **Queue Detection**  
+   - Real-time vehicle queues are measured per direction:  
+     - `get_vertical_wait_count()` / `get_horizontal_wait_count()` exclude right-turn vehicles.  
+     - `get_vertical_right_wait_count()` / `get_horizontal_right_wait_count()` handle right turns.
+
+2. **Adaptive Timing**  
+   - A non-linear formula sets the green duration:  
+     \[
+       \text{Green} = \text{min} + (\text{max} - \text{min}) \times 
+       \frac{\text{queueLength}}{\text{queueLength} + k}
+     \]
+   - Exponential smoothing factor to avoid abrupt changes.
+
+3. **Manual Timing**  
+   - If enabled, a user-defined “traffic cycles per hour” is used to break down the total time.  
+   - Durations for forward/left and right-turn are read from user inputs.
+
+4. **Pedestrian Crossings**  
+   - Puffin signals turn on for all arms simultaneously.  
+   - The system halts vehicle traffic during crossing intervals.
 
 ---
 
-## 📜 License
-This project is licensed under the **MIT License**.
+## Scoring Methodology
+
+For each direction (N, S, E, W), we measure:
+
+1. **Average Wait Time** (heaviest weight: 45%)  
+2. **Maximum Wait Time** (weight: 20%)  
+3. **Maximum Queue Length** (weight: 35%)
+
+A direction score is:
+
+\[
+ \text{Direction Score} = 0.45 * \text{AvgWait} + 0.2 * \text{MaxWait} + 0.35 * \text{MaxQueue}
+\]
+
+By default, the system compares:
+- **User’s Score** vs. **Adaptive Score**  
+  - “Score Difference” = (Adaptive) - (User)
 
 ---
 
-## 📧 Contact Information
-For further questions or support, please contact:
-- 📧 Email: `support@junctionsim.com`
-- 🐞 GitHub Issues: [Submit an issue](https://github.com/your-repo/issues)
+## Running the Tests
+
+This project includes **pytest** test files for both the Flask app and the back-end simulation logic.
+
+1. **Install dev dependencies** (already in `requirements.txt`), then:
+   ```bash
+   pytest
+   ```
+   or
+   ```bash
+   pytest -v  # verbose mode
+   ```
+
+2. Test files of note:
+   - `test_app.py` – Integration tests for Flask endpoints & DB interactions
+   - `test_adaptive_controller.py` – Unit tests for the adaptive traffic logic
+   - `test_traffic_light_controller.py` – Tests the traffic light controller logic
+   - `test_traffic_light_state.py` – Traffic light state sequence tests
+   - `test_vehicle.py`, `test_vehicle_movement.py`, `test_vehicle_stop_line.py` – Vehicle movement and queue logic
+
+3. A `pytest.ini` file is present to filter deprecation warnings and set general pytest config.
 
 ---
 
-Developed as part of the **CS261 Project 2025**, University of Warwick in collaboration with Dorset Software Services Limited.
+## Error Handling & Troubleshooting
 
+1. **Dedicated Error Page**  
+   - If any required parameters are missing or invalid, or if an exception occurs, the system redirects to `error.html` to display a user-friendly message.
+
+2. **Flask Debug Mode**  
+   - In development, you can enable debug mode:
+     ```bash
+     FLASK_ENV=development python app.py
+     ```
+   - Provides stack traces in the browser if an unhandled exception occurs.
+
+3. **Database**  
+   - Ensure `traffic_junction.db` is not read-only and that your user can write to the project folder.
+
+4. **FastAPI Not Starting**  
+   - Check if another process is using port `8000`.  
+   - Some OS or firewall might block the port.
+
+5. **WebSocket Fails**  
+   - Ensure you’re using `http://127.0.0.1:5000` or `http://localhost:5000` exactly in your browser and not mixing with `https` or different ports.
+
+---
+
+## Future Extensions
+
+1. **Multi-Junction Support**  
+   - Expand from single junction to a small network or multi-intersection scenario.
+
+2. **Dynamic Lane Merging**  
+   - Enhance realism by modeling merges, partial lanes, or ephemeral bus lanes.
+
+3. **Adaptive Pedestrian Crossings**  
+   - More advanced logic for pedestrian events (e.g., button requests).
+
+4. **Mobile Responsiveness**  
+   - The front end is primarily sized for desktop; more effort needed for mobile.
+
+5. **Advanced Graphical Effects**  
+   - Add car sprites for turning arcs, smoother transitions, or 3D overlays.
+
+---
+
+## License & Acknowledgments
+
+- This system was developed as part of the **CS261 Project 2025** at the University of Warwick in collaboration with **Dorset Software Services**.
+- Created by **Group 33**: *Adam Fawaz, Adam Salik, Chinua Imoh, Christian Otu, Nikit Sajiv, Robert Mascarenhas*.
+- All code is under [MIT License](./LICENSE) or similar open-source license (if not provided, see your institution’s guidelines).
+
+> **Contact**: For further questions or contributions, please open an issue on this repo or contact the project maintainers.
+
+---
 ```
-
-This `README.md` encapsulates detailed system documentation aligned closely with your project files, codebase, and provided specifications. Let me know if further modifications or additional information are needed!

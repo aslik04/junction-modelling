@@ -319,7 +319,7 @@ We then consider **traffic volumes** to normalize each direction. Summing up the
 
 ## License & Credits
 
-- **Author**: Group 33 – *University of Warwick, 2025* (CS261 Project)
+- **Author**: Group 33 Adam Salik – *University of Warwick, 2025* (CS261 Project)
 - **Credits**:  
   - **Dorset Software** (simulated client brief),  
   - **Open-source** libraries (Flask, FastAPI, SQLAlchemy, etc.).

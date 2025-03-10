@@ -1,6 +1,6 @@
 # 🚦 Junction Traffic Simulation System
 
-A software solution to **model and analyze** four-way traffic junction efficiency. It features:
+A software solution to **model and analyse** four-way traffic junction efficiency. It features:
 
 - **Two possible traffic-control methods**:  
   1. **Adaptive Algorithm**: Dynamically adjusts signal timing based on queue lengths.  
@@ -44,7 +44,7 @@ The **Junction Traffic Simulation System** aims to help **local councils** (in a
 - **Pedestrian crossing** frequency and duration,
 - **Traffic signal mode**: either *Adaptive (dynamic)* or *Manual (user-defined)*,
 
-the simulator:
+The simulator:
 
 1. **Spawns traffic** based on rates.
 2. **Runs either one or two consecutive simulations**:

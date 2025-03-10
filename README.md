@@ -123,10 +123,10 @@ junction-modelling/
 
 ## Installation & Setup
 
-1. **Clone the repo**:
+1. **Download the project codebase**:
 
    ```bash
-   git clone https://github.com/your-user/junction-modelling.git
+   unzip junction-modelling.zip
    cd junction-modelling
    ```
 

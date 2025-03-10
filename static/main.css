@@ -3,53 +3,50 @@
     margin: 0;
     padding: 0;
 }
+
 nav {
-    /* position: -webkit-sticky; */
     position: sticky;
     display: flex;
     justify-content: space-between;
-    top:0;
-    border-bottom: 1px solid white; 
-    padding:20px;
+    top: 0;
+    border-bottom: 1px solid white;
+    padding: 20px;
     margin-top: 0;
     width: 100%;
     background-color: #1F273F;
     color: white;
 }
 
-/* This makes it a line */ 
 a {
     text-decoration: none;
     cursor: pointer;
 }
 
 nav ul {
-	list-style: none;
-	margin: 0;
+    list-style: none;
+    margin: 0;
     padding: 0;
-    display: flex; /* Displays items inline */
-    gap: 20px; /* Space between items */
+    display: flex;
+    gap: 20px;
 }
+
 nav ul li {
     margin: 0;
     padding: 0;
     font-size: 18px;
-} 
-
-
+}
 
 nav a {
     position: relative;
     display: inline-block;
-    padding: 10px 15px; 
+    padding: 10px 15px;
     color: white;
     text-decoration: none;
 }
 
-/* Span for underline effect */
 nav a span {
-    position: relative; /* Keeps span text visible */
-    z-index: 1; /* Keeps text above the underline */
+    position: relative;
+    z-index: 1;
 }
 
 nav a::after {
@@ -58,15 +55,15 @@ nav a::after {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 2px; 
+    height: 2px;
     background-color: red;
-    transform: scaleX(0); /* Hidden initially */
+    transform: scaleX(0);
     transform-origin: bottom right;
     transition: transform 0.5s ease;
 }
 
 
 nav a:hover::after {
-    transform: scaleX(1); /* Full width on hover */
+    transform: scaleX(1);
     transform-origin: bottom left;
-} 
+}

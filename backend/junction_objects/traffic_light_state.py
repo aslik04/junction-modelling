@@ -7,7 +7,7 @@ It handles:
 - Horizontal (East-West) traffic sequences  
 - Pedestrian crossing events
 - Right turn signal coordination
-- Timing and synchronization of light changes
+- Timing and synchronisation of light changes
 - Probabilistic pedestrian event generation
 - Running traffic configurations chosen by client
 
@@ -309,7 +309,7 @@ async def run_traffic_loop(controller: TrafficLightController) -> None:
        - Remaining gaps available this minute 
        - User-configured pedestrian events per minute (from client)
        - Formula: p_gap = remaining_events / remaining_gaps
-    3. Randomizes pedestrian events according to calculated probability
+    3. Randomises pedestrian events according to calculated probability
        where probability is influenced by user-defined pedestrian frequency
     4. Maintains timing by resetting counters every 60 seconds
     5. Executes light sequences and pedestrian events in alternating pattern:

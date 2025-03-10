@@ -35,9 +35,9 @@ def test_initial_state():
             TrafficLightSignal.OFF.value: True,
             TrafficLightSignal.ON.value: False
         }
-        assert controller.trafficLightStates[d] == expected_traffic, f"Traffic lights for {d} did not initialize correctly."
-        assert controller.rightTurnLightStates[d] == expected_right, f"Right-turn lights for {d} did not initialize correctly."
-        assert controller.pedestrianLightStates[d] == expected_pedestrian, f"Pedestrian lights for {d} did not initialize correctly."
+        assert controller.trafficLightStates[d] == expected_traffic, f"Traffic lights for {d} did not initialise correctly."
+        assert controller.rightTurnLightStates[d] == expected_right, f"Right-turn lights for {d} did not initialise correctly."
+        assert controller.pedestrianLightStates[d] == expected_pedestrian, f"Pedestrian lights for {d} did not initialise correctly."
 
 def test_update_traffic_settings_default():
     """Test that when traffic-light-enable is off, sequence lengths are reset to 0."""

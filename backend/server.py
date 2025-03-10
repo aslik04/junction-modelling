@@ -35,7 +35,7 @@ from junction_objects.vehicle_stop_line import has_crossed_line
 from junction_objects.adaptive_controller import run_adaptive_traffic_loop
 
 
-# Initialize FastAPI application
+# Initialise FastAPI application
 app = FastAPI()
 
 # SQLite database connection string
@@ -66,7 +66,7 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 # List to store WebSocket connections
 connected_clients = []
 
-# Initialize traffic light controller
+# Initialise traffic light controller
 traffic_light_logic = TrafficLightController()
 
 # Simulation speed multiplier (1.0 = real time)
@@ -529,7 +529,7 @@ async def spawn_car_loop():
                         junctionData=junction_data
                     )
                     
-                    # Initialize tracking variables for wait time metrics
+                    # Initialise tracking variables for wait time metrics
                     new_car.spawn_time = simulationTime
                     new_car.wait_recorded = False
                     
@@ -624,12 +624,12 @@ async def update_car_loop():
         global wait_count_n, wait_count_s, wait_count_e, wait_count_w
         global max_queue_length_n, max_queue_length_s, max_queue_length_e, max_queue_length_w
 
-        # Initialize counters for current queue lengths
+        # Initialise counters for current queue lengths
         north_waiting_count = south_waiting_count = east_waiting_count = west_waiting_count = 0
 
         # Process each car to update wait times and queue lengths
         for c in cars:
-            # Initialize tracking attributes if they don't exist
+            # Initialise tracking attributes if they don't exist
             if not hasattr(c, 'spawn_time'):
                 c.spawn_time = simulationTime
             if not hasattr(c, 'wait_recorded'):
@@ -875,7 +875,7 @@ def reset_simulation():
 @app.on_event("startup")
 async def on_startup():
     """
-    Initialize simulation tasks when the FastAPI server starts up.
+    Initialise simulation tasks when the FastAPI server starts up.
     Sets simulation_running to True and starts the following async tasks:
     - Traffic light control loop (either standard or adaptive based on client settings)
     - Client choses to see our default dynamic simulation or their own traffic light simulation.

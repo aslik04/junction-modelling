@@ -243,7 +243,7 @@ For each direction (N, E, S, W), we measure:
 score_direction = 0.45 * avgWait + 0.20 * maxWait + 0.35 * maxQueue
 ```
 
-We then consider **traffic volumes** to normalize each direction. Summing up the 4 normalized direction scores yields the final overall score. A lower score → better efficiency.
+We then consider **traffic volumes** to normalise each direction. Summing up the 4 normalised direction scores yields the final overall score. A lower score → better efficiency.
 
 **Score Difference** = `(Adaptive Score) - (User Score)`
 
@@ -325,5 +325,5 @@ We then consider **traffic volumes** to normalize each direction. Summing up the
   - **Open-source** libraries (Flask, FastAPI, SQLAlchemy, etc.).
 - See the project’s LICENSE file for usage guidelines.
 
-**Enjoy exploring your junction optimizations!** 
+**Enjoy exploring your junction optimisations!** 
 ```

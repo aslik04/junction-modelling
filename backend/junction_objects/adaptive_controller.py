@@ -9,7 +9,7 @@ Exponential smoothing is applied to ensure gradual transitions between different
 
 This algorithm operates in a continuous **adaptive control loop** that alternates between vertical (North-South) 
 and horizontal (East-West) traffic flows, dynamically adjusting green light durations based on detected queue lengths. 
-It also incorporates pedestrian crossings at randomized intervals, based on user inputs.
+It also incorporates pedestrian crossings at randomised intervals, based on user inputs.
 
 Key Features:
 1. Real-Time Queue Detection: 

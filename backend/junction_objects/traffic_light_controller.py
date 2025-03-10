@@ -18,7 +18,7 @@ class TrafficLightController:
     
     def __init__(self):
         """
-        Initializes a new TrafficLightController instance.
+        Initialises a new TrafficLightController instance.
         Sets up initial state for traffic light sequences and timings.
         Includes default states for main traffic lights, right turn signals, and pedestrian crossings.
         All lights start in red/off state by default.

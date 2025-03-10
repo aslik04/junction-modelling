@@ -6,7 +6,7 @@ It includes models for managing sessions, configurations, traffic results, and A
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-# Initialize SQLAlchemy database instance
+# Initialise SQLAlchemy database instance
 db = SQLAlchemy()
 
 class Session(db.Model):
@@ -100,7 +100,7 @@ class LeaderboardResult(db.Model):
     max_queue_length_west = db.Column(db.Integer, nullable=False)
 
     def serialize(self):
-        """Converts the model instance to a dictionary for JSON serialization"""
+        """Converts the model instance to a dictionary for JSON serialisation"""
         return {
             "id": self.id,
             "run_id": self.run_id,
@@ -144,7 +144,7 @@ class TrafficSettings(db.Model):
     const_gaps_in_sequence = db.Column(db.Integer, default=5)
 
     def serialize(self):
-        """Converts the model instance to a dictionary for JSON serialization"""
+        """Converts the model instance to a dictionary for JSON serialisation"""
         return {
             "id": self.id,
             "run_id": self.run_id,
@@ -190,7 +190,7 @@ class AlgorithmLeaderboardResult(db.Model):
     max_queue_length_west = db.Column(db.Integer, nullable=False)
 
     def serialize(self):
-        """Converts the model instance to a dictionary for JSON serialization"""
+        """Converts the model instance to a dictionary for JSON serialisation"""
         return {
             "id": self.id,
             "run_id": self.run_id,

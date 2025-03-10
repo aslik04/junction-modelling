@@ -1,5 +1,5 @@
-// Function to equalize the heights of all open dropdowns
-function equalizeDropdownHeights() {
+// Function to equalise the heights of all open dropdowns
+function equaliseDropdownHeights() {
     const dropdowns = document.querySelectorAll('.dropdown-content');
     let openDropdowns = Array.from(dropdowns).filter(div => div.style.display === "block");
     if (openDropdowns.length === 0) return;
@@ -22,7 +22,7 @@ function toggleDropdown(headingId, contentId) {
         content.style.display = "block";
         heading.querySelector('.symbol').textContent = "|";
     }
-    equalizeDropdownHeights();
+    equaliseDropdownHeights();
 }
 
 document.getElementById("backBtn").addEventListener("click", async () => {

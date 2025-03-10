@@ -464,7 +464,7 @@
         console.log("Adjusted horizontal_right_green to", hright, "to meet max allowed horizontal sum of", maxH);
       }
       
-      // Return the normalized values (dividing by number of sequences)
+      // Return the normalised values (dividing by number of sequences)
       return {
         vertical_main_green: vmain / sequences,
         vertical_right_green: vright / sequences,

@@ -23,7 +23,7 @@ class Car:
         junctionData: dict
     ):
         """
-        Initializes a Car object with its movement attributes and position based on the junction data.
+        Initialises a Car object with its movement attributes and position based on the junction data.
         
         Parameters:
             direction (Direction): The initial direction of the car (NORTH, EAST, SOUTH, WEST).

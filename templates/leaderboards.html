@@ -9,33 +9,26 @@
     <div class="header">
         <h1>🏆 User Top 10 Configurations 🏆</h1>
     </div>
-
     <div class="leaderboard-container">
         <table>
             <thead>
                 <tr>
                     <th>Session ID</th>
                     <th>Run ID</th>
-                    <!-- Northbound -->
                     <th>NB Avg Wait (s)</th>
                     <th>NB Max Wait (s)</th>
                     <th>NB Max Queue</th>
-                    <!-- Southbound -->
                     <th>SB Avg Wait (s)</th>
                     <th>SB Max Wait (s)</th>
                     <th>SB Max Queue</th>
-                    <!-- Eastbound -->
                     <th>EB Avg Wait (s)</th>
                     <th>EB Max Wait (s)</th>
                     <th>EB Max Queue</th>
-                    <!-- Westbound -->
                     <th>WB Avg Wait (s)</th>
                     <th>WB Max Wait (s)</th>
                     <th>WB Max Queue</th>
-                    <!-- User and Algorithm Score -->
                     <th>Algorithm Score</th>
                     <th>User Score</th>
-                    <!-- Score Difference -->
                     <th>Overall Score Difference</th>
                 </tr>
             </thead>
@@ -44,25 +37,20 @@
                     <tr onclick="handleRowClick('{{ result.run_id }}', '{{ result.session_id }}')">
                         <td>{{ result.session_id }}</td>
                         <td>{{ result.run_id }}</td>
-                        <!-- Northbound -->
                         <td>{{ result.avg_wait_time_north|round(2) }}</td>
                         <td>{{ result.max_wait_time_north|round(2) }}</td>
                         <td>{{ result.max_queue_length_north }}</td>
-                        <!-- Southbound -->
                         <td>{{ result.avg_wait_time_south|round(2) }}</td>
                         <td>{{ result.max_wait_time_south|round(2) }}</td>
                         <td>{{ result.max_queue_length_south }}</td>
-                        <!-- Eastbound -->
                         <td>{{ result.avg_wait_time_east|round(2) }}</td>
                         <td>{{ result.max_wait_time_east|round(2) }}</td>
                         <td>{{ result.max_queue_length_east }}</td>
-                        <!-- Westbound -->
                         <td>{{ result.avg_wait_time_west|round(2) }}</td>
                         <td>{{ result.max_wait_time_west|round(2) }}</td>
                         <td>{{ result.max_queue_length_west }}</td>
                         <td>{{ result.algorithm_score|round(5) }}</td>
                         <td>{{ result.user_score|round(5) }}</td>
-                        <!-- Score Difference -->
                         <td>{{ result.score_difference|round(5) }}</td>
                     </tr>
                 {% endfor %}
@@ -76,8 +64,7 @@
         <a class="nav-button" href="/session_leaderboard">📊 See User Session Leaderboard</a>
         <a class="nav-button" id="backBtn" href="/parameters">✅ Continue Session (Back to Inputs)</a>
     </div>
-    
-    <!-- Tutorial Popup and Button -->
+
     <div id="tutorial-popup">
         <div id="tutorial-popup-content">
             <span id="tutorial-close">&times;</span>
@@ -101,7 +88,6 @@
     </div>
     <div id="tutorial-button">?</div>
     <script>
-        // Redirect to the configuration details page when row is clicked
         function handleRowClick(row) {
             const runId = row.getElementsByTagName("td")[1].innerText;
             window.location.href = "/junction_details?run_id=" + runId + "&session_id={{session_id}}";

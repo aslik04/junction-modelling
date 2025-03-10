@@ -8,20 +8,15 @@
 
 <body>
   <div class="main-container">
-    <!-- Header -->
     <div class="header">
       <h1>Input your parameters</h1>
     </div>
 
-    <!-- Content -->
     <div class="content">
-      <!-- Top row: Visible parameters form -->
       <form id="parameterForm">
         <div class="top-row">
-          <!-- Left box -->
           <div class="box">
             <h2>Vehicle Settings</h2>
-            <!-- North -->
             <div class="dropdown-heading">
               <span class="symbol">—</span> Northbound (vph)
             </div>
@@ -41,7 +36,6 @@
                 </li>
               </ul>
             </div>
-            <!-- East -->
             <div class="dropdown-heading">
               <span class="symbol">—</span> Eastbound (vph)
             </div>
@@ -61,7 +55,6 @@
                 </li>
               </ul>
             </div>
-            <!-- South -->
             <div class="dropdown-heading">
               <span class="symbol">—</span> Southbound (vph)
             </div>
@@ -81,7 +74,6 @@
                 </li>
               </ul>
             </div>
-            <!-- West -->
             <div class="dropdown-heading">
               <span class="symbol">—</span> Westbound (vph)
             </div>
@@ -103,10 +95,8 @@
             </div>
           </div>
 
-          <!-- Middle box -->
           <div class="box">
             <h2>Junction Settings</h2>
-            <!-- Number of lanes slider -->
             <div class="slider-container">
               <label for="lanes">Number of lanes</label>
               <input type="range" id="lanes" name="lanes" min="1" max="5" value="5">
@@ -118,8 +108,7 @@
                 <span>5</span>
               </div>
             </div>
-      
-            <!-- Pedestrians -->
+
             <div style="display: flex; align-items: center; margin: 2vh 0 1vh;">
               <label for="pedestrian-frequency" style="font-size: 1.5vh; font-weight: 400; margin-right: 1.5vh; cursor: default;">
                 Pedestrian Events (per hr)
@@ -134,17 +123,14 @@
             </div>
           </div>
 
-          <!-- Right box: Traffic Light Settings -->
           <div class="box">
             <h2>Traffic Light Settings</h2>
-            
-            <!-- Enable Traffic Light Settings checkbox -->
+
             <div class="checkbox-container">
               <input type="checkbox" id="traffic-light-enable" name="traffic-light-enable">
               <label for="traffic-light-enable">Enable User Traffic Light Settings</label>
             </div>
           
-            <!-- Sequences per Hour -->
             <ul class="traffic-light-settings">
               <li>
                 <label for="tl_sequences">Traffic Cycles (per hr)</label>
@@ -152,7 +138,6 @@
               </li>
             </ul>
           
-            <!-- Vertical Settings -->
             <div class="dropdown-heading">
               <span class="symbol">—</span> Northbound/Southbound Green Lights
             </div>
@@ -169,7 +154,6 @@
               </ul>
             </div>
           
-            <!-- Horizontal Settings -->
             <div class="dropdown-heading">
               <span class="symbol">—</span> Eastbound/Westbound Green Lights
             </div>
@@ -189,7 +173,6 @@
         </div>
       </form>
 
-      <!-- Bottom box: File Upload area -->
       <form action="/upload" method="POST" enctype="multipart/form-data" style="flex: 0;">
         <div class="bottom-box">
           <div class="drag-drop-box">
@@ -203,9 +186,7 @@
         </div>
       </form>
 
-      <!-- Hidden Final Submission Form: Contains hidden copies of parameter values and the Start button -->
       <form id="hiddenForm" action="/parameters" method="POST" enctype="multipart/form-data">
-        <!-- Hidden inputs for parameters -->
         <input type="hidden" id="hidden_nb_forward" name="nb_forward" value="">
         <input type="hidden" id="hidden_nb_left" name="nb_left" value="">
         <input type="hidden" id="hidden_nb_right" name="nb_right" value="">
@@ -225,8 +206,7 @@
         <input type="hidden" id="hidden_lanes" name="lanes" value="">
         <input type="hidden" id="hidden_pedestrian_frequency" name="pedestrian-frequency" value="">
         <input type="hidden" id="hidden_pedestrian_duration" name="pedestrian-duration" value="">
-        
-        <!-- Hidden inputs for Traffic Light Settings -->
+
         <input type="hidden" id="hidden_tl_enabled" name="traffic-light-enable" value="">
         <input type="hidden" id="hidden_sequences" name="tl_sequences" value="">
         <input type="hidden" id="hidden_vmain" name="tl_vmain" value="">
@@ -234,14 +214,12 @@
         <input type="hidden" id="hidden_vright" name="tl_vright" value="">
         <input type="hidden" id="hidden_hright" name="tl_hright" value="">
 
-        <!-- The visible Start button -->
         <button class="upload-button" type="button" id="startButton">Start</button>
       </form>
 
     </div>
   </div>
 
-  <!-- Tutorial Popup and Button -->
   <div id="tutorial-popup">
     <div id="tutorial-popup-content">
       <span id="tutorial-close">&times;</span>

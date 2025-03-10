@@ -6,13 +6,10 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/junction_details.css') }}">
 </head>
 <body>
-  <!-- Page Title -->
   <h1>Configuration Details from Run {{ configuration.run_id }} in Session {{ configuration.session_id }}</h1>
 
-  <!-- Score Comparison & Results (mirrors results page) -->
   {% if user_metrics and algorithm_metrics %}
   {% if traffic_light_settings.enabled %}
-    <!-- Only show the score difference if user traffic is enabled -->
     <div id="scoreComparison">
       Overall Score Difference: 
       <span id="scoreDiff"></span>
@@ -20,15 +17,12 @@
   {% endif %}
 
   <script>
-    // Parse the score values (ensure they are numeric)
     const algorithmScore = parseFloat("{{ algorithm_metrics.score }}");
     const userScore = parseFloat("{{ user_metrics.score }}");
     const scoreSpan = document.getElementById('scoreDiff');
     if(scoreSpan) {
-      // Calculate the difference
       const unroundeddiff = algorithmScore - userScore;
       const diff = parseFloat(unroundeddiff.toFixed(3))
-      // Update the text and set its color based on the value
       scoreSpan.textContent = diff;
       scoreSpan.style.color = diff >= 0 ? 'green' : 'red';
     }
@@ -37,7 +31,6 @@
 
     <div id="resultsPairContainer">
       {% if traffic_light_settings.enabled %}
-      <!-- User Results Box -->
       <div class="results-box">
         <h2>User Results</h2>
         <div class="score-header">
@@ -81,7 +74,6 @@
         </table>
       </div>
       {% endif %}
-      <!-- Algorithm Results Box -->
       <div class="results-box {% if not traffic_light_settings.enabled %}full-width{% endif %}">
         <h2>Algorithm Results</h2>
         <div class="score-header">
@@ -127,9 +119,7 @@
     </div>
   {% endif %}
 
-  <!-- 2-row, 3-column layout -->
   <div id="infoGrid">
-    <!-- Column 1 -->
     <div class="param-box" style="grid-column: 1; grid-row: 1;">
       <h2>Junction Settings</h2>
       <ul>
@@ -151,7 +141,6 @@
       </ul>
     </div>
 
-    <!-- Column 2 -->
     <div class="direction-box" style="grid-column: 2; grid-row: 1;">
       <h2>North Parameters</h2>
       <ul>
@@ -172,7 +161,6 @@
       </ul>
     </div>
 
-    <!-- Column 3 -->
     <div class="direction-box" style="grid-column: 3; grid-row: 1;">
       <h2>East Parameters</h2>
       <ul>
@@ -194,7 +182,6 @@
     </div>
   </div>
 
-  <!-- Back Link -->
   <a href="javascript:history.back()">Back</a>
   <script src="{{ url_for('static', filename='js/junction_details.js') }}"></script>
 </body>

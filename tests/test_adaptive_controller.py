@@ -4,7 +4,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import asyncio
 import math
-#import random
 import pytest
 from backend.junction_objects.adaptive_controller import (
     get_vertical_wait_count,

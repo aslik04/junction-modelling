@@ -6,38 +6,30 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/session_leaderboard.css') }}">
 </head>
 <body>
-    <!-- Header with bar chart emojis on either side -->
     <div class="header">
         <h1>📊 User Session {{ session_id }} Leaderboards 📊</h1>
     </div>
 
-    <!-- Leaderboard Table -->
     <div class="leaderboard-container">
         <table>
             <thead>
                 <tr>
                     <th>Recent Runs</th>
                     <th>Run ID</th>
-                    <!-- Northbound -->
                     <th>NB Avg Wait (s)</th>
                     <th>NB Max Wait (s)</th>
                     <th>NB Max Queue</th>
-                    <!-- Southbound -->
                     <th>SB Avg Wait (s)</th>
                     <th>SB Max Wait (s)</th>
                     <th>SB Max Queue</th>
-                    <!-- Eastbound -->
                     <th>EB Avg Wait (s)</th>
                     <th>EB Max Wait (s)</th>
                     <th>EB Max Queue</th>
-                    <!-- Westbound -->
                     <th>WB Avg Wait (s)</th>
                     <th>WB Max Wait (s)</th>
                     <th>WB Max Queue</th>
-                    <!-- User and Algorithm Score -->
                     <th>Algorithm Score</th>
                     <th>User Score</th>
-                    <!-- Overall Score -->
                     <th>Overall Score Difference</th>
                 </tr>
             </thead>
@@ -53,25 +45,20 @@
                             {% endif %}
                         </td>
                         <td>{{ run.run_id }}</td>
-                        <!-- Northbound -->
                         <td>{{ run.nb_avg_wait|round|int }}</td>
                         <td>{{ run.nb_max_wait|round|int }}</td>
                         <td>{{ run.nb_max_queue|round|int }}</td>
-                        <!-- Southbound -->
                         <td>{{ run.sb_avg_wait|round|int }}</td>
                         <td>{{ run.sb_max_wait|round|int }}</td>
                         <td>{{ run.sb_max_queue|round|int }}</td>
-                        <!-- Eastbound -->
                         <td>{{ run.eb_avg_wait|round|int }}</td>
                         <td>{{ run.eb_max_wait|round|int }}</td>
                         <td>{{ run.eb_max_queue|round|int }}</td>
-                        <!-- Westbound -->
                         <td>{{ run.wb_avg_wait|round|int }}</td>
                         <td>{{ run.wb_max_wait|round|int }}</td>
                         <td>{{ run.wb_max_queue|round|int }}</td>
                         <td>{{ run.algorithm_score|round(5) }}</td>
                         <td>{{ run.user_score|round(5) }}</td>
-                        <!-- Score -->
                         <td>{{ run.score|round(5) }}</td>
                     </tr>
                     {% endfor %}
@@ -84,7 +71,6 @@
         </table>
     </div>
 
-    <!-- Bottom Nav Buttons with emojis on both sides -->
     <div class="nav-container">
         <a class="nav-button" id="endBtn" href="/index">❌ End Session</a>
         <a class="res-button" id="results" href="/back_to_results">🎉 Back to Results</a>
@@ -92,7 +78,7 @@
         <a class="nav-button" id="backBtn" href="/parameters">✅ Continue Session (Back to Inputs)</a>
     </div>
     
-    <!-- Tutorial Popup and Button -->
+
     <div id="tutorial-popup">
         <div id="tutorial-popup-content">
             <span id="tutorial-close">&times;</span>
@@ -119,7 +105,6 @@
     </div>
     <div id="tutorial-button">?</div>
     <script>
-        // Redirect to the configuration details page when row is clicked
         function handleRowClick(row) {
             const runId = row.getElementsByTagName("td")[1].innerText;
             window.location.href = "/junction_details?run_id=" + runId + "&session_id={{session_id}}";

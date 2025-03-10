@@ -3,15 +3,15 @@ Traffic Junction Simulator Flask Application
 
 This module implements a Flask web application that manages a traffic junction simulation.
 It provides endpoints for starting/stopping a FastAPI-based simulation server, submitting
-and uploading configuration parameters (via forms, CSV, or JSON), and retrieving simulation 
+and uploading configuration parameters (via forms or JSON), and retrieving simulation 
 results and leaderboard metrics.
 
 Key features include:
   - Integration with a FastAPI backend to simulate traffic scenarios.
-  - Database management with SQLAlchemy for storing simulation configurations, session data,
+  - Database management with SQLAlchmy for storing simulation configurations, session data,
     and performance metrics.
   - Multiple endpoints for handling file uploads, parameter submissions, simulation control,
-    and retrieval of simulation results and leaderboards.
+    and retrieval of simulation results and leaderbords.
   - Calculation of custom scores based on wait times and queue lengths for different directions.
 
 Usage:
@@ -49,7 +49,7 @@ global_session_id = 0
 
 with app.app_context():
     """
-    Initialize database and create all tables.
+    Initialise database and create all tables.
     """
     
     db.create_all()
@@ -60,7 +60,7 @@ def start_fastapi():
     """
     Start the FastAPI server as a subprocess.
     
-    It provides a small delay to allow the server to initialize.
+    It provides a small delay to allow the server to intialise.
     
     Global variable 'server_process' is used to track the subprocess.
     """
@@ -80,7 +80,7 @@ def start_fastapi():
 def stop_fastapi():
     """
     Stop the running FastAPI server subprocess.
-    If the process does not terminate within the timeout,
+    If the proces does not terminate within the timeout,
     it is forcibly killed.
     
     Global variable 'server_process' is used to track and manage the subprocess.
@@ -117,7 +117,7 @@ def stop_simulation():
     """
     API endpoint to stop the simulation.
     Returns:
-        tuple: A JSON response with a success message and 200 status code.
+        tuple: A JSON response with a succes message and 200 status code.
     """
     
     stop_fastapi()
@@ -154,7 +154,7 @@ def serve_frontend(filename):
 
 def create_session():
     """
-    Create a new database session for tracking simulations.
+    Create a new databse session for tracking simulations.
     
     Creates a new Session record in the database, commits it, and returns
     the unique session ID.
@@ -176,7 +176,7 @@ def end_session(session_id):
     Mark a specific session as inactive.
     
     Args:
-        session_id (int): The ID of the session to be ended.
+        session_id (int): The ID of the sesion to be ended.
     """
     
     session = Session.query.get(session_id)
@@ -190,7 +190,7 @@ def get_session_leaderboard(session):
     Get the top 10 leaderboard results for a session based on computed scores.
 
     Retrieves all leaderboard results for a given session, computes a score for each
-    using compute_score_4directions, sorts them, and returns the top 10.
+    using compute_score_4directons, sorts them, and returns the top 10.
 
     Args:
         session (int): The session ID to filter results.
@@ -227,10 +227,10 @@ def save_session_leaderboard_result(run_id, session_id,
     Save performance metrics for a specific simulation run to the leaderboard.
     
     Args:
-        run_id (int): Unique for the simulation run.
+        run_id (int): Unique for the simulatoin run.
         session_id (int): ID of the session
         avg_wait_time_n (float): Average wait time for north-bound traffic.
-        max_wait_time_n (float): Maximum wait time for north-bound traffic.
+        max_wait_time_n (float): Maxium wait time for north-bound traffic.
         max_queue_length_n (int): Maximum queue length for north-bound traffic.
         # Similar parameters for south, east, and west directions
     """
@@ -267,13 +267,13 @@ def save_algorithm_result(run_id, session_id,
     """
     Save algorithm's simulation metrics to the leaderboard.
 
-    Stores the performance metrics from the algorithm's simulation run.
+    Stores the performace metrics from the algorithm's simulation run.
 
     Args:
         run_id (int): Identifies simulation run
         session_id (int): Identifies session
         avg_wait_time_n (float): Average wait time for northbound.
-        max_wait_time_n (float): Maximum wait time for northbound.
+        max_wait_time_n (float): Maximum wait time for notrhbound.
         max_queue_length_n (int): Maximum queue length for northbound.
         # Similar parameters for south, east, and west directions
 
@@ -307,11 +307,11 @@ def save_algorithm_result(run_id, session_id,
 
 def get_latest_spawn_rates():
     """
-    Retrieve the latest rates for traffic from the most recent inputs.
+    Retrieve the latest rates for taffic from the most recent inputs.
     
     Returns:
         dict: A nested dictionary containing rates for each direction 
-              and movement type (forward, left, right).
+              and movmeent type (forward, left, right).
     """
     
     latest_config = Configuration.query.order_by(Configuration.run_id.desc()).first()
@@ -350,7 +350,7 @@ def get_latest_junction_settings():
     
     Returns:
         dict: A dictionary containing junction configuration settings 
-              like number of lanes, pedestrian settings, etc.
+              like nuber of lanes, pedestrian settings, etc.
     """
     try:
 
@@ -384,7 +384,7 @@ def get_latest_junction_settings():
 def process_csv(file):
     """
     Read a CSV file from the upload and convert each row into a Configuration object
-    which will be added to the database in the future.
+    which will be aded to the database in the future.
 
     Args:
         file: The uploaded file object.
@@ -457,7 +457,7 @@ def end_session_api():
 @app.route('/')
 def index():
     """
-    Create a new session and render the index page with the session ID.
+    Create a new session and render the index page with the sesion ID.
 
     Returns:
         Renders index page.
@@ -472,7 +472,7 @@ def index():
 @app.route('/index')
 def indexTwo():
     """
-    Starts a session and renders the index page.
+    Starts a session and rendrs the index page.
 
     Returns:
         Renders index page.
@@ -489,7 +489,7 @@ def get_session_run_id():
     """
     Retrieve the latest active session and its run ID.
 
-    Creates a new session if any doesnt exist, and defaults the run ID to 1 if necessary.
+    Creates a new session if any doest exist, and defaults the run ID to 1 if necessary.
 
     Returns:
         JSON: The session ID and run ID.
@@ -629,7 +629,7 @@ def results():
 @app.route('/back_to_results')
 def back_to_results():
     """
-    Retrieve the latest configuration and settings to render the results page again.
+    Retrieve the latset configuration and settings to render the results page again.
 
     Returns:
         Rendered results template with current configuration, spawn rates, and calculated scores.
@@ -835,7 +835,7 @@ def back_to_results():
 
 def get_latest_traffic_light_settings():
     """
-    Get the most recent traffic light settings or default values if none exist.
+    Get the most recent traffic light settings or default valeus if none exist.
 
     Returns:
         dict: A dictionary with the latest traffic light configuration.
@@ -868,11 +868,11 @@ def get_session_leaderboard_result(session_id, run_id):
     Fetch the leaderboard result for a given session and run.
 
     Args:
-        session_id (int): The session identifier.
-        run_id (int): The run identifier.
+        session_id (int): To identify the session.
+        run_id (int): To identify the run.
 
     Returns:
-        LeaderboardResult: The leaderboard result object or None.
+        LeaderboardResult: The leaderboard result object.
     """
     
     return LeaderboardResult.query.filter_by(session_id=session_id, run_id=run_id).first()
@@ -882,8 +882,8 @@ def parameters():
     """
     Handles manual parameter submission.
     On POST, it extracts form data, stores configuration in the database,
-    and sends spawn rates, junction settings, and traffic light settings
-    to the FastAPI server. On GET, it renders the parameters page.
+    and sends spawn rates, junction settings, and trafic light settings
+    to the fastapi server. On GET, it renders the parameters page.
     """
     if request.method == 'POST':
         print("Received Form Data:", request.form)
@@ -953,7 +953,6 @@ def parameters():
             db.session.commit()
             print(f"Data stored with run_id {config.run_id}")
 
-            # Process traffic light settings based on checkbox state
             traffic_enabled = data.get('traffic-light-enable', '') == 'on'
             if traffic_enabled:
                 tl_config = TrafficSettings(
@@ -1011,7 +1010,6 @@ def parameters():
             except requests.exceptions.RequestException as e:
                 print(f"Could not reach server.py: {e}")
 
-            # Build and send junction settings dictionary
             junction_settings = {
                 "lanes": safe_int(data.get('lanes', 5)),
                 "pedestrian_duration": pedestrian_duration,
@@ -1026,7 +1024,6 @@ def parameters():
             except requests.exceptions.RequestException as e:
                 print(f"Could not reach server.py: {e}")
 
-            # Build and send traffic light settings dictionary
             traffic_light_settings = {
                 "traffic-light-enable": "on" if traffic_enabled else "",
                 "sequences": tl_config.sequences_per_hour,
@@ -1058,11 +1055,11 @@ def junction_settings_proxy():
     """
     Retrieve junction settings from the FastAPI service.
 
-    Sends a GET request to the FastAPI endpoint
-    In an error, returns a error message with a 500 status code.
+    Sends a GET request to the fastAPI endpoint
+    In an error, returns a eror message with a 500 status code.
 
     Returns:
-        Response: A response containing the junction settings or an error message.
+        Response: A response containing the juncion settings or an error message.
     """
     
     try:
@@ -1092,10 +1089,10 @@ def uploadfile():
 @app.route('/upload', methods=['POST'])
 def upload():
     """
-    Process file upload and update configuration and traffic settings.
+    Process file upload and updte configuration and traffic settings.
 
     Handles a file upload making sure that a file is provided and that its extension is '.json'
-    Parses the file to extract input parameters. Stores the configuration
+    Parses the file to extract input parmaeters. Stores the configuration
     and traffic settings in the database, and sends data to other endpoints. 
 
     Returns:
@@ -1120,11 +1117,9 @@ def upload():
     data = {}
     try:
         if ext == '.json':
-            # Read and parse JSON file
             file_content = file.read().decode('utf-8')
             json_data = json.loads(file_content)
             
-            # Map JSON vehicle settings to expected keys
             vehicle = json_data.get("vehicle_settings", {})
             north = vehicle.get("north", {})
             east = vehicle.get("east", {})
@@ -1147,13 +1142,11 @@ def upload():
             data['wb_left'] = west.get("turning_left", 0)
             data['wb_right'] = west.get("turning_right", 0)
 
-            # Map JSON junction settings
             junction = json_data.get("junction_settings", {})
             data['lanes'] = junction.get("number_of_lanes", 5)
             data['pedestrian-duration'] = junction.get("pedestrian_duration", 0)
             data['pedestrian-frequency'] = junction.get("pedestrian_frequency", 0)
 
-            # Map JSON traffic light settings
             tls = json_data.get("traffic_light_settings", {})
             if tls.get("enabled", False):
                 data['traffic-light-enable'] = 'on'
@@ -1165,16 +1158,13 @@ def upload():
             data['tl_vmain'] = vertical_seq.get("main_green_length", 0)
             data['tl_vright'] = vertical_seq.get("right_green_length", 0)
             data['tl_hmain'] = horizontal_seq.get("main_green_length", 0)
-            # Use 0 if right_green_length is None
             data['tl_hright'] = horizontal_seq.get("right_green_length") or 0
 
         elif ext == '.csv':
-            # Read and parse CSV file
             file_content = file.read().decode('utf-8')
             csv_reader = csv.DictReader(StringIO(file_content))
-            row = next(csv_reader)  # Assuming a single row of data
+            row = next(csv_reader) 
 
-            # Map CSV columns to expected keys
             data['nb_forward'] = row.get("north_forward", 0)
             data['nb_left'] = row.get("north_tleft", 0)
             data['nb_right'] = row.get("north_tright", 0)
@@ -1211,7 +1201,6 @@ def upload():
     print("Parsed file data:", data)
 
     try:
-        # Find or create a session
         session_obj = Session.query.get(global_session_id)
 
         def safe_int(value):
@@ -1222,35 +1211,28 @@ def upload():
             except:
                 return 0
 
-        # Calculate VPH totals for each direction
         north_vph = safe_int(data.get('nb_forward')) + safe_int(data.get('nb_left')) + safe_int(data.get('nb_right'))
         south_vph = safe_int(data.get('sb_forward')) + safe_int(data.get('sb_left')) + safe_int(data.get('sb_right'))
         east_vph  = safe_int(data.get('eb_forward')) + safe_int(data.get('eb_left')) + safe_int(data.get('eb_right'))
         west_vph  = safe_int(data.get('wb_forward')) + safe_int(data.get('wb_left')) + safe_int(data.get('wb_right'))
 
-        # Store user input in the database (Configuration)
         config = Configuration(
             session_id=session_obj.id,
-            # Junction Settings
             lanes=safe_int(data.get('lanes', 5)),
             pedestrian_duration=safe_int(data.get('pedestrian-duration')),
             pedestrian_frequency=safe_int(data.get('pedestrian-frequency')),
-            # North
             north_vph=north_vph,
             north_forward_vph=safe_int(data.get('nb_forward')),
             north_left_vph=safe_int(data.get('nb_left')),
             north_right_vph=safe_int(data.get('nb_right')),
-            # South
             south_vph=south_vph,
             south_forward_vph=safe_int(data.get('sb_forward')),
             south_left_vph=safe_int(data.get('sb_left')),
             south_right_vph=safe_int(data.get('sb_right')),
-            # East
             east_vph=east_vph,
             east_forward_vph=safe_int(data.get('eb_forward')),
             east_left_vph=safe_int(data.get('eb_left')),
             east_right_vph=safe_int(data.get('eb_right')),
-            # West
             west_vph=west_vph,
             west_forward_vph=safe_int(data.get('wb_forward')),
             west_left_vph=safe_int(data.get('wb_left')),
@@ -1259,8 +1241,6 @@ def upload():
         db.session.add(config)
         db.session.commit()
         print(f"Data stored with run_id {config.run_id}")
-
-        # Process traffic light settings
         traffic_enabled = data.get('traffic-light-enable', '') == 'on'
         if traffic_enabled:
             tl_config = TrafficSettings(
@@ -1288,7 +1268,6 @@ def upload():
         db.session.commit()
         print(f"Traffic settings stored for run_id {config.run_id}")
 
-        # Construct spawn rates dictionary
         spawn_rates = {
             "north": {
                 "forward": safe_int(data.get('nb_forward')),
@@ -1313,7 +1292,6 @@ def upload():
         }
         print("Parsed Spawn Rates:", spawn_rates)
 
-        # Send spawn rates to server.py
         try:
             response = requests.post("http://127.0.0.1:8000/update_spawn_rates", json=spawn_rates)
             if response.status_code == 200:
@@ -1321,7 +1299,6 @@ def upload():
         except requests.exceptions.RequestException as e:
             print(f"⚠️ Could not reach server.py: {e}")
 
-        # Construct junction settings dictionary
         junction_settings = {
             "lanes": safe_int(data.get('lanes', 5)),
             "pedestrian_duration": safe_int(data.get('pedestrian-duration')),
@@ -1329,13 +1306,13 @@ def upload():
         }
         print("Parsed Junction Settings:", junction_settings)
 
-        # Send junction settings to server.py
+
         try:
             response = requests.post("http://127.0.0.1:8000/update_junction_settings", json=junction_settings)
             if response.status_code == 200:
-                print("Junction settings sent successfully to server.py.")
+                print("Juncion settings sent succesfully to server.py.")
             else:
-                print(f"Error sending junction settings: {response.text}")
+                print(f"Error sending juncion settings: {response.text}")
         except requests.exceptions.RequestException as e:
             print(f"Could not reach server.py: {e}")
 
@@ -1355,7 +1332,7 @@ def upload():
             else:
                 print(f"Error sending traffic light settings: {response.text}")
         except requests.exceptions.RequestException as e:
-            print(f"Could not reach server.py for traffic lights: {e}")
+            print(f"Could not reach server.py for trafic lights: {e}")
 
         print("THIS IS DEBUG" + str(safe_int(data.get('lanes', 5))))
 
@@ -1377,11 +1354,11 @@ def simulate():
     Simulate a traffic run and save the simulation results.
 
     Retrieves simulation parameters (run_id and session_id) from the request JSON, then sends a GET request
-    to the FastAPI simulation endpoint. Then processes the simulation response to extract user and algorithm metrics, 
+    to the fastapi simulation endpoint. Then proceses the simulation response to extract user and algorithm metrics, 
     calculates scores and saves leaderboard results 
     
     Returns:
-        Response: A response containing simulation results and computed scores,
+        Response: A response containing simulation results and calculated scores,
                   or an error message with a 400 status code.
     """
     
@@ -1503,8 +1480,8 @@ def get_all_time_best_configurations():
     """
     Gets and calcuates the all-time best configurations from the leaderboard.
 
-    The function joins leaderboard results with algorithm results and traffic settings,
-    computes scores, and returns the top 10 configurations based on the score difference.
+    The function joins leaderboard results with algorithm results and trafic settings,
+    computes scores, and returns the top 10 configuraions based on the score difference.
 
     Returns:
         list: A list of dictionaries containing configuration details and scores.
@@ -1584,7 +1561,7 @@ def session_leaderboard_page():
     Render the session leaderboard page.
 
     Determines the current session and retrieves the recent runs with computed scores,
-    then renders the leaderboard page for that session.
+    then renders the leaderbaord page for that session.
 
     Returns:
         Renders page for session leaderboard.
@@ -1693,7 +1670,7 @@ def compute_score_4directions(
     Compute a combined score for four directions based on various traffic metrics.
 
     The score is computed for each direction (north, south, east, west) using the
-    weighted sum of average wait time, maximum wait time, and maximum queue length, normalized
+    weighted sum of average wait time, maximum wait time, and maximum queue length, normalised
     by the total vehicle volume for that direction. The final score is the sum of the four
     directional scores.
 
@@ -1714,7 +1691,7 @@ def compute_score_4directions(
         wb_queue (int): Maximum queue length for westbound.
 
     Returns:
-        float: The computed total score.
+        float: The calculated total score.
     """
 
     vehicle_input = Configuration.query.filter_by(run_id=run_id, session_id=session_id).first()

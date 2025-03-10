@@ -6,12 +6,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/search_Algorithm_Runs.css') }}">
 </head>
 <body>
-    <!-- Header with search emojis on either side -->
     <div class="header">
         <h1>🔍 Search Algorithm Simulation Runs 🔍</h1>
     </div>
 
-    <!-- Search Form Container -->
     <div class="search-container">
         <form id="searchForm" action="/junction_details" method="get">
             <label for="run_id">Run ID:</label>
@@ -31,7 +29,6 @@
         <a class="nav-button" id="backBtn" href="/parameters">✅ Continue Session (Back to Inputs)</a>
     </div>
 
-    <!-- Tutorial Popup and Button -->
     <div id="tutorial-popup">
         <div id="tutorial-popup-content">
             <span id="tutorial-close">&times;</span>

@@ -1004,7 +1004,7 @@ def parameters():
                 }
             }
             try:
-                response = requests.post("http://127.0.0.1:8000/update_spawn_rates", json=spawn_rates)
+                response = requests.post("https://junction-modelling-server.onrender.com/update_spawn_rates", json=spawn_rates)
                 if response.status_code == 200:
                     print("Spawn rates sent successfully to server.py.")
             except requests.exceptions.RequestException as e:
@@ -1016,7 +1016,7 @@ def parameters():
                 "pedestrian_frequency": pedestrian_frequency,
             }
             try:
-                response = requests.post("http://127.0.0.1:8000/update_junction_settings", json=junction_settings)
+                response = requests.post("https://junction-modelling-server.onrender.com/update_junction_settings", json=junction_settings)
                 if response.status_code == 200:
                     print("Junction settings sent successfully to server.py.")
                 else:
@@ -1033,7 +1033,7 @@ def parameters():
                 "horizontal_right_green": tl_config.horizontal_right_green
             }
             try:
-                response = requests.post("http://127.0.0.1:8000/update_traffic_light_settings", json=traffic_light_settings)
+                response = requests.post("https://junction-modelling-server.onrender.com/update_traffic_light_settings", json=traffic_light_settings)
                 if response.status_code == 200:
                     print("Traffic light settings sent successfully to server.py.")
                 else:
@@ -1063,7 +1063,7 @@ def junction_settings_proxy():
     """
     
     try:
-        resp = requests.get("http://127.0.0.1:8000/junction_settings")
+        resp = requests.get("https://junction-modelling-server.onrender.com/junction_settings")
         return jsonify(resp.json())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -1293,7 +1293,7 @@ def upload():
         print("Parsed Spawn Rates:", spawn_rates)
 
         try:
-            response = requests.post("http://127.0.0.1:8000/update_spawn_rates", json=spawn_rates)
+            response = requests.post("https://junction-modelling-server.onrender.com/update_spawn_rates", json=spawn_rates)
             if response.status_code == 200:
                 print("Spawn rates sent successfully to server.py.")
         except requests.exceptions.RequestException as e:
@@ -1308,7 +1308,7 @@ def upload():
 
 
         try:
-            response = requests.post("http://127.0.0.1:8000/update_junction_settings", json=junction_settings)
+            response = requests.post("https://junction-modelling-server.onrender.com/update_junction_settings", json=junction_settings)
             if response.status_code == 200:
                 print("Juncion settings sent succesfully to server.py.")
             else:
@@ -1326,7 +1326,7 @@ def upload():
             "horizontal_right_green": safe_int(data.get('tl_hright'))
         }
         try:
-            response = requests.post("http://127.0.0.1:8000/update_traffic_light_settings", json=traffic_light_settings)
+            response = requests.post("https://junction-modelling-server.onrender.com/update_traffic_light_settings", json=traffic_light_settings)
             if response.status_code == 200:
                 print("Traffic light settings sent successfully to server.py.")
             else:
@@ -1368,7 +1368,7 @@ def simulate():
         run_id = data.get('run_id')
         session_id = data.get('session_id')
         
-        sim_response = requests.get("http://localhost:8000/simulate_fast") 
+        sim_response = requests.get("https://junction-modelling-server.onrender.com/simulate_fast") 
         sim_response.raise_for_status()  
         
         metrics = sim_response.json()

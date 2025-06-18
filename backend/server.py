@@ -27,12 +27,12 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
-from junction_objects.traffic_light_controller import TrafficLightController
-from junction_objects.traffic_light_state import run_traffic_loop
-from junction_objects.vehicle import Car
-from junction_objects.vehicle_movement import update_vehicle
-from junction_objects.vehicle_stop_line import has_crossed_line
-from junction_objects.adaptive_controller import run_adaptive_traffic_loop
+from backend.junction_objects.traffic_light_controller import TrafficLightController
+from backend.junction_objects.traffic_light_state import run_traffic_loop
+from backend.junction_objects.vehicle import Car
+from backend.junction_objects.vehicle_movement import update_vehicle
+from backend.junction_objects.vehicle_stop_line import has_crossed_line
+from backend.junction_objects.adaptive_controller import run_adaptive_traffic_loop
 
 
 # Initialise FastAPI application

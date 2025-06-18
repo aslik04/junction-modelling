@@ -29,6 +29,8 @@ import time
 # Add backend directory to Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
 
+import requests
+import json
 import csv
 from io import StringIO
 from flask import Flask, flash, request, jsonify, render_template, url_for, redirect, send_from_directory, Response

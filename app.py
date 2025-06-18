@@ -37,15 +37,19 @@ from flask import Flask, flash, request, jsonify, render_template, url_for, redi
 from models import db, Configuration, LeaderboardResult, Session, TrafficSettings, AlgorithmLeaderboardResult
 from sqlalchemy import inspect, and_
 
-# Import FastAPI app
+# Import FastAPI app and ASGI adapter
 from fastapi import FastAPI
 from fastapi.middleware.wsgi import WSGIMiddleware
 from backend.server import app as fastapi_app
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.serving import run_simple
 
 app = Flask(__name__)
 
-# Mount FastAPI app to handle WebSocket and API routes
-app.wsgi_app = WSGIMiddleware(fastapi_app, app.wsgi_app)
+# Mount FastAPI app correctly using DispatcherMiddleware
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/ws': WSGIMiddleware(fastapi_app)
+})
 
 app.secret_key = "Group_33" 
 
@@ -1263,7 +1267,7 @@ def upload():
                 vertical_main_green=safe_int(data.get('tl_vmain')),
                 horizontal_main_green=safe_int(data.get('tl_hmain')),
                 vertical_right_green=safe_int(data.get('tl_vright')),
-                horizontal_right_green=safe_int(data.get('tl_hright'))
+                horizontal_right_green=safe_int(data.get('tl_hright')),
             )
         else:
             tl_config = TrafficSettings(
@@ -1810,7 +1814,7 @@ def get_recent_runs_with_scores(session_id):
             ar.avg_wait_time_west,  ar.max_wait_time_west,  ar.max_queue_length_west,
         )
 
-        final_score = algorithm_final_score - user_final_score
+        final_score = algorithm_final_score - user_final_score;
 
         runs_with_scores.append({
             "run_id": ur.run_id,
@@ -1899,10 +1903,6 @@ def junction_details():
         traffic_light_settings = {
             "enabled": tls_obj.enabled,
             "sequences_per_hour": tls_obj.sequences_per_hour,
-            "vertical_main_green": tls_obj.vertical_main_green,
-            "horizontal_main_green": tls_obj.horizontal_main_green,
-            "vertical_right_green": tls_obj.vertical_right_green,
-            "horizontal_right_green": tls_obj.horizontal_right_green
         }
 
     # Query user leaderboard result.
@@ -1980,7 +1980,7 @@ def junction_details():
             algorithm_metrics["max_queue_length_w"]
         )
     else:
-        algorithm_metrics = {
+               algorithm_metrics = {
             "avg_wait_time_n": 0, "avg_wait_time_s": 0, "avg_wait_time_e": 0, "avg_wait_time_w": 0,
             "max_wait_time_n": 0, "max_wait_time_s": 0, "max_wait_time_e": 0, "max_wait_time_w": 0,
             "max_queue_length_n": 0, "max_queue_length_s": 0, "max_queue_length_e": 0, "max_queue_length_w": 0,

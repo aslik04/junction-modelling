@@ -34,6 +34,11 @@ from junction_objects.vehicle_movement import update_vehicle
 from junction_objects.vehicle_stop_line import has_crossed_line
 from junction_objects.adaptive_controller import run_adaptive_traffic_loop
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 
 # Initialise FastAPI application
 app = FastAPI()

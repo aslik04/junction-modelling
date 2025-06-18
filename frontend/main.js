@@ -223,10 +223,11 @@ function animate() {
 
 /**
  * This is the WebSocket connection to the backend.
- * We connect to the backend on port 8000, and listen for messages from the server.
+ * We connect to the backend on the same host, and listen for messages from the server.
  * We have callbacks for when the connection is opened, when a message is received, and when the connection is closed.
  */
-const ws = new WebSocket(`wss://${window.location.host}/ws`);
+const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+const ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
 // Make the WebSocket connection available globally.
 window.ws = ws;  
 

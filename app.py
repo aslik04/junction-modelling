@@ -22,18 +22,28 @@ Author: Group_33
 
 import os
 import sys
-import time
-import subprocess
-import csv
 import io
+import subprocess
+import time
+
+# Add backend directory to Python path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
+
+import csv
 from io import StringIO
-import requests
 from flask import Flask, flash, request, jsonify, render_template, url_for, redirect, send_from_directory, Response
 from models import db, Configuration, LeaderboardResult, Session, TrafficSettings, AlgorithmLeaderboardResult
 from sqlalchemy import inspect, and_
-import json
+
+# Import FastAPI app
+from fastapi import FastAPI
+from fastapi.middleware.wsgi import WSGIMiddleware
+from backend.server import app as fastapi_app
 
 app = Flask(__name__)
+
+# Mount FastAPI app to handle WebSocket and API routes
+app.wsgi_app = WSGIMiddleware(fastapi_app, app.wsgi_app)
 
 app.secret_key = "Group_33" 
 

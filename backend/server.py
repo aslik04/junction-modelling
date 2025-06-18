@@ -17,14 +17,6 @@ for quick strategy comparison. Configuration options include lane count, spawn r
 and simulation speed. Connects to a frontend on port 8000.
 """
 
-import sys
-import os
-
-# Add root project directory and backend folder to Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend')))
-
-
 import asyncio
 import json
 import random
@@ -41,11 +33,6 @@ from junction_objects.vehicle import Car
 from junction_objects.vehicle_movement import update_vehicle
 from junction_objects.vehicle_stop_line import has_crossed_line
 from junction_objects.adaptive_controller import run_adaptive_traffic_loop
-
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 # Initialise FastAPI application

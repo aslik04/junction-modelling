@@ -17,6 +17,14 @@ for quick strategy comparison. Configuration options include lane count, spawn r
 and simulation speed. Connects to a frontend on port 8000.
 """
 
+import sys
+import os
+
+# Add root project directory and backend folder to Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend')))
+
+
 import asyncio
 import json
 import random

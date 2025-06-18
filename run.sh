@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Start FastAPI server in background
-cd backend || exit
-nohup uvicorn server:app --host 0.0.0.0 --port 8000 > ../fastapi.log 2>&1 &
-cd ..
+# Start FastAPI (server.py) in background
+uvicorn backend.server:app --host 0.0.0.0 --port 8001 &
 
-# Start Flask app in foreground
-python app.py
+# Start Flask (app.py) on main Render port (5000)
+gunicorn app:app -b 0.0.0.0:5000

@@ -33,6 +33,16 @@ from models import db, Configuration, LeaderboardResult, Session, TrafficSetting
 from sqlalchemy import inspect, and_
 import json
 
+import threading
+import uvicorn
+from backend import server  # Adjust if necessary
+
+def run_fastapi():
+    uvicorn.run(server.app, host="0.0.0.0", port=8000)
+
+threading.Thread(target=run_fastapi, daemon=True).start()
+
+
 app = Flask(__name__)
 
 app.secret_key = "Group_33" 

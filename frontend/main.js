@@ -226,7 +226,7 @@ function animate() {
  * We connect to the backend on port 8000, and listen for messages from the server.
  * We have callbacks for when the connection is opened, when a message is received, and when the connection is closed.
  */
-const ws = new WebSocket("ws://junction-modelling-app.onrender.com/ws");
+const ws = new WebSocket("ws://localhost:8000/ws");
 // Make the WebSocket connection available globally.
 window.ws = ws;  
 

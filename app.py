@@ -1368,7 +1368,7 @@ def simulate():
         run_id = data.get('run_id')
         session_id = data.get('session_id')
         
-        sim_response = requests.get("http://localhost:8000/simulate_fast") 
+        sim_response = requests.get("https://junction-simulator.onrender.com/simulate_fast")
         sim_response.raise_for_status()  
         
         metrics = sim_response.json()

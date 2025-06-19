@@ -80,7 +80,7 @@ function updateCanvasSize() {
   const canvas = document.getElementById("junctionCanvas");
 
   // We want the canvas to be square, so we set the width and height to the same value.
-  canvas.width = canvas.height = container.clientHeight * (1 + lanes / 10);
+  canvas.width = canvas.height = container.clientHeight * (1 + lanes / 5);
 }
 
 /**
@@ -223,11 +223,10 @@ function animate() {
 
 /**
  * This is the WebSocket connection to the backend.
- * We connect to the backend on the same host, and listen for messages from the server.
+ * We connect to the backend on port 8000, and listen for messages from the server.
  * We have callbacks for when the connection is opened, when a message is received, and when the connection is closed.
  */
-const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-const ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
+const ws = new WebSocket("ws://localhost:8000/ws");
 // Make the WebSocket connection available globally.
 window.ws = ws;  
 
